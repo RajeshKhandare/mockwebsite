@@ -25,7 +25,7 @@ export default async function TestsPage() {
               <span className="badge">{Math.round(test.duration_seconds / 60)} min</span>
               <span className="badge">{test.question_count * Number(test.marks_per_question)} marks</span>
             </div>
-            <p className="muted">Languages: {test.supported_languages.map((l) => l.toUpperCase()).join(" · ")}</p>
+            <p className="muted">Languages: {test.supported_languages.map((l: string) => l.toUpperCase()).join(" · ")}</p>
             <Link className="btn btn-primary" href={"/test/" + (test.slug ?? test.id)}>View instructions</Link>
           </article>
         ))}
