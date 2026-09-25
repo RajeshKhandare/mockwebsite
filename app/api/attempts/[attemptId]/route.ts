@@ -49,6 +49,13 @@ export async function GET(
 
   if (optionsError) return NextResponse.json({ error: "Question options could not be loaded." }, { status: 500 });
 
+  const { data: answers, error: answersError } = await supabase
+    .from("test_answers")
+    .select("question_id,selected_option,marked_for_review")
+    .eq("attempt_id", attemptId);
+
+  if (answersError) return NextResponse.json({ error: "Saved answers could not be loaded." }, { status: 500 });
+
   const questionMap = new Map((questions ?? []).map((q) => [q.id, q]));
   const optionMap = new Map<string, typeof options>();
   for (const option of options ?? []) {
