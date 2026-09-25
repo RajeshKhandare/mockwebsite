@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const exams = [
-  { name: "Banking Exams", slug: "banking", desc: "Practice for major banking recruitment stages.", tags: ["Prelims", "Mains", "Sectional"] },
-  { name: "SSC Exams", slug: "ssc", desc: "A foundation for SSC-style competitive exam preparation.", tags: ["Tier-based", "Subject Tests"] },
-  { name: "Railway Exams", slug: "railways", desc: "Flexible test structures for railway recruitment exams.", tags: ["Practice", "Mock Tests"] },
+  { name: "Banking Exams", slug: "banking-demo", desc: "Practice for major banking recruitment stages.", tags: ["Prelims", "Mains", "Sectional"] },
+  { name: "SSC Exams", slug: "", desc: "A foundation for SSC-style competitive exam preparation.", tags: ["Tier-based", "Subject Tests"] },
+  { name: "Railway Exams", slug: "", desc: "Flexible test structures for railway recruitment exams.", tags: ["Practice", "Mock Tests"] },
 ];
 
 export default function HomePage() {
@@ -38,7 +38,7 @@ export default function HomePage() {
                 <h3>{exam.name}</h3>
                 <p>{exam.desc}</p>
                 <div className="meta">{exam.tags.map((tag) => <span className="badge" key={tag}>{tag}</span>)}</div>
-                <Link className="btn btn-secondary" href={`/exams/${exam.slug}`}>View exam</Link>
+                <Link className="btn btn-secondary" href={exam.slug ? `/exams/${exam.slug}` : "/exams"}>{exam.slug ? "View exam" : "Explore exams"}</Link>
               </article>
             ))}
           </div>
