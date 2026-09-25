@@ -79,7 +79,7 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
       <section className="panel">
         <h2>Scoring summary</h2>
         <p className="muted">{template.question_count} questions · +{template.marks_per_question} for correct · −{template.negative_marks} for incorrect.</p>
-        <Link className="button primary" href="/tests">Take another test</Link>
+        <div className="button-row"><Link className="button" href={"/test/" + attemptId + "/analysis"}>View analysis</Link><Link className="button primary" href="/tests">Take another test</Link></div>
       </section>
     </main>
   );
