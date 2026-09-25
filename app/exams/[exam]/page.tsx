@@ -1,19 +1,43 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-const catalog: Record<string, { name: string; description: string; stages: string[]; subjects: string[] }> = {
-  banking: { name: "Banking Exams", description: "Build preparation through configurable stages, subjects and mock tests.", stages: ["Prelims", "Mains"], subjects: ["Quantitative Aptitude", "Reasoning", "English"] },
-  ssc: { name: "SSC Exams", description: "A scalable exam area for tier-based preparation and subject practice.", stages: ["Tier I", "Tier II"], subjects: ["Quantitative Aptitude", "Reasoning", "English"] },
-  railways: { name: "Railway Exams", description: "Structured practice for railway recruitment examinations.", stages: ["CBT", "Subject Tests"], subjects: ["Mathematics", "General Intelligence", "General Awareness"] },
-};
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function ExamPage({ params }: { params: Promise<{ exam: string }> }) {
   const { exam } = await params;
-  const item = catalog[exam];
+  const supabase = await createSupabaseServerClient();
+
+  const { data: item } = await supabase
+    .from("exams")
+    .select("id,name,slug,description")
+    .eq("slug", exam)
+    .eq("is_active", true)
+    .maybeSingle();
   if (!item) notFound();
-  return <main className="section"><div className="container">
-    <div className="eyebrow">Exam</div><h1 style={{fontSize: 42}}>{item.name}</h1><p style={{maxWidth:720,color:"var(--muted)"}}>{item.description}</p>
-    <div className="section"><div className="section-header"><div><h2>Stages</h2><p>Select the stage before choosing a test.</p></div></div><div className="grid">{item.stages.map((stage) => <article className="card" key={stage}><h3>{stage}</h3><p>View stage-specific subjects and mock tests.</p><Link className="btn btn-primary" href={`/exams/${exam}/${stage.toLowerCase().replaceAll(" ","-")}`}>View stage</Link></article>)}</div></div>
-    <div className="section"><div className="section-header"><div><h2>Subjects</h2><p>Subject and topic tests use the same reusable question pool.</p></div></div><div className="grid">{item.subjects.map((subject) => <article className="card" key={subject}><h3>{subject}</h3><p>Practice questions, sectional tests and topic-level analysis.</p><Link className="btn btn-secondary" href="/tests">View tests</Link></article>)}</div></div>
-  </div></main>;
+
+  const { data: stages } = await supabase
+    .from("exam_stages")
+    .select("id,slug,name,description,sort_order")
+    .eq("exam_id", item.id)
+    .order("sort_order");
+
+  return (
+    <main className="section"><div className="container">
+      <div className="eyebrow">Exam</div>
+      <h1 style={{fontSize:42}}>{item.name}</h1>
+      <p style={{maxWidth:720,color:"var(--muted)"}}>{item.description ?? "Structured preparation through configurable stages, subjects and mock tests."}</p>
+      <div className="section">
+        <div className="section-header"><div><h2>Stages</h2><p>Select a configured stage to view its subjects and published mock tests.</p></div></div>
+        <div className="grid">
+          {(stages ?? []).map((stage) => (
+            <article className="card" key={stage.id}>
+              <h3>{stage.name}</h3>
+              <p>{stage.description ?? "Stage-specific subjects and mock tests."}</p>
+              <Link className="btn btn-primary" href={`/exams/${item.slug}/${stage.slug}`}>View stage</Link>
+            </article>
+          ))}
+          {!stages?.length && <p className="muted">No stages are configured for this exam yet.</p>}
+        </div>
+      </div>
+    </div></main>
+  );
 }
