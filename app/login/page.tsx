@@ -11,7 +11,8 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 export default async function LoginPage({ searchParams }: Props) {
   const params = await searchParams;
   const error = typeof params.error === "string" ? params.error : "";
-  const message = typeof params.message === "string" ? params.message : "";\n  const next = typeof params.next === "string" && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
+  const message = typeof params.message === "string" ? params.message : "";
+  const next = typeof params.next === "string" && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
 
   return (
     <main className="page-shell narrow-shell">
@@ -21,7 +22,8 @@ export default async function LoginPage({ searchParams }: Props) {
         <p className="muted">Access mock tests, attempts, results and performance history.</p>
         {error && <p className="form-message error">Please check your details and try again.</p>}
         {message === "check-email" && <p className="form-message success">Account created. Check your email if confirmation is enabled.</p>}
-        <form className="auth-form">\n          <input type="hidden" name="next" value={next} />
+        <form className="auth-form">
+          <input type="hidden" name="next" value={next} />
           <label>Name <span>(for new accounts)</span><input name="display_name" type="text" autoComplete="name" placeholder="Your name" /></label>
           <label>Email<input name="email" type="email" autoComplete="email" required /></label>
           <label>Password<input name="password" type="password" autoComplete="current-password" minLength={8} required /></label>
