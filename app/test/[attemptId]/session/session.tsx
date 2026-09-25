@@ -45,7 +45,8 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   async function saveAnswer(questionId: string, selectedOption: number | null, markedForReview: boolean) {
     setSaving(true);
     const response = await fetch("/api/attempts/" + attemptId + "/answer", {
-      method: "POST", headers: {"Content-Type":"application/json"},
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
       body: JSON.stringify({ questionId, selectedOption, markedForReview }),
     });
     if (!response.ok) {
@@ -89,36 +90,40 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const minutes = Math.floor(remaining / 60).toString().padStart(2,"0");
   const seconds = (remaining % 60).toString().padStart(2,"0");
 
-  return <main className="section"><div className="container">
-    <div className="section-header">
-      <div><div className="eyebrow">Live test · {payload.attempt.language.toUpperCase()}</div><h1 style={{fontSize:32}}>{payload.template.title}</h1><p>Question {current + 1} of {payload.questions.length} · Answered {answered}</p></div>
-      <div className="card" style={{padding:"12px 16px"}}><strong>{minutes}:{seconds}</strong><br/><span style={{color:"var(--muted)",fontSize:12}}>Time remaining</span></div>
-    </div>
-    <div className="test-layout">
-      <section className="card">
-        <h2 style={{fontSize:20}}>Q{current + 1}. {question.text}</h2>
-        <div style={{display:"grid",gap:10,marginTop:22}}>
-          {question.options.map((option) => (
-            <button key={option.id} onClick={() => choose(option.index)} className="btn"
-              style={{justifyContent:"flex-start",background:answers[question.id]===option.index?"#eef3f9":"white",borderColor:answers[question.id]===option.index?"var(--brand)":"var(--border)"}}>
-              {String.fromCharCode(65 + option.index)}. {option.text}
-            </button>
-          ))}
+  return (
+    <main className="section">
+      <div className="container">
+        <div className="section-header">
+          <div><div className="eyebrow">Live test · {payload.attempt.language.toUpperCase()}</div><h1 style={{fontSize:32}}>{payload.template.title}</h1><p>Question {current + 1} of {payload.questions.length} · Answered {answered}</p></div>
+          <div className="card" style={{padding:"12px 16px"}}><strong>{minutes}:{seconds}</strong><br/><span style={{color:"var(--muted)",fontSize:12}}>Time remaining</span></div>
         </div>
-        <div className="actions">
-          <button className="btn btn-secondary" onClick={clearResponse}>Clear response</button>
-          <button className="btn btn-secondary" onClick={toggleMark}>{marked.has(question.id) ? "Unmark" : "Mark for review"}</button>
-          <button className="btn btn-primary" disabled={saving} onClick={() => setCurrent((v) => Math.min(payload.questions.length - 1, v + 1))}>Save & Next</button>
+        <div className="test-layout">
+          <section className="card">
+            <h2 style={{fontSize:20}}>Q{current + 1}. {question.text}</h2>
+            <div style={{display:"grid",gap:10,marginTop:22}}>
+              {question.options.map((option) => (
+                <button key={option.id} onClick={() => choose(option.index)} className="btn"
+                  style={{justifyContent:"flex-start",background:answers[question.id]===option.index?"#eef3f9":"white",borderColor:answers[question.id]===option.index?"var(--brand)":"var(--border)"}}>
+                  {String.fromCharCode(65 + option.index)}. {option.text}
+                </button>
+              ))}
+            </div>
+            <div className="actions">
+              <button className="btn btn-secondary" onClick={clearResponse}>Clear response</button>
+              <button className="btn btn-secondary" onClick={toggleMark}>{marked.has(question.id) ? "Unmark" : "Mark for review"}</button>
+              <button className="btn btn-primary" disabled={saving} onClick={() => setCurrent((v) => Math.min(payload.questions.length - 1, v + 1))}>Save & Next</button>
+            </div>
+          </section>
+          <aside className="card">
+            <h3>Question palette</h3>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
+              {payload.questions.map((q, i) => <button key={q.id} onClick={() => setCurrent(i)} className="btn" style={{padding:0,minHeight:38,background:answers[q.id]!==undefined && answers[q.id]!==null?"#dcfce7":marked.has(q.id)?"#fef3c7":"white"}}>{i + 1}</button>)}
+            </div>
+            <p style={{marginTop:18,fontSize:13,color:"var(--muted)"}}>Green = answered · Amber = marked for review · White = not answered.</p>
+            <button className="btn" disabled={saving} onClick={() => void submit(false)} style={{width:"100%",marginTop:10,borderColor:"var(--danger)",color:"var(--danger)"}}>Submit test</button>
+          </aside>
         </div>
-      </section>
-      <aside className="card">
-        <h3>Question palette</h3>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
-          {payload.questions.map((q, i) => <button key={q.id} onClick={() => setCurrent(i)} className="btn" style={{padding:0,minHeight:38,background:answers[q.id]!==undefined && answers[q.id]!==null?"#dcfce7":marked.has(q.id)?"#fef3c7":"white"}}>{i + 1}</button>)}
-        </div>
-        <p style={{marginTop:18,fontSize:13,color:"var(--muted)"}}>Green = answered · Amber = marked for review · White = not answered.</p>
-        <button className="btn" disabled={saving} onClick={() => void submit(false)} style={{width:"100%",marginTop:10,borderColor:"var(--danger)",color:"var(--danger)"}}>Submit test</button>
-      </aside>
-    </div>
-  </div>;
+      </div>
+    </main>
+  );
 }

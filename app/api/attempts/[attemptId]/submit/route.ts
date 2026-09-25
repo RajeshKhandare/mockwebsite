@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { scoreAttempt } from "@/lib/attempt-scoring";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { scoreAttempt } from "@/lib/attempt-scoring";
 
 export async function POST(
   _request: Request,
@@ -13,5 +13,5 @@ export async function POST(
 
   const result = await scoreAttempt(attemptId, user.id);
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
-  return NextResponse.json(result);
+  return NextResponse.json({ ok: true, result: result.result });
 }
