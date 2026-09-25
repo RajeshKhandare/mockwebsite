@@ -31,12 +31,15 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
   if (!result || !template) notFound();
 
   const ids = (links ?? []).map((row) => row.question_id);
-  const [{ data: questions }, { data: answers }] = await Promise.all([
+  const [{ data: questions }, { data: answers }, { data: options }] = await Promise.all([
     ids.length ? supabase.from("questions").select("id,question_text,explanation").in("id", ids) : Promise.resolve({data:[]}),
     supabase.from("test_answers").select("question_id,selected_option,marked_for_review").eq("attempt_id", attemptId),
+    ids.length ? supabase.from("question_options").select("question_id,option_index,option_text,is_correct").in("question_id", ids).order("option_index") : Promise.resolve({data:[]}),
   ]);
   const answerMap = new Map((answers ?? []).map((a) => [a.question_id, a]));
   const questionMap = new Map((questions ?? []).map((q) => [q.id, q]));
+  const optionMap = new Map<string, typeof options>();
+  for (const option of options ?? []) optionMap.set(option.question_id, [...(optionMap.get(option.question_id) ?? []), option]);
 
   return (
     <main className="page-shell">
@@ -58,8 +61,16 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
           {(links ?? []).map((link) => {
             const question = questionMap.get(link.question_id);
             const answer = answerMap.get(link.question_id);
+            const questionOptions = optionMap.get(question?.id ?? "") ?? [];
+            const correctOption = questionOptions.find((option) => option.is_correct);
+            const selectedOption = questionOptions.find((option) => option.option_index === answer?.selected_option);
+            const isCorrect = Boolean(correctOption && selectedOption && correctOption.option_index === selectedOption.option_index);
             return question ? <article className="list-row" key={question.id}>
-              <div><strong>Q{link.position + 1}. {question.question_text}</strong><p className="muted">{answer?.selected_option === null || answer?.selected_option === undefined ? "Not answered" : "Your response: option " + (answer.selected_option + 1)}{answer?.marked_for_review ? " · Marked for review" : ""}</p></div>
+              <div>
+                <strong>Q{link.position + 1}. {question.question_text}</strong>
+                <p className="muted">{selectedOption ? "Your response: " + selectedOption.option_text : "Not answered"}{answer?.marked_for_review ? " · Marked for review" : ""}</p>
+                <p className="muted">{correctOption ? "Correct answer: " + correctOption.option_text : "Correct answer unavailable."} · {selectedOption ? (isCorrect ? "Correct" : "Incorrect") : "Unattempted"}</p>
+              </div>
               <small>{question.explanation ?? "No explanation provided."}</small>
             </article> : null;
           })}
