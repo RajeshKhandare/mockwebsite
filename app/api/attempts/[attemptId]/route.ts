@@ -80,5 +80,6 @@ export async function GET(
     attempt,
     template,
     questions: result,
+    answers: answers ?? [],
   });
 }
