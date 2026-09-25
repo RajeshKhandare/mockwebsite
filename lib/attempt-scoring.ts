@@ -34,14 +34,7 @@ export async function scoreAttempt(attemptId: string, userId: string) {
     return { ok: false as const, status: 500, error: "Test configuration is unavailable." };
   }
 
-  const now = Date.now();
   const startedAtMs = Date.parse(attempt.started_at);
-  const elapsedSeconds = Math.max(0, Math.floor((now - startedAtMs) / 1000));
-  if (elapsedSeconds >= Number(template.duration_seconds)) {
-    await supabase.from("test_attempts").update({ status: "expired" })
-      .eq("id", attemptId).eq("user_id", userId).eq("status", "in_progress");
-    return { ok: false as const, status: 409, error: "Time is over. This attempt has expired." };
-  }
 
   const { data: attemptQuestions, error: questionError } = await supabase
     .from("test_attempt_questions")
