@@ -14,7 +14,11 @@ export async function scoreAttempt(attemptId: string, userId: string) {
     return { ok: false as const, status: 404, error: "Attempt not found." };
   }
 
-  if (attempt.status === "expired" || attempt.status === "abandoned") {\n    return { ok: false as const, status: 409, error: "This attempt is no longer active." };\n  }\n\n  if (attempt.status === "submitted") {
+  if (attempt.status === "expired" || attempt.status === "abandoned") {
+    return { ok: false as const, status: 409, error: "This attempt is no longer active." };
+  }
+
+  if (attempt.status === "submitted") {
     const { data: existing } = await supabase.from("results").select("*").eq("attempt_id", attemptId).maybeSingle();
     if (existing) return { ok: true as const, alreadySubmitted: true, result: existing };
   }
