@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ exam: string; stage: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -28,16 +30,17 @@ export default async function ExamStagePage({ params }: Props) {
   const { exam, stage } = await params;
   const supabase = await createSupabaseServerClient();
 
-  const { data: stageRow } = await supabase
+  const { data: stageRow, error: stageError } = await supabase
     .from("exam_stages")
     .select("id,name,description,exams!inner(name,slug)")
     .eq("slug", stage)
     .eq("exams.slug", exam)
     .maybeSingle();
 
+  if (stageError) return <main className="section"><div className="container"><div className="card"><h2>Stage unavailable</h2><p className="muted">This stage could not be loaded right now.</p></div></div></main>;
   if (!stageRow) notFound();
 
-  const [{ data: subjectLinks }, { data: tests }] = await Promise.all([
+  const [{ data: subjectLinks, error: subjectsError }, { data: tests, error: testsError }] = await Promise.all([
     supabase
       .from("exam_stage_subjects")
       .select("subject_id,sort_order,subjects(id,name,slug)")
@@ -61,6 +64,7 @@ export default async function ExamStagePage({ params }: Props) {
         <h1 style={{fontSize:42}}>{stageRow.name}</h1>
         <p style={{maxWidth:720,color:"var(--muted)"}}>{stageRow.description ?? "Prepare with structured subjects and mock tests."}</p>
 
+        {(subjectsError || testsError) ? <div className="card"><p className="muted">Stage content could not be loaded completely right now. Please try again shortly.</p></div> : <>
         <section className="section">
           <div className="section-header"><div><h2>Subjects</h2><p>Subject structure comes from the exam configuration.</p></div></div>
           <div className="grid">
@@ -96,6 +100,7 @@ export default async function ExamStagePage({ params }: Props) {
             {!tests?.length && <p className="muted">No published mock tests are available for this stage yet.</p>}
           </div>
         </section>
+        </>}
       </div>
     </main>
   );
