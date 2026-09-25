@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ exam: string; stage: string; subject: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -46,7 +48,7 @@ export default async function SubjectPage({ params }: Props) {
     .maybeSingle();
   if (!link) notFound();
 
-  const { data: topics } = await supabase
+  const { data: topics, error: topicsError } = await supabase
     .from("topics")
     .select("id,name,slug")
     .eq("subject_id", subjectRow.id)
@@ -62,6 +64,7 @@ export default async function SubjectPage({ params }: Props) {
         <p style={{maxWidth:720,color:"var(--muted)"}}>Practice this subject with reusable topic and test configuration.</p>
         <div className="section">
           <div className="section-header"><div><h2>Topics</h2><p>Topics are managed in the question catalog.</p></div></div>
+          {topicsError ? <div className="card"><p className="muted">Topics could not be loaded right now.</p></div> : (
           <div className="grid">
             {(topics ?? []).map((topic) => (
               <article className="card" key={topic.id}>
@@ -71,7 +74,7 @@ export default async function SubjectPage({ params }: Props) {
               </article>
             ))}
             {!topics?.length && <p className="muted">Topics will appear when this subject is configured.</p>}
-          </div>
+          </div>)}
         </div>
         <Link href={`/exams/${exam}/${stage}`}>Back to {stageRow.name}</Link>
       </div>
