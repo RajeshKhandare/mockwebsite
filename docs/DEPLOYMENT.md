@@ -4,8 +4,8 @@
 
 1. Create a Supabase project.
 2. Apply supabase/schema.sql.
-3. Apply migrations in order: 0002_exam_and_user_foundation.sql, 0003_data_api_grants.sql, 0004_question_access.sql, 0005_profile_and_admin_hardening.sql.
-4. Apply supabase/seed.sql for the original demo dataset.
+3. Apply migrations in order: 0002_exam_and_user_foundation.sql, 0003_data_api_grants.sql, 0004_question_access.sql, 0005_profile_and_admin_hardening.sql, 0006_production_rls_hardening.sql.
+4. Apply supabase/seed.sql for the original demo dataset. The seed expects the unique test-template slug constraint from migration 0006.
 5. Configure Auth email/site settings for the production URL and /auth/callback.
 6. Create an admin user through Supabase Auth, then add that user's UUID to public.admin_users.
 
