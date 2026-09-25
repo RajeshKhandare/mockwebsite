@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     .eq("exam_stage_id", template.exam_stage_id)
     .eq("language", parsed.data.language)
     .eq("status", "approved")
-    .limit(template.question_count);
+    .limit(Math.min(1000, Math.max(template.question_count * 10, template.question_count)));
 
   if (questionError || !questions || questions.length < template.question_count) {
     return NextResponse.json({
@@ -43,7 +43,32 @@ export async function POST(request: Request) {
     }, { status: 422 });
   }
 
-  const shuffled = [...questions].sort(() => Math.random() - 0.5);
+  const questionIds = questions.map((question) => question.id);
+  const { data: optionRows, error: optionError } = await admin
+    .from("question_options")
+    .select("question_id,option_index,is_correct")
+    .in("question_id", questionIds);
+
+  if (optionError) return NextResponse.json({ error: "Question options could not be validated." }, { status: 500 });
+
+  const optionStats = new Map<string, { count: number; correct: number }>();
+  for (const option of optionRows ?? []) {
+    const stats = optionStats.get(option.question_id) ?? { count: 0, correct: 0 };
+    stats.count += 1;
+    if (option.is_correct) stats.correct += 1;
+    optionStats.set(option.question_id, stats);
+  }
+
+  const readyQuestions = questions.filter((question) => {
+    const stats = optionStats.get(question.id);
+    return stats?.count === 4 && stats.correct === 1;
+  });
+
+  if (readyQuestions.length < template.question_count) {
+    return NextResponse.json({ error: "This test is not ready yet. Every live question must have exactly four options and one correct answer." }, { status: 422 });
+  }
+
+  const shuffled = [...readyQuestions].sort(() => Math.random() - 0.5).slice(0, template.question_count);
   const { data: attempt, error: attemptError } = await admin
     .from("test_attempts")
     .insert({ user_id: user.id, test_template_id: template.id, language: parsed.data.language })
