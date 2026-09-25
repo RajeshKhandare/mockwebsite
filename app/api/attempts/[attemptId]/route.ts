@@ -17,6 +17,9 @@ export async function GET(
 
   if (error || !attempt) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
 
+  if (attempt.status === "submitted") return NextResponse.json({ error: "This attempt has already been submitted." }, { status: 409 });
+  if (attempt.status !== "in_progress") return NextResponse.json({ error: "This attempt is no longer active." }, { status: 409 });
+
   const { data: template } = await supabase
     .from("test_templates")
     .select("title,question_count,duration_seconds,marks_per_question,negative_marks")
