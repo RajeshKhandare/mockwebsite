@@ -54,36 +54,44 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
 
   async function saveAnswer(questionId: string, selectedOption: number | null, markedForReview: boolean) {
     setSaving(true);
-    const response = await fetch("/api/attempts/" + attemptId + "/answer", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ questionId, selectedOption, markedForReview }),
-    });
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      setError(data.error ?? "Answer could not be saved.");
+    try {
+      const response = await fetch("/api/attempts/" + attemptId + "/answer", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ questionId, selectedOption, markedForReview }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        setError(data.error ?? "Answer could not be saved.");
+        return false;
+      }
+      return true;
+    } catch {
+      setError("Network error. Your answer could not be saved.");
+      return false;
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
-  function choose(index: number) {
-    if (!question || submittingRef.current) return;
-    setAnswers((prev) => ({...prev, [question.id]: index}));
-    void saveAnswer(question.id, index, marked.has(question.id));
+  async function choose(index: number) {
+    if (!question || submittingRef.current || saving) return;
+    const ok = await saveAnswer(question.id, index, marked.has(question.id));
+    if (ok) setAnswers((prev) => ({...prev, [question.id]: index}));
   }
 
-  function clearResponse() {
-    if (!question || submittingRef.current) return;
-    setAnswers((prev) => ({...prev, [question.id]: null}));
-    void saveAnswer(question.id, null, marked.has(question.id));
+  async function clearResponse() {
+    if (!question || submittingRef.current || saving) return;
+    const ok = await saveAnswer(question.id, null, marked.has(question.id));
+    if (ok) setAnswers((prev) => ({...prev, [question.id]: null}));
   }
 
-  function toggleMark() {
-    if (!question || submittingRef.current) return;
+  async function toggleMark() {
+    if (!question || submittingRef.current || saving) return;
     const next = new Set(marked);
     if (next.has(question.id)) next.delete(question.id); else next.add(question.id);
-    setMarked(next);
-    void saveAnswer(question.id, answers[question.id] ?? null, next.has(question.id));
+    const ok = await saveAnswer(question.id, answers[question.id] ?? null, next.has(question.id));
+    if (ok) setMarked(next);
   }
 
   async function submit(auto = false) {
@@ -114,15 +122,15 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
             <h2 style={{fontSize:20}}>Q{current + 1}. {question.text}</h2>
             <div style={{display:"grid",gap:10,marginTop:22}}>
               {question.options.map((option) => (
-                <button key={option.id} onClick={() => choose(option.index)} className="btn"
+                <button key={option.id} onClick={() => void choose(option.index)} className="btn"
                   style={{justifyContent:"flex-start",background:answers[question.id]===option.index?"#eef3f9":"white",borderColor:answers[question.id]===option.index?"var(--brand)":"var(--border)"}}>
                   {String.fromCharCode(65 + option.index)}. {option.text}
                 </button>
               ))}
             </div>
             <div className="actions">
-              <button className="btn btn-secondary" onClick={clearResponse}>Clear response</button>
-              <button className="btn btn-secondary" onClick={toggleMark}>{marked.has(question.id) ? "Unmark" : "Mark for review"}</button>
+              <button className="btn btn-secondary" onClick={() => void clearResponse()}>Clear response</button>
+              <button className="btn btn-secondary" onClick={() => void toggleMark()}>{marked.has(question.id) ? "Unmark" : "Mark for review"}</button>
               <button className="btn btn-primary" disabled={saving} onClick={() => setCurrent((v) => Math.min(payload.questions.length - 1, v + 1))}>Save & Next</button>
             </div>
           </section>
