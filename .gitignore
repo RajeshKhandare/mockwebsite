@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.wrangler/
+.env
+.env.local
+.env.*.local
+.dev.vars
+coverage/
+dist/
+*.log
+.DS_Store
