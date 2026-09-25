@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import TestSession from "./session";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Live Test | MockTest",
   robots: { index: false, follow: false },
