@@ -1,6 +1,6 @@
 # AI Mock Test — Cloudflare Edition
 
-Premium, mobile-first competitive-exam mock-test platform for Indian banking exams.
+Premium, mobile-first competitive-exam mock-test platform for Indian exam preparation.
 
 ## Locked scope
 - Cloudflare-first deployment
@@ -17,4 +17,12 @@ Premium, mobile-first competitive-exam mock-test platform for Indian banking exa
 ## Delivery rule
 BUILD -> TEST -> VERIFY -> FIX -> DEPLOY
 
-See docs/ARCHITECTURE.md and docs/PRODUCT-UX.md.
+## Current implementation
+- Generic exam, stage, subject, topic and test-template foundation
+- Supabase schema, migrations and original demo seed data
+- Cookie-based Supabase Auth foundation
+- Authenticated attempt creation, answer persistence and server-side result scoring
+- Student dashboard and test history foundation
+- CI validates typecheck, lint, unit tests and production build
+
+See docs/ARCHITECTURE.md, docs/PRODUCT-UX.md and docs/TESTING-CHECKLIST.md.
