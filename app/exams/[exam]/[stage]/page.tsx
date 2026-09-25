@@ -16,7 +16,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .maybeSingle();
 
   if (!row) return { title: "Exam Stage | MockTest" };
-  const examRelation = (row as unknown as { exams?: { name?: string; slug?: string } | Array<{ name?: string; slug?: string }> }).exams;\n  const examName = Array.isArray(examRelation) ? examRelation[0]?.name : examRelation?.name;
+  const examRelation = (row as unknown as { exams?: { name?: string; slug?: string } | Array<{ name?: string; slug?: string }> }).exams;
+  const examName = Array.isArray(examRelation) ? examRelation[0]?.name : examRelation?.name;
   return {
     title: `${row.name} Mock Tests | ${examName ?? "MockTest"}`,
     description: `Practice ${row.name} questions, subjects and mock tests.`,
@@ -50,7 +51,8 @@ export default async function ExamStagePage({ params }: Props) {
       .order("title"),
   ]);
 
-  const examRelation = (stageRow as unknown as { exams?: { name?: string; slug?: string } | Array<{ name?: string; slug?: string }> }).exams;\n  const examData = Array.isArray(examRelation) ? examRelation[0] : examRelation;
+  const examRelation = (stageRow as unknown as { exams?: { name?: string; slug?: string } | Array<{ name?: string; slug?: string }> }).exams;
+  const examData = Array.isArray(examRelation) ? examRelation[0] : examRelation;
 
   return (
     <main className="section">
