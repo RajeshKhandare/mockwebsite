@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Question = { id: string; position: number; text: string; options: { id: string; index: number; text: string }[] };
@@ -18,13 +18,21 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const [marked, setMarked] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [remaining, setRemaining] = useState(0);
+  const [remaining, setRemaining] = useState(0);\n  const submittingRef = useRef(false);
 
   useEffect(() => {
     fetch("/api/attempts/" + attemptId).then(async (r) => {
       const data = await r.json();
       if (!r.ok) throw new Error(data.error ?? "Unable to load test.");
       setPayload(data);
+      const restoredAnswers: Record<string, number | null> = {};
+      const restoredMarked = new Set<string>();
+      for (const answer of data.answers ?? []) {
+        restoredAnswers[answer.question_id] = answer.selected_option;
+        if (answer.marked_for_review) restoredMarked.add(answer.question_id);
+      }
+      setAnswers(restoredAnswers);
+      setMarked(restoredMarked);
       setRemaining(Math.max(0, data.template.duration_seconds - Math.floor((Date.now() - Date.parse(data.attempt.started_at)) / 1000)));
     }).catch((e) => setError(e.message));
   }, [attemptId]);
@@ -34,7 +42,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
     const timer = window.setInterval(() => {
       const seconds = Math.max(0, payload.template.duration_seconds - Math.floor((Date.now() - Date.parse(payload.attempt.started_at)) / 1000));
       setRemaining(seconds);
-      if (seconds === 0) void submit(true);
+      if (seconds === 0 && !submittingRef.current) void submit(true);
     }, 1000);
     return () => window.clearInterval(timer);
   }, [payload]);
@@ -57,7 +65,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   }
 
   function choose(index: number) {
-    if (!question) return;
+    if (!question || submittingRef.current) return;
     setAnswers((prev) => ({...prev, [question.id]: index}));
     void saveAnswer(question.id, index, marked.has(question.id));
   }
@@ -78,9 +86,9 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
 
   async function submit(auto = false) {
     if (!auto && !window.confirm("Submit this test? You will not be able to change answers after submission.")) return;
-    const response = await fetch("/api/attempts/" + attemptId + "/submit", {method:"POST"});
+    submittingRef.current = true;\n    const response = await fetch("/api/attempts/" + attemptId + "/submit", {method:"POST"});
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) { setError(data.error ?? "Could not submit test."); return; }
+    if (!response.ok) { submittingRef.current = false; setError(data.error ?? "Could not submit test."); return; }
     router.push("/test/" + attemptId + "/result");
   }
 
