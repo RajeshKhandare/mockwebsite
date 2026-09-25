@@ -54,6 +54,17 @@ export async function POST(
 
   if (!linkedQuestion) return NextResponse.json({ error: "Question is not part of this attempt." }, { status: 400 });
 
+  if (parsed.data.selectedOption !== null) {
+    const { data: selectedOption } = await supabase
+      .from("question_options")
+      .select("option_index")
+      .eq("question_id", parsed.data.questionId)
+      .eq("option_index", parsed.data.selectedOption)
+      .maybeSingle();
+
+    if (!selectedOption) return NextResponse.json({ error: "Selected option is invalid." }, { status: 400 });
+  }
+
   const { error } = await supabase.from("test_answers").upsert({
     attempt_id: attemptId,
     question_id: parsed.data.questionId,
