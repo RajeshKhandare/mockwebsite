@@ -27,3 +27,8 @@ BUILD -> TEST -> VERIFY -> FIX -> DEPLOY
 
 See docs/ARCHITECTURE.md, docs/PRODUCT-UX.md and docs/TESTING-CHECKLIST.md.
 
+
+
+## Launch verification
+
+The production catalog and authenticated test flow are validated through CI before release.
