@@ -21,16 +21,26 @@ export async function scoreAttempt(attemptId: string, userId: string) {
   if (attempt.status === "submitted") {
     const { data: existing } = await supabase.from("results").select("*").eq("attempt_id", attemptId).maybeSingle();
     if (existing) return { ok: true as const, alreadySubmitted: true, result: existing };
+    return { ok: false as const, status: 409, error: "This attempt was submitted but its result is unavailable." };
   }
 
   const { data: template, error: templateError } = await supabase
     .from("test_templates")
-    .select("marks_per_question,negative_marks")
+    .select("marks_per_question,negative_marks,duration_seconds")
     .eq("id", attempt.test_template_id)
     .single();
 
   if (templateError || !template) {
     return { ok: false as const, status: 500, error: "Test configuration is unavailable." };
+  }
+
+  const now = Date.now();
+  const startedAtMs = Date.parse(attempt.started_at);
+  const elapsedSeconds = Math.max(0, Math.floor((now - startedAtMs) / 1000));
+  if (elapsedSeconds > Number(template.duration_seconds)) {
+    await supabase.from("test_attempts").update({ status: "expired" })
+      .eq("id", attemptId).eq("user_id", userId).eq("status", "in_progress");
+    return { ok: false as const, status: 409, error: "Time is over. This attempt has expired." };
   }
 
   const { data: attemptQuestions, error: questionError } = await supabase
@@ -72,15 +82,27 @@ export async function scoreAttempt(attemptId: string, userId: string) {
   });
 
   const submittedAt = new Date().toISOString();
-  const timeTaken = Math.max(
-    0,
-    Math.floor((Date.parse(submittedAt) - Date.parse(attempt.started_at)) / 1000),
+  const timeTaken = Math.min(
+    Number(template.duration_seconds),
+    Math.max(0, Math.floor((Date.parse(submittedAt) - startedAtMs) / 1000)),
   );
 
-  await supabase.from("test_attempts").update({
-    status: "submitted",
-    submitted_at: submittedAt,
-  }).eq("id", attemptId);
+  const { data: finalized, error: finalizeError } = await supabase
+    .from("test_attempts")
+    .update({ status: "submitted", submitted_at: submittedAt })
+    .eq("id", attemptId)
+    .eq("user_id", userId)
+    .eq("status", "in_progress")
+    .select("id")
+    .maybeSingle();
+
+  if (finalizeError) return { ok: false as const, status: 500, error: "Attempt could not be finalized." };
+
+  if (!finalized) {
+    const { data: existing } = await supabase.from("results").select("*").eq("attempt_id", attemptId).maybeSingle();
+    if (existing) return { ok: true as const, alreadySubmitted: true, result: existing };
+    return { ok: false as const, status: 409, error: "This attempt is no longer active." };
+  }
 
   const result = {
     attempt_id: attemptId,
