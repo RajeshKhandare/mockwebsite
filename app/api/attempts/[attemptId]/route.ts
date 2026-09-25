@@ -35,7 +35,7 @@ export async function GET(
 
   const { data: questions, error: questionsError } = await supabase
     .from("questions")
-    .select("id,question_text,explanation")
+    .select("id,question_text")
     .in("id", ids)
     .eq("language", attempt.language);
 
