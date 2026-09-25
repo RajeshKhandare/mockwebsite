@@ -8,6 +8,7 @@ type Payload = {
   attempt: { id: string; status: string; language: string; started_at: string };
   template: { title: string; question_count: number; duration_seconds: number };
   questions: Question[];
+  answers?: { question_id: string; selected_option: number | null; marked_for_review: boolean }[];
 };
 
 export default function TestSession({ attemptId }: { attemptId: string }) {
@@ -18,7 +19,8 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const [marked, setMarked] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [remaining, setRemaining] = useState(0);\n  const submittingRef = useRef(false);
+  const [remaining, setRemaining] = useState(0);
+  const submittingRef = useRef(false);
 
   useEffect(() => {
     fetch("/api/attempts/" + attemptId).then(async (r) => {
@@ -71,13 +73,13 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   }
 
   function clearResponse() {
-    if (!question) return;
+    if (!question || submittingRef.current) return;
     setAnswers((prev) => ({...prev, [question.id]: null}));
     void saveAnswer(question.id, null, marked.has(question.id));
   }
 
   function toggleMark() {
-    if (!question) return;
+    if (!question || submittingRef.current) return;
     const next = new Set(marked);
     if (next.has(question.id)) next.delete(question.id); else next.add(question.id);
     setMarked(next);
@@ -85,8 +87,10 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   }
 
   async function submit(auto = false) {
+    if (submittingRef.current) return;
     if (!auto && !window.confirm("Submit this test? You will not be able to change answers after submission.")) return;
-    submittingRef.current = true;\n    const response = await fetch("/api/attempts/" + attemptId + "/submit", {method:"POST"});
+    submittingRef.current = true;
+    const response = await fetch("/api/attempts/" + attemptId + "/submit", {method:"POST"});
     const data = await response.json().catch(() => ({}));
     if (!response.ok) { submittingRef.current = false; setError(data.error ?? "Could not submit test."); return; }
     router.push("/test/" + attemptId + "/result");
