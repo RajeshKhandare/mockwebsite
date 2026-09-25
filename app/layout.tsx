@@ -3,7 +3,7 @@ import "./globals.css";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://mockwebsite.example"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: { default: "MockTest — Exam Preparation & Mock Tests", template: "%s | MockTest" },
   description: "A structured exam preparation platform with mock tests, practice, analytics and learning resources.",
   robots: { index: true, follow: true },
