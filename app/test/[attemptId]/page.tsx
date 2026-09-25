@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import StartTest from "./start-test";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Test Instructions | MockTest",
   robots: { index: false, follow: false },
@@ -11,13 +13,14 @@ export const metadata: Metadata = {
 export default async function TestInstructionsPage({ params }: { params: Promise<{ attemptId: string }> }) {
   const { attemptId } = await params;
   const supabase = await createSupabaseServerClient();
-  const { data: test } = await supabase
+  const { data: test, error } = await supabase
     .from("test_templates")
     .select("id,slug,title,description,question_count,duration_seconds,marks_per_question,negative_marks,supported_languages")
     .eq("is_active", true)
     .or("slug.eq." + attemptId + ",id.eq." + attemptId)
     .maybeSingle();
 
+  if (error) return <main className="section"><div className="container"><div className="card"><h2>Test unavailable</h2><p className="muted">This test could not be loaded right now. Please try again shortly.</p></div></div></main>;
   if (!test) notFound();
 
   return (
@@ -39,10 +42,7 @@ export default async function TestInstructionsPage({ params }: { params: Promise
           <span className="badge">{test.question_count * Number(test.marks_per_question)} marks</span>
           <span className="badge">−{test.negative_marks} negative</span>
         </div>
-        <StartTest
-          testTemplateId={test.id}
-          languages={test.supported_languages}
-        />
+        <StartTest testTemplateId={test.id} languages={test.supported_languages} />
       </div>
     </div></main>
   );
