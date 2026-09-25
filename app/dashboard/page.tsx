@@ -3,6 +3,8 @@ import Link from "next/link";
 import { logout } from "@/app/login/actions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Dashboard | MockTest",
   robots: { index: false, follow: false },
