@@ -22,13 +22,28 @@ export async function POST(
 
   const { data: attempt } = await supabase
     .from("test_attempts")
-    .select("id,status")
+    .select("id,status,started_at,test_template_id")
     .eq("id", attemptId)
     .eq("user_id", user.id)
     .single();
 
   if (!attempt) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
   if (attempt.status !== "in_progress") return NextResponse.json({ error: "This attempt is no longer active." }, { status: 409 });
+
+  const { data: template } = await supabase
+    .from("test_templates")
+    .select("duration_seconds")
+    .eq("id", attempt.test_template_id)
+    .single();
+
+  if (!template) return NextResponse.json({ error: "Test configuration is unavailable." }, { status: 500 });
+
+  const elapsedSeconds = Math.floor((Date.now() - Date.parse(attempt.started_at)) / 1000);
+  if (elapsedSeconds >= Number(template.duration_seconds)) {
+    await supabase.from("test_attempts").update({ status: "expired" })
+      .eq("id", attemptId).eq("user_id", user.id).eq("status", "in_progress");
+    return NextResponse.json({ error: "Time is over. This attempt has expired." }, { status: 409 });
+  }
 
   const { data: linkedQuestion } = await supabase
     .from("test_attempt_questions")
