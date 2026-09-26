@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid scoring request." }, { status: 400 });
 
-  const result = await scoreAttempt(parsed.data.attemptId, user.id);
+  const result = await scoreAttempt(parsed.data.attemptId, { userId: user.id, guestToken: null });
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
   return NextResponse.json(result);
 }
