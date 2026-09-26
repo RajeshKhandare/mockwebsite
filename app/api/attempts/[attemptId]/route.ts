@@ -63,7 +63,8 @@ export async function GET(
   if (answersError) return NextResponse.json({ error: "Saved answers could not be loaded." }, { status: 500 });
 
   const questionMap = new Map((questions ?? []).map((q) => [q.id, q]));
-  const optionMap = new Map<string, typeof options>();
+  type AttemptOption = { id: string; question_id: string; option_index: number; option_text: string };
+  const optionMap = new Map<string, AttemptOption[]>();
   for (const option of options ?? []) {
     const current = optionMap.get(option.question_id) ?? [];
     current.push(option);
