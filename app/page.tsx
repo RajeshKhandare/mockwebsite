@@ -52,7 +52,7 @@ export default function HomePage() {
       <section className="stats-strip">
         <div className="container stats-wide">
           <div><strong>20+</strong><span>exam tracks in the library</span></div>
-          <div><strong>9</strong><span>published mock tests</span></div>
+          <div><strong>5</strong><span>published mock tests</span></div>
           <div><strong>15</strong><span>approved practice questions</span></div>
           <div><strong>3</strong><span>test languages available</span></div>
         </div>
