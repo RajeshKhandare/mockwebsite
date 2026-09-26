@@ -17,7 +17,7 @@ export default function AuthPanel({ next, error, message }: Props) {
       <p className="eyebrow">{mode === "login" ? "Student account" : "Join MockTest"}</p>
       <h1>{mode === "login" ? "Welcome back." : "Create your account."}</h1>
       <p className="muted">{mode === "login" ? "Continue your preparation from where you left off." : "Keep your attempts, results and preparation history together."}</p>
-      {error && <p className="form-message error">{error === "invalid" ? "Email or password is incorrect." : error === "signup" ? "We could not create the account. The email may already be registered." : error === "reset" ? "We could not send a reset email. Please try again." : "Please check the details and try again."}</p>}
+      {error && <p className="form-message error">{error === "invalid" ? "Email or password is incorrect." : error === "signup" ? "We could not create the account. The email may already be registered." : error === "reset" ? "We could not send a reset email. Please try again." : error === "exists" ? "An account already exists for this email. Log in or reset your password." : "Please check the details and try again."}</p>}
       {message === "check-email" && <p className="form-message success">Check your email to finish creating your account.</p>}
       {message === "reset-sent" && <p className="form-message success">Password reset instructions have been sent to your email.</p>}
       {mode === "login" ? (
