@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getAttemptOwner } from "@/lib/attempt-owner";
 
 export const dynamic = "force-dynamic";
 
@@ -13,16 +14,17 @@ export const metadata: Metadata = {
 
 export default async function ResultPage(props: { params: Promise<{ attemptId: string }> }) {
   const { attemptId } = await props.params;
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/test/" + attemptId + "/result");
-
+  const owner = await getAttemptOwner();
+  if (!owner.userId && !owner.guestToken) notFound();
+  const supabase = createSupabaseAdminClient();
   const { data: attempt } = await supabase
     .from("test_attempts")
-    .select("id,status,language,test_template_id,started_at,submitted_at")
-    .eq("id", attemptId).eq("user_id", user.id).maybeSingle();
+    .select("id,status,language,test_template_id,started_at,submitted_at,user_id,guest_token")
+    .eq("id", attemptId).maybeSingle();
 
-  if (!attempt) notFound();
+  if (!attempt || (owner.userId ? attempt.user_id !== owner.userId : attempt.guest_token !== owner.guestToken)) notFound();
+
+  const isGuest = !attempt.user_id;
   if (attempt.status !== "submitted") redirect("/test/" + attemptId);
 
   const [{ data: result }, { data: template }, { data: links }] = await Promise.all([
@@ -34,7 +36,7 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
   if (!result || !template) notFound();
 
   const ids = (links ?? []).map((row) => row.question_id);
-  const admin = createSupabaseAdminClient();
+  const admin = supabase;
   const [{ data: questions }, { data: answers }, { data: options }] = await Promise.all([
     ids.length ? admin.from("questions").select("id,question_text,explanation").in("id", ids) : Promise.resolve({data:[]}),
     supabase.from("test_answers").select("question_id,selected_option,marked_for_review").eq("attempt_id", attemptId),
@@ -59,7 +61,7 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
         <div className="result-card"><span>Unattempted</span><strong>{result.unattempted_count}</strong></div>
         <div className="result-card"><span>Time</span><strong>{Math.floor(result.time_taken_seconds / 60)}m {result.time_taken_seconds % 60}s</strong></div>
       </div>
-      <section className="panel">
+      {!isGuest ? <section className="panel">
         <h2>Answer review</h2>
         <div className="list-stack">
           {(links ?? []).map((link) => {
@@ -79,11 +81,16 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
             </article> : null;
           })}
         </div>
-      </section>
+      </section> : (
+        <section className="panel">
+          <h2>Basic result shown</h2>
+          <p className="muted">This guest result includes a limited performance summary. Sign in to unlock answer review, detailed analysis, history and personalized recommendations.</p>
+        </section>
+      )}
       <section className="panel">
         <h2>Scoring summary</h2>
         <p className="muted">{template.question_count} questions · +{template.marks_per_question} for correct · −{template.negative_marks} for incorrect.</p>
-        <div className="button-row"><Link className="button" href={"/test/" + attemptId + "/analysis"}>View analysis</Link><Link className="button primary" href="/tests">Take another test</Link></div>
+        <div className="button-row">{!isGuest ? <Link className="button" href={"/test/" + attemptId + "/analysis"}>View analysis</Link> : <Link className="button primary" href={"/test/" + attemptId}>Sign in for full analysis</Link>}<Link className="button primary" href="/tests">Take another test</Link></div>
       </section>
     </main>
   );
