@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { login, signup } from "@/app/login/actions";
+import { login, signup, requestPasswordReset } from "@/app/login/actions";
 
 type Props = { nextPath: string; error?: string; message?: string; openInitially?: boolean; triggerLabel?: string };
 
@@ -33,6 +33,7 @@ export default function TestAuthBox({ nextPath, error, message, openInitially = 
             <label>Email<input name="email" type="email" autoComplete="email" required /></label>
             <label>Password<input name="password" type="password" autoComplete="current-password" required /></label>
             <button className="button primary auth-submit" formAction={login}>Log in</button>
+            <div className="reset-form"><input name="reset_email" type="email" placeholder="Email for password reset" /><button className="text-button" type="button" onClick={() => { const input = document.querySelector<HTMLInputElement>('input[name="reset_email"]'); if (input?.value) { const form = document.createElement("form"); form.method = "post"; form.action = "/login"; } }}>Forgot password?</button></div>
           </form>
         ) : (
           <form className="auth-form auth-modal-form">
