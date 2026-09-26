@@ -13,12 +13,16 @@ export const metadata: Metadata = {
 export default async function TestInstructionsPage({ params }: { params: Promise<{ attemptId: string }> }) {
   const { attemptId } = await params;
   const supabase = createSupabasePublicClient();
-  const { data: test, error } = await supabase
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const isTemplateId = uuidPattern.test(attemptId);
+  const query = supabase
     .from("test_templates")
     .select("id,slug,title,description,question_count,duration_seconds,marks_per_question,negative_marks,supported_languages")
-    .eq("is_active", true)
-    .or("slug.eq." + attemptId + ",id.eq." + attemptId)
-    .maybeSingle();
+    .eq("is_active", true);
+
+  const { data: test, error } = isTemplateId
+    ? await query.eq("id", attemptId).maybeSingle()
+    : await query.eq("slug", attemptId).maybeSingle();
 
   if (error) {
     console.error("Test template load failed", error);
