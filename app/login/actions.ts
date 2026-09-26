@@ -3,10 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 function safeNextPath(value: FormDataEntryValue | null) {
   const next = typeof value === "string" ? value : "/dashboard";
   return next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+}
+
+function authRedirect(path: string, error: string) {
+  return redirect(path + (path.includes("?") ? "&" : "?") + "error=" + error);
 }
 
 export async function login(formData: FormData) {
@@ -17,7 +22,11 @@ export async function login(formData: FormData) {
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) redirect("/login?error=invalid");
+  if (error) {
+    const inline = formData.get("inline") === "1";
+    if (inline && next !== "/dashboard") authRedirect(next, "invalid");
+    redirect("/login?error=invalid");
+  }
 
   revalidatePath("/", "layout");
   redirect(next);
@@ -27,7 +36,17 @@ export async function signup(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const displayName = String(formData.get("display_name") ?? "").trim();
-  if (!email || password.length < 8) redirect("/login?error=signup");
+  const targetExam = String(formData.get("target_exam") ?? "").trim();
+  const educationLevel = String(formData.get("education_level") ?? "").trim();
+  const state = String(formData.get("state") ?? "").trim();
+  const preparationStage = String(formData.get("preparation_stage") ?? "").trim();
+  const preferredLanguage = String(formData.get("preferred_language") ?? "").trim();
+  const inline = formData.get("inline") === "1";
+  const next = safeNextPath(formData.get("next"));
+  if (!email || password.length < 8) {
+    if (inline && next !== "/dashboard") authRedirect(next, "signup");
+    redirect("/login?error=signup");
+  }
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signUp({
@@ -35,12 +54,29 @@ export async function signup(formData: FormData) {
     password,
     options: { data: { display_name: displayName || undefined } },
   });
-  if (error) redirect("/login?error=signup");
+  if (error) {
+    if (inline && next !== "/dashboard") authRedirect(next, "signup");
+    redirect("/login?error=signup");
+  }
+
+  if (data.user) {
+    const admin = createSupabaseAdminClient();
+    await admin.from("profiles").upsert({
+      id: data.user.id,
+      display_name: displayName || null,
+      target_exam: targetExam || null,
+      education_level: educationLevel || null,
+      state: state || null,
+      preparation_stage: preparationStage || null,
+      preferred_language: preferredLanguage || null,
+    }, { onConflict: "id" });
+  }
 
   if (data.session) {
     revalidatePath("/", "layout");
     redirect("/dashboard");
   }
+  if (inline && next !== "/dashboard") redirect(next + (next.includes("?") ? "&" : "?") + "message=check-email");
   redirect("/login?message=check-email");
 }
 
