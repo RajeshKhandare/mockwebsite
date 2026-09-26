@@ -14,8 +14,9 @@ const fallbackExams = [
 
 export default async function HomePage() {
   const supabase = createSupabasePublicClient();
-  const [{ data: exams }, { data: stats }] = await Promise.all([
+  const [{ data: exams }, { data: tests }, { data: stats }] = await Promise.all([
     supabase.from("exams").select("id,name,slug,description,category_id").eq("is_active", true).order("name").limit(12),
+    supabase.from("test_templates").select("id,slug,title,description,test_type,question_count,duration_seconds").eq("is_active", true).order("title").limit(3),
     supabase.rpc("get_platform_stats"),
   ]);
   const platform = (stats ?? {}) as { exam_tracks?: number; published_mocks?: number; approved_questions?: number; completed_attempts?: number; unique_students?: number };
@@ -72,6 +73,27 @@ export default async function HomePage() {
                 <h3>{exam.name}</h3>
                 <p>{exam.description ?? "Structured practice with configurable stages and mock tests."}</p>
                 <span className="card-link">Explore track <b>→</b></span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <div className="section-header">
+            <div><div className="eyebrow">Live practice library</div><h2>Pick a test and start now.</h2><p>Published tests are ready to open from the preparation library.</p></div>
+            <Link className="button secondary" href="/tests">See all tests</Link>
+          </div>
+          <div className="grid">
+            {(tests ?? []).map((test) => (
+              <Link className="card test-card" key={test.id} href={`/test/${test.slug ?? test.id}`}>
+                <div className="test-card-top"><span className="test-index">LIVE</span><span className="badge">Free to try</span></div>
+                <div className="eyebrow">{test.test_type.replace("_"," ")}</div>
+                <h3>{test.title}</h3>
+                <p>{test.description}</p>
+                <div className="meta"><span className="badge">{test.question_count} questions</span><span className="badge">{Math.round(test.duration_seconds / 60)} min</span></div>
+                <span className="card-link">View test <b>→</b></span>
               </Link>
             ))}
           </div>
