@@ -15,13 +15,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <header className="site-header">
           <div className="container nav">
-            <Link href="/" className="logo">MockTest</Link>
+            <Link href="/" className="logo"><span className="logo-mark">M</span><span>MockTest</span></Link>
             <nav className="nav-links" aria-label="Primary navigation">
               <Link href="/exams">Exams</Link>
               <Link href="/tests">Mock Tests</Link>
               <Link href="/practice">Practice</Link>
               <Link href="/resources">Resources</Link>
-              <Link href="/login">Login</Link>
+              <Link href="/login" className="nav-cta">Sign in</Link>
             </nav>
           </div>
         </header>
