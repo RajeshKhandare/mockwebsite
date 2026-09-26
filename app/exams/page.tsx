@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
 export default async function ExamsPage() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   const [{ data: categories, error: categoriesError }, { data: exams, error: examsError }] = await Promise.all([
     supabase.from("exam_categories").select("id,name,slug,description").eq("is_active", true).order("sort_order"),
     supabase.from("exams").select("id,name,slug,description,category_id").eq("is_active", true).order("name"),
