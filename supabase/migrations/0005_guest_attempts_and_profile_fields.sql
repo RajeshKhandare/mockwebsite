@@ -12,7 +12,7 @@ alter table public.test_attempts
 alter table public.test_attempts
   add column if not exists guest_token text;
 
-create unique index if not exists test_attempts_guest_token_uidx
+create index if not exists test_attempts_guest_token_idx
   on public.test_attempts (guest_token)
   where guest_token is not null;
 
