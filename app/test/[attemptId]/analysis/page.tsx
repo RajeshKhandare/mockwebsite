@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getAttemptOwner } from "@/lib/attempt-owner";
+import TestAuthBox from "../test-auth-box";
 
 export const dynamic = "force-dynamic";
 
@@ -13,18 +15,28 @@ export const metadata: Metadata = {
 
 export default async function AnalysisPage(props: { params: Promise<{ attemptId: string }> }) {
   const { attemptId } = await props.params;
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/test/" + attemptId + "/analysis");
+  const searchParams = await (props as { searchParams?: Promise<Record<string, string | string[] | undefined>> }).searchParams;
+  const error = typeof searchParams?.error === "string" ? searchParams.error : "";
+  const message = typeof searchParams?.message === "string" ? searchParams.message : "";
+  const owner = await getAttemptOwner();
+  if (!owner.userId && !owner.guestToken) notFound();
 
+  const supabase = createSupabaseAdminClient();
   const { data: attempt } = await supabase
     .from("test_attempts")
-    .select("id,status,test_template_id,language")
+    .select("id,status,test_template_id,language,user_id,guest_token")
     .eq("id", attemptId)
-    .eq("user_id", user.id)
     .maybeSingle();
 
-  if (!attempt) notFound();
+  if (!attempt || (owner.userId ? attempt.user_id !== owner.userId : attempt.guest_token !== owner.guestToken)) notFound();
+  if (!owner.userId) {
+    return (
+      <main className="page-shell">
+        <div className="section-heading"><div><p className="eyebrow">Full analysis locked</p><h1>Sign in to unlock detailed performance analysis</h1><p className="muted">Your basic result is available without an account. Sign in to see subject and topic breakdowns, answer review, history and personalized recommendations.</p></div></div>
+        <TestAuthBox nextPath={"/test/" + attemptId + "/analysis"} error={error} message={message} />
+      </main>
+    );
+  }
   if (attempt.status !== "submitted") redirect("/test/" + attemptId);
 
   const [{ data: result }, { data: template }, { data: links }, { data: answers }] = await Promise.all([
