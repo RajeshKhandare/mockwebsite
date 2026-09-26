@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -19,12 +20,23 @@ export async function POST(request: Request) {
   const admin = createSupabaseAdminClient();
   const { data: template, error: templateError } = await admin
     .from("test_templates")
-    .select("id,exam_stage_id,question_count,supported_languages,is_active")
+    .select("id,exam_stage_id,question_count,supported_languages,is_active,requires_login")
     .eq("id", parsed.data.testTemplateId)
     .eq("is_active", true)
     .single();
 
   if (templateError || !template) return NextResponse.json({ error: "Test not found." }, { status: 404 });
+
+  const cookieStore = await cookies();
+  const { data: { user } } = await supabase.auth.getUser();
+  let guestToken = cookieStore.get("mock_guest")?.value;
+  if (!user && template.requires_login) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+  if (!user && !guestToken) {
+    guestToken = crypto.randomUUID() + "-" + crypto.randomUUID();
+  }
+
   if (!template.supported_languages.includes(parsed.data.language)) {
     return NextResponse.json({ error: "Selected language is not available for this test." }, { status: 400 });
   }
@@ -71,7 +83,12 @@ export async function POST(request: Request) {
   const shuffled = [...readyQuestions].sort(() => Math.random() - 0.5).slice(0, template.question_count);
   const { data: attempt, error: attemptError } = await admin
     .from("test_attempts")
-    .insert({ user_id: user.id, test_template_id: template.id, language: parsed.data.language })
+    .insert({
+      user_id: user?.id ?? null,
+      guest_token: user ? null : guestToken,
+      test_template_id: template.id,
+      language: parsed.data.language,
+    })
     .select("id")
     .single();
 
@@ -90,5 +107,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not prepare test questions." }, { status: 500 });
   }
 
-  return NextResponse.json({ attemptId: attempt.id });
+  const response = NextResponse.json({ attemptId: attempt.id, guest: !user });
+  if (!user && guestToken) {
+    response.cookies.set("mock_guest", guestToken, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 30 });
+  }
+  return response;
 }
