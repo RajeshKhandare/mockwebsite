@@ -60,7 +60,7 @@ export default async function TestInstructionsPage({ params, searchParams }: { p
         {test.requires_login && !user ? (
           <TestAuthBox nextPath={"/test/" + attemptId} error={error} message={message} />
         ) : !test.requires_login ? (
-          <TestAuthBox nextPath={"/test/" + attemptId} error={error} message={message} />
+          <TestAuthBox nextPath={"/test/" + attemptId} error={error} message={message} openInitially={false} />
         ) : null}
         <StartTest testTemplateId={test.id} languages={test.supported_languages} requiresLogin={test.requires_login} loggedIn={Boolean(user)} />
       </div>
