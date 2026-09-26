@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +9,7 @@ type Props = { params: Promise<{ exam: string; stage: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { exam, stage } = await params;
-  const supabase = createSupabaseAdminClient();
+  const supabase = createSupabasePublicClient();
   const { data: row } = await supabase
     .from("exam_stages")
     .select("name,exams!inner(name,slug)")
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ExamStagePage({ params }: Props) {
   const { exam, stage } = await params;
-  const supabase = createSupabaseAdminClient();
+  const supabase = createSupabasePublicClient();
 
   const { data: stageRow, error: stageError } = await supabase
     .from("exam_stages")

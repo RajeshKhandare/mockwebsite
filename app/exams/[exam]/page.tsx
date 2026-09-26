@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 
 export const dynamic = "force-dynamic";
 
 export default async function ExamPage({ params }: { params: Promise<{ exam: string }> }) {
   const { exam } = await params;
-  const supabase = createSupabaseAdminClient();
+  const supabase = createSupabasePublicClient();
 
   const { data: item, error: itemError } = await supabase
     .from("exams")

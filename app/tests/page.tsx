@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 
 export const dynamic = "force-dynamic";
 
 export default async function TestsPage() {
-  const supabase = createSupabaseAdminClient();
+  const supabase = createSupabasePublicClient();
   const { data: tests, error } = await supabase
     .from("test_templates")
     .select("id,slug,title,description,test_type,question_count,duration_seconds,marks_per_question,negative_marks,supported_languages")
