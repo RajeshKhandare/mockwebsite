@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -36,8 +37,9 @@ export default async function AnalysisPage(props: { params: Promise<{ attemptId:
   if (!result || !template) notFound();
 
   const ids = (links ?? []).map((row) => row.question_id);
+  const admin = createSupabaseAdminClient();
   const { data: questions } = ids.length
-    ? await supabase.from("questions").select("id,subject_id").in("id", ids)
+    ? await admin.from("questions").select("id,subject_id").in("id", ids)
     : { data: [] as Array<{ id: string; subject_id: string | null }> };
 
   const subjectIds = [...new Set((questions ?? []).map((q) => q.subject_id).filter((id): id is string => Boolean(id)))];
@@ -46,7 +48,7 @@ export default async function AnalysisPage(props: { params: Promise<{ attemptId:
     : { data: [] as Array<{ id: string; name: string }> };
 
   const { data: options } = ids.length
-    ? await supabase.from("question_options").select("question_id,option_index,is_correct").in("question_id", ids)
+    ? await admin.from("question_options").select("question_id,option_index,is_correct").in("question_id", ids)
     : { data: [] as Array<{ question_id: string; option_index: number; is_correct: boolean }> };
 
   const questionMap = new Map((questions ?? []).map((q) => [q.id, q]));
