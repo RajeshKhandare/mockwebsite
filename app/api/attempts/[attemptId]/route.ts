@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(
   _request: Request,
@@ -36,7 +37,8 @@ export async function GET(
   const ids = (links ?? []).map((row) => row.question_id);
   if (!ids.length) return NextResponse.json({ error: "This attempt has no questions." }, { status: 422 });
 
-  const { data: questions, error: questionsError } = await supabase
+  const admin = createSupabaseAdminClient();
+  const { data: questions, error: questionsError } = await admin
     .from("questions")
     .select("id,question_text")
     .in("id", ids)
@@ -44,7 +46,7 @@ export async function GET(
 
   if (questionsError) return NextResponse.json({ error: "Question content could not be loaded." }, { status: 500 });
 
-  const { data: options, error: optionsError } = await supabase
+  const { data: options, error: optionsError } = await admin
     .from("question_options")
     .select("id,question_id,option_index,option_text")
     .in("question_id", ids)
