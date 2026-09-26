@@ -25,11 +25,11 @@ export default async function TestInstructionsPage({ params, searchParams }: { p
     .select("id,slug,title,description,question_count,duration_seconds,marks_per_question,negative_marks,supported_languages,requires_login")
     .eq("is_active", true);
 
-  const { data: test, error } = isTemplateId
+  const { data: test, error: templateError } = isTemplateId
     ? await query.eq("id", attemptId).maybeSingle()
     : await query.eq("slug", attemptId).maybeSingle();
 
-  if (error) {
+  if (templateError) {
     console.error("Test template load failed", error);
     return <main className="section"><div className="container"><div className="card"><h2>Test unavailable</h2><p className="muted">This test could not be loaded right now. Please try again shortly.</p></div></div></main>;
   }
