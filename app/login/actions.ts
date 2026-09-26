@@ -102,3 +102,18 @@ export async function logout() {
   revalidatePath("/", "layout");
   redirect("/");
 }
+
+
+export async function requestPasswordReset(formData: FormData) {
+  const email = String(formData.get("email") ?? "").trim();
+  const next = safeNextPath(formData.get("next"));
+  if (!email) redirect("/login?error=reset&next=" + encodeURIComponent(next));
+
+  const supabase = await createSupabaseServerClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: siteUrl + "/auth/callback?next=" + encodeURIComponent("/reset-password"),
+  });
+  if (error) redirect("/login?error=reset&next=" + encodeURIComponent(next));
+  redirect("/login?message=reset-sent&next=" + encodeURIComponent(next));
+}
