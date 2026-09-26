@@ -34,14 +34,14 @@ export async function login(formData: FormData) {
   if (!email || !password) redirect("/login?error=missing");
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data: loginData, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     const inline = formData.get("inline") === "1";
     if (inline && next !== "/dashboard") authRedirect(next, "invalid");
     redirect("/login?error=invalid");
   }
 
-  await claimGuestAttempts((await supabase.auth.getUser()).data.user?.id ?? "");
+  if (loginData.user) await claimGuestAttempts(loginData.user.id);
   revalidatePath("/", "layout");
   redirect(next);
 }
