@@ -7,7 +7,7 @@ export default async function TestsPage() {
   const supabase = createSupabasePublicClient();
   const { data: tests, error } = await supabase
     .from("test_templates")
-    .select("id,slug,title,description,test_type,question_count,duration_seconds,marks_per_question,negative_marks,supported_languages")
+    .select("id,slug,title,description,test_type,question_count,duration_seconds,marks_per_question,negative_marks,supported_languages,requires_login")
     .eq("is_active", true)
     .order("title");
 
@@ -19,10 +19,10 @@ export default async function TestsPage() {
       {error ? (
         <div className="card" style={{marginTop:28}}><h2>Mock-test catalogue temporarily unavailable</h2><p className="muted">The mock-test catalogue could not be loaded right now. Please try again shortly.</p></div>
       ) : (
-        <div className="grid" style={{marginTop:28}}>
+        <div className="grid" style={{marginTop:32}}>
           {(tests ?? []).map((test) => (
             <article className="card" key={test.id}>
-              <div className="eyebrow">{test.test_type.replace("_"," ")}</div>
+              <div className="section-header" style={{alignItems:"center",marginBottom:12}}><div className="eyebrow">{test.test_type.replace("_"," ")}</div><span className="badge">{test.requires_login ? "Account required" : "Free to try"}</span></div>
               <h3>{test.title}</h3>
               <p>{test.description}</p>
               <div className="meta">
