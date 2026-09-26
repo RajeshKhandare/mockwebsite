@@ -1,27 +1,27 @@
 import Link from "next/link";
-import { createSupabasePublicClient } from "@/lib/supabase/public";
 
-export const dynamic = "force-dynamic";
+const featuredExams = [
+  ["Banking Aptitude Demo", "banking-demo", "A small original mock-test dataset used to verify the complete test flow."],
+  ["CDS", "cds", "Combined Defence Services preparation."],
+  ["CTET", "ctet", "Central Teacher Eligibility Test preparation."],
+  ["CUET UG", "cuet-ug", "Common University Entrance Test preparation."],
+  ["GATE CSE", "gate-cse", "Computer Science engineering entrance preparation."],
+  ["IBPS PO", "ibps-po", "Probationary Officer practice and mock-test preparation."],
+  ["JEE Main", "jee-main", "Engineering entrance preparation."],
+  ["Judiciary", "judiciary", "State judiciary and judicial services preparation."],
+  ["NDA", "nda", "National Defence Academy and Naval Academy preparation."],
+  ["NEET UG", "neet-ug", "Medical entrance preparation."],
+  ["Police Constable", "police-constable", "General police recruitment preparation."],
+  ["RBI Grade B", "rbi-grade-b", "Reserve Bank Grade B preparation."],
+] as const;
 
-const fallbackExams = [
-  ["Banking", "SBI PO · IBPS PO", "Banking & Insurance"],
-  ["SSC", "CGL · CHSL", "SSC"],
-  ["Railways", "NTPC · Group D", "Railways"],
-  ["Teaching", "CTET", "Teaching"],
-  ["Civil Services", "UPSC CSE", "Civil Services"],
-  ["Defence", "CDS · NDA", "Defence"],
-];
+const featuredTests = [
+  ["Banking 10-Minute Challenge", "banking-10-minute-challenge-01", "A fast ten-question challenge.", "practice", 10, 10],
+  ["Banking Accuracy Builder", "banking-accuracy-builder-01", "Practice set focused on careful, accurate solving.", "practice", 5, 7],
+  ["Banking Aptitude Quick Mock", "banking-demo-quick-01", "Five original questions for verifying the complete mock-test workflow.", "full_mock", 5, 10],
+] as const;
 
-export default async function HomePage() {
-  const supabase = createSupabasePublicClient();
-  const [{ data: exams }, { data: tests }, { data: stats }] = await Promise.all([
-    supabase.from("exams").select("id,name,slug,description,category_id").eq("is_active", true).order("name").limit(12),
-    supabase.from("test_templates").select("id,slug,title,description,test_type,question_count,duration_seconds").eq("is_active", true).order("title").limit(3),
-    supabase.rpc("get_platform_stats"),
-  ]);
-  const platform = (stats ?? {}) as { exam_tracks?: number; published_mocks?: number; approved_questions?: number; completed_attempts?: number; unique_students?: number };
-  const featured = (exams ?? []).slice(0, 6);
-
+export default function HomePage() {
   return (
     <main>
       <section className="hero hero-premium">
@@ -51,11 +51,10 @@ export default async function HomePage() {
 
       <section className="stats-strip">
         <div className="container stats-wide">
-          <div><strong>{platform.exam_tracks ?? 0}+</strong><span>exam tracks in the library</span></div>
-          <div><strong>{platform.published_mocks ?? 0}</strong><span>published mock tests</span></div>
-          <div><strong>{platform.approved_questions ?? 0}</strong><span>approved practice questions</span></div>
+          <div><strong>20+</strong><span>exam tracks in the library</span></div>
+          <div><strong>9</strong><span>published mock tests</span></div>
+          <div><strong>15</strong><span>approved practice questions</span></div>
           <div><strong>3</strong><span>test languages available</span></div>
-
         </div>
       </section>
 
@@ -66,12 +65,12 @@ export default async function HomePage() {
             <Link className="button secondary" href="/exams">View full library</Link>
           </div>
           <div className="grid exam-card-grid">
-            {(featured.length ? featured : fallbackExams.map(([name,desc,cat]) => ({id:name,name,slug:"",description:desc,category_id:cat}))).map((exam: any, index: number) => (
-              <Link className="card exam-card" key={exam.id} href={exam.slug ? `/exams/${exam.slug}` : "/exams"}>
-                <div className="exam-art"><span>{String(exam.name).split(" ").map((x:string)=>x[0]).slice(0,2).join("")}</span><small>{String(index + 1).padStart(2,"0")}</small></div>
+            {featuredExams.slice(0, 6).map(([name, slug, description], index) => (
+              <Link className="card exam-card" key={slug} href={`/exams/${slug}`}>
+                <div className="exam-art"><span>{name.split(" ").map((x) => x[0]).slice(0,2).join("")}</span><small>{String(index + 1).padStart(2,"0")}</small></div>
                 <div className="eyebrow">Exam track</div>
-                <h3>{exam.name}</h3>
-                <p>{exam.description ?? "Structured practice with configurable stages and mock tests."}</p>
+                <h3>{name}</h3>
+                <p>{description}</p>
                 <span className="card-link">Explore track <b>→</b></span>
               </Link>
             ))}
@@ -86,13 +85,13 @@ export default async function HomePage() {
             <Link className="button secondary" href="/tests">See all tests</Link>
           </div>
           <div className="grid">
-            {(tests ?? []).map((test) => (
-              <Link className="card test-card" key={test.id} href={`/test/${test.slug ?? test.id}`}>
+            {featuredTests.map(([title, slug, description, testType, questionCount, durationMinutes]) => (
+              <Link className="card test-card" key={slug} href={`/test/${slug}`}>
                 <div className="test-card-top"><span className="test-index">LIVE</span><span className="badge">Free to try</span></div>
-                <div className="eyebrow">{test.test_type.replace("_"," ")}</div>
-                <h3>{test.title}</h3>
-                <p>{test.description}</p>
-                <div className="meta"><span className="badge">{test.question_count} questions</span><span className="badge">{Math.round(test.duration_seconds / 60)} min</span></div>
+                <div className="eyebrow">{testType.replace("_"," ")}</div>
+                <h3>{title}</h3>
+                <p>{description}</p>
+                <div className="meta"><span className="badge">{questionCount} questions</span><span className="badge">{durationMinutes} min</span></div>
                 <span className="card-link">View test <b>→</b></span>
               </Link>
             ))}
