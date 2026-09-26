@@ -55,7 +55,7 @@ export default async function HomePage() {
           <div><strong>{platform.published_mocks ?? 0}</strong><span>published mock tests</span></div>
           <div><strong>{platform.approved_questions ?? 0}</strong><span>approved practice questions</span></div>
           <div><strong>3</strong><span>test languages available</span></div>
-          {Number(platform.unique_students ?? 0) > 0 && <div><strong>{platform.unique_students}</strong><span>students with completed attempts</span></div>}
+
         </div>
       </section>
 
