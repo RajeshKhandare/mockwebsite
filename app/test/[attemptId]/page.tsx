@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 import StartTest from "./start-test";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default async function TestInstructionsPage({ params }: { params: Promise<{ attemptId: string }> }) {
   const { attemptId } = await params;
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicClient();
   const { data: test, error } = await supabase
     .from("test_templates")
     .select("id,slug,title,description,question_count,duration_seconds,marks_per_question,negative_marks,supported_languages")
@@ -20,7 +20,10 @@ export default async function TestInstructionsPage({ params }: { params: Promise
     .or("slug.eq." + attemptId + ",id.eq." + attemptId)
     .maybeSingle();
 
-  if (error) return <main className="section"><div className="container"><div className="card"><h2>Test unavailable</h2><p className="muted">This test could not be loaded right now. Please try again shortly.</p></div></div></main>;
+  if (error) {
+    console.error("Test template load failed", error);
+    return <main className="section"><div className="container"><div className="card"><h2>Test unavailable</h2><p className="muted">This test could not be loaded right now. Please try again shortly.</p></div></div></main>;
+  }
   if (!test) notFound();
 
   return (
