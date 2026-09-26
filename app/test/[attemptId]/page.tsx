@@ -47,11 +47,11 @@ export default async function TestInstructionsPage({ params, searchParams }: { p
         <h3>Before you begin</h3>
         <ul style={{lineHeight:1.9,color:"var(--muted)"}}>
           <li>Choose the language for this test: English, Hindi or Marathi when available.</li>
-          <li>Your attempt is saved to your account as you answer.</li>
+          <li>Your answers are saved securely during the test. Sign in to retain the attempt in your account and unlock full analysis.</li>
           <li>Scoring is performed on the server after submission.</li>
           <li>Do not refresh or close the test window unnecessarily during an active attempt.</li>
         </ul>
-        <div className="meta">
+        <div className="meta"><span className="badge">{test.requires_login ? "Account required" : "Free to try"}</span>
           <span className="badge">{test.question_count} questions</span>
           <span className="badge">{Math.round(test.duration_seconds / 60)} minutes</span>
           <span className="badge">{test.question_count * Number(test.marks_per_question)} marks</span>
