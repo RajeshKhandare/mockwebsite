@@ -129,9 +129,10 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
               ))}
             </div>
             <div className="actions">
-              <button className="btn btn-secondary" onClick={() => void clearResponse()}>Clear response</button>
-              <button className="btn btn-secondary" onClick={() => void toggleMark()}>{marked.has(question.id) ? "Unmark" : "Mark for review"}</button>
-              <button className="btn btn-primary" disabled={saving} onClick={() => setCurrent((v) => Math.min(payload.questions.length - 1, v + 1))}>Save & Next</button>
+              <button className="btn btn-secondary" disabled={current === 0 || saving} onClick={() => setCurrent((v) => Math.max(0, v - 1))}>Previous</button>
+              <button className="btn btn-secondary" disabled={saving} onClick={() => void clearResponse()}>Clear response</button>
+              <button className="btn btn-secondary" disabled={saving} onClick={() => void toggleMark()}>{marked.has(question.id) ? "Unmark" : "Mark for review"}</button>
+              <button className="btn btn-primary" disabled={saving || current === payload.questions.length - 1} onClick={() => setCurrent((v) => Math.min(payload.questions.length - 1, v + 1))}>Save & Next</button>
             </div>
           </section>
           <aside className="card">
