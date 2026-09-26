@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { login, signup, requestPasswordReset } from "@/app/login/actions";
 
@@ -11,12 +11,8 @@ export default function TestAuthBox({ nextPath, error, message, openInitially = 
   const [mode, setMode] = useState<"login" | "signup" | "reset">(
     error === "reset" || message === "reset-sent" ? "reset" : error === "signup" || message === "check-email" ? "signup" : "login"
   );
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-
   if (!open) return <button className="auth-trigger" type="button" onClick={() => setOpen(true)}>{triggerLabel}</button>;
-  if (!mounted) return null;
+  if (typeof document === "undefined") return null;
 
   const dialog = (
     <div className="auth-overlay" role="dialog" aria-modal="true" aria-label="Student account">
