@@ -1,16 +1,16 @@
 import { calculateScore } from "@/lib/scoring";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-export async function scoreAttempt(attemptId: string, userId: string) {
+export async function scoreAttempt(attemptId: string, owner: { userId: string | null; guestToken: string | null }) {
   const supabase = createSupabaseAdminClient();
 
   const { data: attempt, error: attemptError } = await supabase
     .from("test_attempts")
-    .select("id,user_id,test_template_id,status,started_at")
+    .select("id,user_id,guest_token,test_template_id,status,started_at")
     .eq("id", attemptId)
     .single();
 
-  if (attemptError || !attempt || attempt.user_id !== userId) {
+  if (attemptError || !attempt || (owner.userId ? attempt.user_id !== owner.userId : attempt.guest_token !== owner.guestToken)) {
     return { ok: false as const, status: 404, error: "Attempt not found." };
   }
 
@@ -85,7 +85,6 @@ export async function scoreAttempt(attemptId: string, userId: string) {
     .from("test_attempts")
     .update({ status: "submitted", submitted_at: submittedAt })
     .eq("id", attemptId)
-    .eq("user_id", userId)
     .eq("status", "in_progress")
     .select("id")
     .maybeSingle();
@@ -111,26 +110,28 @@ export async function scoreAttempt(attemptId: string, userId: string) {
   const { error: resultError } = await supabase.from("results").upsert(result, { onConflict: "attempt_id" });
   if (resultError) return { ok: false as const, status: 500, error: "Result could not be saved." };
 
-  const { data: previous } = await supabase
-    .from("performance_stats")
-    .select("*")
-    .eq("user_id", userId)
-    .maybeSingle();
+  if (owner.userId) {
+    const { data: previous } = await supabase
+      .from("performance_stats")
+      .select("*")
+      .eq("user_id", owner.userId)
+      .maybeSingle();
 
-  const previousAttempts = Number(previous?.attempts_count ?? 0);
-  const previousCompleted = Number(previous?.completed_count ?? 0);
-  const previousAccuracy = Number(previous?.average_accuracy ?? 0);
-  const previousScore = Number(previous?.average_score ?? 0);
+    const previousAttempts = Number(previous?.attempts_count ?? 0);
+    const previousCompleted = Number(previous?.completed_count ?? 0);
+    const previousAccuracy = Number(previous?.average_accuracy ?? 0);
+    const previousScore = Number(previous?.average_score ?? 0);
 
-  await supabase.from("performance_stats").upsert({
-    user_id: userId,
-    attempts_count: previousAttempts + 1,
-    completed_count: previousCompleted + 1,
-    average_accuracy: ((previousAccuracy * previousCompleted) + calculated.accuracy) / (previousCompleted + 1),
-    average_score: ((previousScore * previousCompleted) + calculated.score) / (previousCompleted + 1),
-    total_time_seconds: Number(previous?.total_time_seconds ?? 0) + timeTaken,
-    updated_at: submittedAt,
-  }, { onConflict: "user_id" });
+    await supabase.from("performance_stats").upsert({
+      user_id: owner.userId,
+      attempts_count: previousAttempts + 1,
+      completed_count: previousCompleted + 1,
+      average_accuracy: ((previousAccuracy * previousCompleted) + calculated.accuracy) / (previousCompleted + 1),
+      average_score: ((previousScore * previousCompleted) + calculated.score) / (previousCompleted + 1),
+      total_time_seconds: Number(previous?.total_time_seconds ?? 0) + timeTaken,
+      updated_at: submittedAt,
+    }, { onConflict: "user_id" });
+  }
 
   return { ok: true as const, alreadySubmitted: false, result };
 }
