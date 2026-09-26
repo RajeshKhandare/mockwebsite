@@ -307,3 +307,15 @@ h2 { letter-spacing:-.03em; }
   .feature-layout h2 { font-size:31px; }
   .cta-panel { flex-direction:column; align-items:flex-start; padding:25px; }
 }
+
+.library-count { min-width:110px; padding:13px 15px; border:1px solid var(--border); border-radius:13px; background:#fff; text-align:center; box-shadow:var(--shadow-sm); }
+.library-count strong { display:block; font-size:26px; color:var(--brand); letter-spacing:-.04em; }
+.library-count span { color:var(--muted); font-size:11px; }
+.category-pills { display:flex; flex-wrap:wrap; gap:9px; }
+.category-pills span { padding:10px 13px; border:1px solid var(--border); background:#fff; border-radius:999px; color:#475467; font-size:12px; font-weight:750; }
+.test-card { position:relative; display:flex; flex-direction:column; min-height:300px; }
+.test-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.test-index { width:35px; height:35px; display:grid; place-items:center; border-radius:10px; background:#edf3fa; color:var(--brand); font-size:11px; font-weight:900; }
+.test-card h3 { font-size:20px; }
+.test-card-footer { margin-top:auto; padding-top:16px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--muted); font-size:11px; font-weight:750; }
+.test-card-footer .btn { min-height:39px; padding:0 13px; }
