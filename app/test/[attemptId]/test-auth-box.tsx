@@ -73,9 +73,9 @@ export default function TestAuthBox({ nextPath, error, message, openInitially = 
           </form>
         )}
 
-        <button type="button" className="auth-mode-link" onClick={() => setMode(mode === "reset" ? "login" : mode === "login" ? "signup" : "login")}>
-          {mode === "reset" ? "Back to log in" : mode === "login" ? "Create account" : "Back to log in"}
-        </button>
+        {mode === "reset" && (
+          <button type="button" className="auth-mode-link" onClick={() => setMode("login")}>Back to log in</button>
+        )}
       </section>
     </div>
   );
