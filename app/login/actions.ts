@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -12,6 +13,18 @@ function safeNextPath(value: FormDataEntryValue | null) {
 
 function authRedirect(path: string, error: string) {
   return redirect(path + (path.includes("?") ? "&" : "?") + "error=" + error);
+}
+
+async function claimGuestAttempts(userId: string) {
+  const cookieStore = await cookies();
+  const guestToken = cookieStore.get("mock_guest")?.value;
+  if (!guestToken) return;
+  const admin = createSupabaseAdminClient();
+  await admin.from("test_attempts")
+    .update({ user_id: userId, guest_token: null })
+    .eq("guest_token", guestToken)
+    .is("user_id", null);
+  cookieStore.set("mock_guest", "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 });
 }
 
 export async function login(formData: FormData) {
@@ -28,6 +41,7 @@ export async function login(formData: FormData) {
     redirect("/login?error=invalid");
   }
 
+  await claimGuestAttempts((await supabase.auth.getUser()).data.user?.id ?? "");
   revalidatePath("/", "layout");
   redirect(next);
 }
@@ -73,6 +87,7 @@ export async function signup(formData: FormData) {
   }
 
   if (data.session) {
+    await claimGuestAttempts(data.user.id);
     revalidatePath("/", "layout");
     redirect(inline ? next : "/dashboard");
   }
