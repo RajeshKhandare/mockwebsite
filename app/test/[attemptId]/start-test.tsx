@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Props = { testTemplateId: string; languages: string[] };
+type Props = { testTemplateId: string; languages: string[]; requiresLogin: boolean; loggedIn: boolean };
 
-export default function StartTest({ testTemplateId, languages }: Props) {
+export default function StartTest({ testTemplateId, languages, requiresLogin, loggedIn }: Props) {
   const router = useRouter();
   const [language, setLanguage] = useState(languages[0] ?? "en");
   const [loading, setLoading] = useState(false);
@@ -21,8 +21,8 @@ export default function StartTest({ testTemplateId, languages }: Props) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       if (response.status === 401) {
-        const next = window.location.pathname;
-        router.push("/login?next=" + encodeURIComponent(next));
+        setError("Please sign in above to start this test.");
+        setLoading(false);
         return;
       }
       setError(data.error ?? "Could not start the test.");
@@ -40,8 +40,8 @@ export default function StartTest({ testTemplateId, languages }: Props) {
         {languages.map((value) => <option key={value} value={value}>{value === "en" ? "English" : value === "hi" ? "Hindi" : "Marathi"}</option>)}
       </select>
       {error && <p style={{color:"var(--danger)",marginTop:10}}>{error}</p>}
-      <button className="btn btn-primary" disabled={loading} onClick={start} style={{marginTop:16}}>
-        {loading ? "Preparing test…" : "Start test"}
+      <button className="btn btn-primary" disabled={loading || (requiresLogin && !loggedIn)} onClick={start} style={{marginTop:16}}>
+        {loading ? "Preparing test…" : requiresLogin && !loggedIn ? "Sign in to start" : "Start test"}
       </button>
     </div>
   );
