@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -33,10 +34,11 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
   if (!result || !template) notFound();
 
   const ids = (links ?? []).map((row) => row.question_id);
+  const admin = createSupabaseAdminClient();
   const [{ data: questions }, { data: answers }, { data: options }] = await Promise.all([
-    ids.length ? supabase.from("questions").select("id,question_text,explanation").in("id", ids) : Promise.resolve({data:[]}),
+    ids.length ? admin.from("questions").select("id,question_text,explanation").in("id", ids) : Promise.resolve({data:[]}),
     supabase.from("test_answers").select("question_id,selected_option,marked_for_review").eq("attempt_id", attemptId),
-    ids.length ? supabase.from("question_options").select("question_id,option_index,option_text,is_correct").in("question_id", ids).order("option_index") : Promise.resolve({data:[]}),
+    ids.length ? admin.from("question_options").select("question_id,option_index,option_text,is_correct").in("question_id", ids).order("option_index") : Promise.resolve({data:[]}),
   ]);
   const answerMap = new Map((answers ?? []).map((a) => [a.question_id, a]));
   const questionMap = new Map((questions ?? []).map((q) => [q.id, q]));
