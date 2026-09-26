@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import { login, signup } from "@/app/login/actions";
 
 type Props = {
@@ -18,23 +15,14 @@ export default function TestAuthBox({
   openInitially = true,
   triggerLabel = "Sign in for full analysis",
 }: Props) {
-  const [open, setOpen] = useState(openInitially || Boolean(error) || Boolean(message));
-
-  if (!open) {
-    return (
-      <button className="auth-trigger" type="button" onClick={() => setOpen(true)}>
-        {triggerLabel}
-      </button>
-    );
-  }
+  const initiallyOpen = openInitially || Boolean(error) || Boolean(message);
 
   return (
-    <div className="auth-overlay" role="dialog" aria-modal="true" aria-label="Sign in">
-      <div className="auth-backdrop" onClick={() => !openInitially && setOpen(false)} />
-      <section className="auth-modal">
-        {!openInitially && (
-          <button className="auth-close" type="button" aria-label="Close" onClick={() => setOpen(false)}>×</button>
-        )}
+    <details className="auth-dialog" open={initiallyOpen}>
+      {!initiallyOpen && <summary className="auth-trigger">{triggerLabel}</summary>}
+      <div className="auth-overlay" role="dialog" aria-modal="true" aria-label="Sign in">
+        <div className="auth-backdrop" />
+        <section className="auth-modal">
         <div className="auth-modal-header">
           <div className="auth-modal-mark">M</div>
           <div>
@@ -79,7 +67,8 @@ export default function TestAuthBox({
             <button className="button secondary" formAction={signup}>Create account</button>
           </form>
         </details>
-      </section>
-    </div>
+        </section>
+      </div>
+    </details>
   );
 }
