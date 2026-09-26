@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getAttemptOwner } from "@/lib/attempt-owner";
 import { scoreAttempt } from "@/lib/attempt-scoring";
 
 export async function POST(
@@ -7,11 +7,10 @@ export async function POST(
   context: { params: Promise<{ attemptId: string }> },
 ) {
   const { attemptId } = await context.params;
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  const owner = await getAttemptOwner();
+  if (!owner.userId && !owner.guestToken) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
 
-  const result = await scoreAttempt(attemptId, user.id);
+  const result = await scoreAttempt(attemptId, owner);
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
   return NextResponse.json({ ok: true, result: result.result });
 }
