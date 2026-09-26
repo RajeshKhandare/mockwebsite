@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -120,7 +120,11 @@ export async function requestPasswordReset(formData: FormData) {
   if (!email) redirect("/login?error=reset&next=" + encodeURIComponent(next));
 
   const supabase = await createSupabaseServerClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const requestHeaders = await headers();
+  const origin = requestHeaders.get("origin");
+  const host = requestHeaders.get("host");
+  const forwardedProto = requestHeaders.get("x-forwarded-proto") ?? "https";
+  const siteUrl = origin ?? (host ? forwardedProto + "://" + host : process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000");
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: siteUrl + "/auth/callback?next=" + encodeURIComponent("/reset-password"),
   });
