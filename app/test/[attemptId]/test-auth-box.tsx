@@ -23,18 +23,25 @@ export default function TestAuthBox({ nextPath, error, message, openInitially = 
         <p className="eyebrow">{mode === "login" ? "Student account" : "Join MockTest"}</p>
         <h2>{mode === "login" ? "Welcome back." : "Create your account."}</h2>
         {error === "invalid" && <p className="form-message error">Email or password is incorrect.</p>}
-        {error === "signup" && <p className="form-message error">We could not create the account. The email may already be registered.</p>}
+        {error === "signup" && <p className="form-message error">We could not create the account. Please check the details and try again.</p>}
+        {error === "exists" && <p className="form-message error">An account already exists for this email. Log in or reset your password.</p>}
         {message === "check-email" && <p className="form-message success">Check your email to finish creating your account.</p>}
 
         {mode === "login" ? (
-          <form className="auth-form auth-modal-form">
-            <input type="hidden" name="next" value={nextPath} />
-            <input type="hidden" name="inline" value="1" />
-            <label>Email<input name="email" type="email" autoComplete="email" required /></label>
-            <label>Password<input name="password" type="password" autoComplete="current-password" required /></label>
-            <button className="button primary auth-submit" formAction={login}>Log in</button>
-            <form className="reset-form"><input type="hidden" name="next" value={nextPath} /><input name="email" type="email" placeholder="Email for password reset" required /><button className="text-button" formAction={requestPasswordReset}>Forgot password?</button></form>
-          </form>
+          <>
+            <form className="auth-form auth-modal-form">
+              <input type="hidden" name="next" value={nextPath} />
+              <input type="hidden" name="inline" value="1" />
+              <label>Email<input name="email" type="email" autoComplete="email" required /></label>
+              <label>Password<input name="password" type="password" autoComplete="current-password" required /></label>
+              <button className="button primary auth-submit" formAction={login}>Log in</button>
+            </form>
+            <form className="reset-form auth-modal-reset">
+              <input type="hidden" name="next" value={nextPath} />
+              <input name="email" type="email" placeholder="Email for password reset" autoComplete="email" required />
+              <button className="text-button" formAction={requestPasswordReset}>Forgot password?</button>
+            </form>
+          </>
         ) : (
           <form className="auth-form auth-modal-form">
             <input type="hidden" name="next" value={nextPath} />
