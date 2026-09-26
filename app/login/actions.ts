@@ -73,6 +73,16 @@ export async function signup(formData: FormData) {
     redirect("/login?error=signup");
   }
 
+  const alreadyRegistered = Boolean(
+    data.user &&
+    Array.isArray(data.user.identities) &&
+    data.user.identities.length === 0
+  );
+  if (alreadyRegistered) {
+    if (inline && next !== "/dashboard") authRedirect(next, "exists");
+    redirect("/login?error=exists");
+  }
+
   if (data.user) {
     const admin = createSupabaseAdminClient();
     await admin.from("profiles").upsert({
