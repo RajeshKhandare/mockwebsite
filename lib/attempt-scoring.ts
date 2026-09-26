@@ -35,6 +35,15 @@ export async function scoreAttempt(attemptId: string, userId: string) {
   }
 
   const startedAtMs = Date.parse(attempt.started_at);
+  const elapsedBeforeSubmit = Math.floor((Date.now() - startedAtMs) / 1000);
+  if (elapsedBeforeSubmit >= Number(template.duration_seconds)) {
+    await supabase.from("test_attempts")
+      .update({ status: "expired" })
+      .eq("id", attemptId)
+      .eq("user_id", userId)
+      .eq("status", "in_progress");
+    return { ok: false as const, status: 409, error: "Time is over. This attempt has expired." };
+  }
 
   const { data: attemptQuestions, error: questionError } = await supabase
     .from("test_attempt_questions")
