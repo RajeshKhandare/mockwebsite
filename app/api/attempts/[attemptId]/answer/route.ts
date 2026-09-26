@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getAttemptOwner } from "@/lib/attempt-owner";
 
 const payloadSchema = z.object({
   questionId: z.string().uuid(),
@@ -14,21 +14,22 @@ export async function POST(
   context: { params: Promise<{ attemptId: string }> },
 ) {
   const { attemptId } = await context.params;
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  const { userId, guestToken } = await getAttemptOwner();
+  if (!userId && !guestToken) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
+  const supabase = createSupabaseAdminClient();
 
   const parsed = payloadSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid answer." }, { status: 400 });
 
   const { data: attempt } = await supabase
     .from("test_attempts")
-    .select("id,status,started_at,test_template_id")
+    .select("id,status,started_at,test_template_id,user_id,guest_token")
     .eq("id", attemptId)
-    .eq("user_id", user.id)
     .single();
 
-  if (!attempt) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
+  if (!attempt || (userId ? attempt.user_id !== userId : attempt.guest_token !== guestToken)) {
+    return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
+  }
   if (attempt.status !== "in_progress") return NextResponse.json({ error: "This attempt is no longer active." }, { status: 409 });
 
   const { data: template } = await supabase
