@@ -76,8 +76,10 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
 
   async function choose(index: number) {
     if (!question || submittingRef.current || saving) return;
+    const previous = answers[question.id] ?? null;
+    setAnswers((prev) => ({ ...prev, [question.id]: index }));
     const ok = await saveAnswer(question.id, index, marked.has(question.id));
-    if (ok) setAnswers((prev) => ({...prev, [question.id]: index}));
+    if (!ok) setAnswers((prev) => ({ ...prev, [question.id]: previous }));
   }
 
   async function clearResponse() {
@@ -118,12 +120,12 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
           <div className="card" style={{padding:"12px 16px"}}><strong>{minutes}:{seconds}</strong><br/><span style={{color:"var(--muted)",fontSize:12}}>Time remaining</span></div>
         </div>
         <div className="test-layout">
-          <section className="card">
-            <h2 style={{fontSize:20}}>Q{current + 1}. {question.text}</h2>
-            <div style={{display:"grid",gap:10,marginTop:22}}>
+          <section className="card test-question-panel">
+            <div className="question-topline"><span className="question-number">Question {current + 1}</span><span className="question-status">{answers[question.id] !== null && answers[question.id] !== undefined ? "Answered" : "Not answered"}</span></div>
+            <h2 className="question-title">Q{current + 1}. {question.text}</h2>
+            <div className="option-list">
               {question.options.map((option) => (
-                <button key={option.id} onClick={() => void choose(option.index)} className="btn"
-                  style={{justifyContent:"flex-start",background:answers[question.id]===option.index?"#eef3f9":"white",borderColor:answers[question.id]===option.index?"var(--brand)":"var(--border)"}}>
+                <button key={option.id} onClick={() => void choose(option.index)} className={"option-card " + (answers[question.id] === option.index ? "selected" : "")}>
                   {String.fromCharCode(65 + option.index)}. {option.text}
                 </button>
               ))}
@@ -135,12 +137,12 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
               <button className="btn btn-primary" disabled={saving || current === payload.questions.length - 1} onClick={() => setCurrent((v) => Math.min(payload.questions.length - 1, v + 1))}>Save & Next</button>
             </div>
           </section>
-          <aside className="card">
-            <h3>Question palette</h3>
+          <aside className="card question-palette">
+            <div className="palette-heading"><div><p className="eyebrow">Navigator</p><h3>Questions</h3></div><strong>{answered}/{payload.questions.length}</strong></div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
               {payload.questions.map((q, i) => <button key={q.id} onClick={() => setCurrent(i)} className="btn" style={{padding:0,minHeight:38,background:answers[q.id]!==undefined && answers[q.id]!==null?"#dcfce7":marked.has(q.id)?"#fef3c7":"white"}}>{i + 1}</button>)}
             </div>
-            <p style={{marginTop:18,fontSize:13,color:"var(--muted)"}}>Green = answered · Amber = marked for review · White = not answered.</p>
+            <div className="palette-legend"><span><i className="legend answered" />Answered</span><span><i className="legend marked" />Review</span><span><i className="legend empty" />Unanswered</span></div>
             <button className="btn" disabled={saving} onClick={() => void submit(false)} style={{width:"100%",marginTop:10,borderColor:"var(--danger)",color:"var(--danger)"}}>Submit test</button>
           </aside>
         </div>
