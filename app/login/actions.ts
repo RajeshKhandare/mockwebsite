@@ -86,8 +86,9 @@ export async function signup(formData: FormData) {
     }, { onConflict: "id" });
   }
 
-  if (data.session && data.user) {
-    await claimGuestAttempts(data.user.id);
+  const signedInUserId = data.user?.id;
+  if (data.session && signedInUserId) {
+    await claimGuestAttempts(signedInUserId);
     revalidatePath("/", "layout");
     redirect(inline ? next : "/dashboard");
   }
