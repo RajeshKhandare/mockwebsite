@@ -44,8 +44,11 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
   ]);
   const answerMap = new Map((answers ?? []).map((a) => [a.question_id, a]));
   const questionMap = new Map((questions ?? []).map((q) => [q.id, q]));
-  const optionMap = new Map<string, typeof options>();
-  for (const option of options ?? []) optionMap.set(option.question_id, [...(optionMap.get(option.question_id) ?? []), option]);
+  type ResultOption = { question_id: string; option_index: number; option_text: string; is_correct: boolean };
+  const optionMap = new Map<string, ResultOption[]>();
+  for (const option of options ?? []) {
+    optionMap.set(option.question_id, [...(optionMap.get(option.question_id) ?? []), option]);
+  }
 
   return (
     <main className="page-shell">
