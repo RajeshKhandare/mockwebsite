@@ -1,58 +1,85 @@
+"use client";
+
+import { useState } from "react";
 import { login, signup } from "@/app/login/actions";
 
 type Props = {
   nextPath: string;
   error?: string;
   message?: string;
+  openInitially?: boolean;
+  triggerLabel?: string;
 };
 
-export default function TestAuthBox({ nextPath, error, message }: Props) {
+export default function TestAuthBox({
+  nextPath,
+  error,
+  message,
+  openInitially = true,
+  triggerLabel = "Sign in for full analysis",
+}: Props) {
+  const [open, setOpen] = useState(openInitially || Boolean(error) || Boolean(message));
+
+  if (!open) {
+    return (
+      <button className="auth-trigger" type="button" onClick={() => setOpen(true)}>
+        {triggerLabel}
+      </button>
+    );
+  }
+
   return (
-    <section className="card" style={{ marginTop: 24, maxWidth: 760 }}>
-      <div className="eyebrow">Optional account</div>
-      <h2 style={{ marginTop: 6 }}>Sign in to save progress & unlock full analysis</h2>
-      <p className="muted">You can take this test without an account. Sign in or create an account for detailed performance analysis, history, recommendations and access to login-required tests.</p>
-      {error === "invalid" && <p className="form-message error">Email or password is incorrect. Please try again.</p>}
-      {error === "signup" && <p className="form-message error">We could not create the account. Check the required fields and try again.</p>}
-      {message === "check-email" && <p className="form-message success">Account created. Check your email if confirmation is enabled.</p>}
+    <div className="auth-overlay" role="dialog" aria-modal="true" aria-label="Sign in">
+      <div className="auth-backdrop" onClick={() => !openInitially && setOpen(false)} />
+      <section className="auth-modal">
+        {!openInitially && (
+          <button className="auth-close" type="button" aria-label="Close" onClick={() => setOpen(false)}>×</button>
+        )}
+        <div className="auth-modal-header">
+          <div className="auth-modal-mark">M</div>
+          <div>
+            <p className="eyebrow">Student account</p>
+            <h2>Unlock your full preparation view</h2>
+          </div>
+        </div>
+        <p className="muted">Continue on this page. Sign in to save your performance, unlock detailed analysis and get recommendations matched to your preparation.</p>
 
-      <form className="auth-form" style={{ marginTop: 18 }}>
-        <input type="hidden" name="next" value={nextPath} />
-        <input type="hidden" name="inline" value="1" />
-        <label>Email<input name="email" type="email" autoComplete="email" required /></label>
-        <label>Password<input name="password" type="password" autoComplete="current-password" minLength={8} required /></label>
-        <button className="button primary" formAction={login}>Log in</button>
-      </form>
+        {error === "invalid" && <p className="form-message error">Email or password is incorrect. Please try again.</p>}
+        {error === "signup" && <p className="form-message error">We could not create the account. Please check the details and try again.</p>}
+        {message === "check-email" && <p className="form-message success">Account created. Check your email if confirmation is enabled.</p>}
 
-      <details style={{ marginTop: 20 }}>
-        <summary style={{ cursor: "pointer", fontWeight: 700 }}>Create account</summary>
-        <form className="auth-form" style={{ marginTop: 16 }}>
+        <form className="auth-form auth-modal-form">
           <input type="hidden" name="next" value={nextPath} />
           <input type="hidden" name="inline" value="1" />
-          <label>Name <span>(optional)</span><input name="display_name" type="text" autoComplete="name" placeholder="Your name" /></label>
           <label>Email<input name="email" type="email" autoComplete="email" required /></label>
-          <label>Password<input name="password" type="password" autoComplete="new-password" minLength={8} required /></label>
-          <p className="muted" style={{ marginBottom: 0 }}>Optional profile details help us personalize exam recommendations. You can leave all of these blank and change them later.</p>
-          <label>Target exam <span>(optional)</span><input name="target_exam" type="text" placeholder="e.g. Banking, SSC, UPSC" /></label>
-          <label>Education level <span>(optional)</span>
-            <select name="education_level" defaultValue="">
-              <option value="">Prefer not to say</option><option>School</option><option>College</option><option>Graduate</option><option>Postgraduate</option><option>Working professional</option>
-            </select>
-          </label>
-          <label>State <span>(optional)</span><input name="state" type="text" placeholder="e.g. Maharashtra" /></label>
-          <label>Preparation stage <span>(optional)</span>
-            <select name="preparation_stage" defaultValue="">
-              <option value="">Select later</option><option>Just starting</option><option>Preparing regularly</option><option>Revision</option><option>Final preparation</option>
-            </select>
-          </label>
-          <label>Preferred test language <span>(optional)</span>
-            <select name="preferred_language" defaultValue="">
-              <option value="">Select later</option><option value="en">English</option><option value="hi">Hindi</option><option value="mr">Marathi</option>
-            </select>
-          </label>
-          <button className="button secondary" formAction={signup}>Create account</button>
+          <label>Password<input name="password" type="password" autoComplete="current-password" minLength={8} required /></label>
+          <button className="button primary auth-submit" formAction={login}>Log in</button>
         </form>
-      </details>
-    </section>
+
+        <div className="auth-divider"><span>New here?</span></div>
+
+        <details className="signup-details">
+          <summary>Create account</summary>
+          <form className="auth-form" style={{ marginTop: 14 }}>
+            <input type="hidden" name="next" value={nextPath} />
+            <input type="hidden" name="inline" value="1" />
+            <label>Name <span>(optional)</span><input name="display_name" type="text" autoComplete="name" placeholder="Your name" /></label>
+            <label>Email<input name="email" type="email" autoComplete="email" required /></label>
+            <label>Password<input name="password" type="password" autoComplete="new-password" minLength={8} required /></label>
+            <div className="profile-intro">Optional details help personalize your exam, article and practice recommendations. You can skip every field.</div>
+            <label>Target exam <span>(optional)</span><input name="target_exam" type="text" placeholder="Banking, SSC, UPSC…" /></label>
+            <div className="auth-two-col">
+              <label>Education <span>(optional)</span><select name="education_level" defaultValue=""><option value="">Select</option><option>School</option><option>College</option><option>Graduate</option><option>Postgraduate</option><option>Working professional</option></select></label>
+              <label>State <span>(optional)</span><input name="state" type="text" placeholder="Maharashtra" /></label>
+            </div>
+            <div className="auth-two-col">
+              <label>Preparation stage <span>(optional)</span><select name="preparation_stage" defaultValue=""><option value="">Select</option><option>Just starting</option><option>Preparing regularly</option><option>Revision</option><option>Final preparation</option></select></label>
+              <label>Preferred language <span>(optional)</span><select name="preferred_language" defaultValue=""><option value="">Select</option><option value="en">English</option><option value="hi">Hindi</option><option value="mr">Marathi</option></select></label>
+            </div>
+            <button className="button secondary" formAction={signup}>Create account</button>
+          </form>
+        </details>
+      </section>
+    </div>
   );
 }
