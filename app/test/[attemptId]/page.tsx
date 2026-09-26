@@ -26,7 +26,7 @@ export default async function TestInstructionsPage({ params, searchParams }: { p
     : await query.eq("slug", attemptId).maybeSingle();
 
   if (templateError) {
-    console.error("Test template load failed", error);
+    console.error("Test template load failed", templateError);
     return <main className="section"><div className="container"><div className="card"><h2>Test unavailable</h2><p className="muted">This test could not be loaded right now. Please try again shortly.</p></div></div></main>;
   }
   if (!test) notFound();
