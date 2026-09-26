@@ -9,32 +9,34 @@ export default async function ExamsPage() {
     supabase.from("exam_categories").select("id,name,slug,description").eq("is_active", true).order("sort_order"),
     supabase.from("exams").select("id,name,slug,description,category_id").eq("is_active", true).order("name"),
   ]);
-
   const catalogError = categoriesError || examsError;
+  const categoryMap = new Map((categories ?? []).map((c) => [c.id, c.name]));
 
   return (
     <main className="section"><div className="container">
       <div className="section-header">
-        <div><div className="eyebrow">Exam library</div><h1 style={{fontSize:40}}>Choose an exam</h1><p>Browse active exam configurations, stages, subjects and mock tests.</p></div>
+        <div><div className="eyebrow">Exam library</div><h1 style={{fontSize:42}}>Find your exam.</h1><p>Browse preparation tracks across banking, SSC, railways, teaching, civil services, defence, engineering and more.</p></div>
+        <div className="library-count"><strong>{exams?.length ?? 0}</strong><span>exam tracks</span></div>
       </div>
       {catalogError ? (
-        <div className="card"><h2>Exam catalog temporarily unavailable</h2><p className="muted">The exam catalogue could not be loaded right now. Please try again shortly.</p></div>
+        <div className="card"><h2>Exam catalog temporarily unavailable</h2><p className="muted">Please try again shortly.</p></div>
       ) : (
         <>
-          <div className="grid">
-            {(exams ?? []).map((exam) => (
-              <article className="card" key={exam.id}>
+          <div className="grid exam-card-grid">
+            {(exams ?? []).map((exam, index) => (
+              <Link className="card exam-card" key={exam.id} href={`/exams/${exam.slug}`}>
+                <div className="exam-art"><span>{exam.name.split(" ").map((x) => x[0]).slice(0,2).join("")}</span><small>{String(index + 1).padStart(2,"0")}</small></div>
+                <div className="eyebrow">{categoryMap.get(exam.category_id ?? "") ?? "Exam track"}</div>
                 <h3>{exam.name}</h3>
-                <p>{exam.description ?? "Structured preparation with configurable stages and subjects."}</p>
-                <Link className="btn btn-primary" href={`/exams/${exam.slug}`}>Open exam</Link>
-              </article>
+                <p>{exam.description ?? "Structured preparation with configurable stages and mock tests."}</p>
+                <span className="card-link">Open exam <b>→</b></span>
+              </Link>
             ))}
-            {!exams?.length && <p className="muted">No active exams are published yet.</p>}
           </div>
           {!!categories?.length && (
-            <section className="section">
-              <div className="section-header"><div><h2>Exam categories</h2><p>Categories provide a scalable grouping for future exam families.</p></div></div>
-              <div className="meta">{categories.map((category) => <span className="badge" key={category.id}>{category.name}</span>)}</div>
+            <section className="section" style={{paddingBottom:10}}>
+              <div className="section-header"><div><div className="eyebrow">Preparation families</div><h2>Explore by category</h2></div></div>
+              <div className="category-pills">{categories.map((category) => <span key={category.id}>{category.name}</span>)}</div>
             </section>
           )}
         </>
