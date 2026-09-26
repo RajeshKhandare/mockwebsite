@@ -128,6 +128,10 @@ h2 { letter-spacing:-.03em; }
 .form-message.error { background:#fff1f2; color:var(--danger); border:1px solid #ffd6db; }
 .form-message.success { background:#effaf5; color:var(--success); border:1px solid #cceee0; }
 
+.auth-dialog { margin-top:18px; }
+.auth-dialog > summary { list-style:none; }
+.auth-dialog > summary::-webkit-details-marker { display:none; }
+.auth-dialog[open] > summary { position:fixed; z-index:110; right:24px; top:18px; min-height:38px; padding:0 13px; font-size:12px; }
 .auth-overlay { position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:20px; }
 .auth-backdrop { position:absolute; inset:0; background:rgba(8,18,35,.46); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px); animation:fadeIn .18s ease; }
 .auth-modal {
