@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getAttemptOwner } from "@/lib/attempt-owner";
 import TestAuthBox from "../test-auth-box";
@@ -13,9 +12,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AnalysisPage(props: { params: Promise<{ attemptId: string }> }) {
+export default async function AnalysisPage(props: { params: Promise<{ attemptId: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { attemptId } = await props.params;
-  const searchParams = await (props as { searchParams?: Promise<Record<string, string | string[] | undefined>> }).searchParams;
+  const searchParams = await props.searchParams;
   const error = typeof searchParams?.error === "string" ? searchParams.error : "";
   const message = typeof searchParams?.message === "string" ? searchParams.message : "";
   const owner = await getAttemptOwner();
