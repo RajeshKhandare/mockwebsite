@@ -12,16 +12,14 @@ function createClient() {
 }
 
 export default function ResetPasswordPage() {
+  const hasConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY));
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState("Checking reset session…");
+  const [status, setStatus] = useState(hasConfig ? "Checking reset session…" : "Account service is temporarily unavailable.");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
-    if (!supabase) {
-      setStatus("Account service is temporarily unavailable.");
-      return;
-    }
+    if (!supabase) return;
 
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
