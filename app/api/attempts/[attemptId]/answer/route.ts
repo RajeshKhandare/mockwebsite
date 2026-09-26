@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 const payloadSchema = z.object({
   questionId: z.string().uuid(),
@@ -40,7 +41,6 @@ export async function POST(
 
   const elapsedSeconds = Math.floor((Date.now() - Date.parse(attempt.started_at)) / 1000);
   if (elapsedSeconds >= Number(template.duration_seconds)) {
-    const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
     const admin = createSupabaseAdminClient();
     await admin.from("test_attempts").update({ status: "expired" })
       .eq("id", attemptId).eq("user_id", user.id).eq("status", "in_progress");
