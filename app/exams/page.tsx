@@ -25,7 +25,7 @@ export default async function ExamsPage() {
           <div className="grid exam-card-grid">
             {(exams ?? []).map((exam, index) => (
               <Link className="card exam-card" key={exam.id} href={`/exams/${exam.slug}`}>
-                <div className="exam-art"><span>{exam.name.split(" ").map((x) => x[0]).slice(0,2).join("")}</span><small>{String(index + 1).padStart(2,"0")}</small></div>
+                <div className="exam-art"><span>{exam.name.split(" ").map((x: string) => x[0]).slice(0,2).join("")}</span><small>{String(index + 1).padStart(2,"0")}</small></div>
                 <div className="eyebrow">{categoryMap.get(exam.category_id ?? "") ?? "Exam track"}</div>
                 <h3>{exam.name}</h3>
                 <p>{exam.description ?? "Structured preparation with configurable stages and mock tests."}</p>
