@@ -90,7 +90,7 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
       <section className="panel">
         <h2>Scoring summary</h2>
         <p className="muted">{template.question_count} questions · +{template.marks_per_question} for correct · −{template.negative_marks} for incorrect.</p>
-        <div className="button-row">{!isGuest ? <Link className="button" href={"/test/" + attemptId + "/analysis"}>View analysis</Link> : <Link className="button primary" href={"/test/" + attemptId}>Sign in for full analysis</Link>}<Link className="button primary" href="/tests">Take another test</Link></div>
+        <div className="button-row">{!isGuest ? <Link className="button" href={"/test/" + attemptId + "/analysis"}>View analysis</Link> : <Link className="button primary" href={"/test/" + attemptId + "/analysis"}>Sign in for full analysis</Link>}<Link className="button primary" href="/tests">Take another test</Link></div>
       </section>
     </main>
   );
