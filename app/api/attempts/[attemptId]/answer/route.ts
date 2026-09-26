@@ -57,7 +57,8 @@ export async function POST(
   if (!linkedQuestion) return NextResponse.json({ error: "Question is not part of this attempt." }, { status: 400 });
 
   if (parsed.data.selectedOption !== null) {
-    const { data: selectedOption } = await supabase
+    const admin = createSupabaseAdminClient();
+    const { data: selectedOption } = await admin
       .from("question_options")
       .select("option_index")
       .eq("question_id", parsed.data.questionId)
