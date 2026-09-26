@@ -3,9 +3,15 @@ export async function supabaseRestGet<T>(
   query: Record<string, string>,
   options: { single?: boolean } = {},
 ): Promise<T> {
-  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!baseUrl || !key) throw new Error("Supabase public environment variables are missing.");
+  const runtimeEnv = process.env as Record<string, string | undefined>;
+  const baseUrl = runtimeEnv["NEXT_PUBLIC_SUPABASE_URL"];
+  const key =
+    runtimeEnv["NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"] ??
+    runtimeEnv["NEXT_PUBLIC_SUPABASE_ANON_KEY"];
+
+  if (!baseUrl || !key) {
+    throw new Error("Supabase public environment variables are missing.");
+  }
 
   const url = new URL(`/rest/v1/${table}`, baseUrl);
   Object.entries(query).forEach(([name, value]) => url.searchParams.set(name, value));
