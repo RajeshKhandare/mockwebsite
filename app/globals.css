@@ -319,3 +319,19 @@ h2 { letter-spacing:-.03em; }
 .test-card h3 { font-size:20px; }
 .test-card-footer { margin-top:auto; padding-top:16px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--muted); font-size:11px; font-weight:750; }
 .test-card-footer .btn { min-height:39px; padding:0 13px; }
+
+
+/* Compact account surfaces */
+.narrow-shell { max-width: 560px; }
+.auth-card-premium { padding: 22px 24px; border-radius: 16px; }
+.auth-card-premium h1 { font-size: 34px; margin: 10px 0 10px; }
+.auth-card-premium .muted { font-size: 13px; line-height: 1.5; }
+.auth-mode-switch { margin-bottom: 20px; }
+.auth-form { gap: 12px; margin-top: 18px; }
+.auth-form input, .auth-form select { min-height: 43px; }
+.auth-mode-link { margin-top: 15px; font-size: 13px; }
+.auth-modal { width:min(500px,100%); padding:22px; border-radius:18px; }
+.auth-modal .auth-mode-switch { margin-bottom: 18px; }
+.auth-modal .auth-form { margin-top: 15px; gap: 11px; }
+.auth-modal .auth-form input { min-height: 42px; }
+.auth-modal-reset { margin-top: 10px; }
