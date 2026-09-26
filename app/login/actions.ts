@@ -74,7 +74,7 @@ export async function signup(formData: FormData) {
 
   if (data.session) {
     revalidatePath("/", "layout");
-    redirect("/dashboard");
+    redirect(inline ? next : "/dashboard");
   }
   if (inline && next !== "/dashboard") redirect(next + (next.includes("?") ? "&" : "?") + "message=check-email");
   redirect("/login?message=check-email");
