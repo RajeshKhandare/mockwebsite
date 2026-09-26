@@ -335,3 +335,21 @@ h2 { letter-spacing:-.03em; }
 .auth-modal .auth-form { margin-top: 15px; gap: 11px; }
 .auth-modal .auth-form input { min-height: 42px; }
 .auth-modal-reset { margin-top: 10px; }
+
+
+/* Final auth UX */
+.auth-card-premium { padding:22px 24px; }
+.auth-card-premium h1 { font-size:32px; line-height:1.1; }
+.auth-card-premium .auth-form { gap:11px; margin-top:16px; }
+.auth-card-premium .auth-mode-link { margin-top:13px; }
+.auth-forgot-link { display:block; width:100%; margin:12px 0 0; text-align:right; }
+.auth-overlay { position:fixed !important; inset:0 !important; width:100vw; height:100dvh; z-index:2147483647; padding:16px; isolation:isolate; }
+.auth-backdrop { position:absolute !important; inset:0 !important; width:100%; height:100%; z-index:0; background:rgba(8,18,35,.58); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+.auth-modal { position:relative; z-index:1; width:min(430px,calc(100vw - 32px)); max-height:calc(100dvh - 32px); overflow:auto; padding:18px; border-radius:16px; }
+.auth-modal h2 { font-size:22px; margin:2px 0 4px; }
+.auth-modal .auth-mode-switch { margin-bottom:15px; }
+.auth-modal .auth-form { gap:9px; margin-top:12px; }
+.auth-modal .auth-form input { min-height:39px; }
+.auth-modal .auth-close { right:10px; top:10px; width:32px; height:32px; }
+.auth-modal .auth-mode-link { margin-top:12px; font-size:12px; }
+.result-unlock-panel { border-color:#cbd9e9; background:#fbfdff; }
