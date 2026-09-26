@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getAttemptOwner } from "@/lib/attempt-owner";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(
@@ -7,16 +7,17 @@ export async function GET(
   context: { params: Promise<{ attemptId: string }> },
 ) {
   const { attemptId } = await context.params;
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-
+  const { userId, guestToken } = await getAttemptOwner();
+  if (!userId && !guestToken) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
+  const supabase = createSupabaseAdminClient();
   const { data: attempt, error } = await supabase
     .from("test_attempts")
-    .select("id,status,language,started_at,test_template_id")
-    .eq("id", attemptId).eq("user_id", user.id).single();
+    .select("id,status,language,started_at,test_template_id,user_id,guest_token")
+    .eq("id", attemptId).single();
 
-  if (error || !attempt) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
+  if (error || !attempt || (userId ? attempt.user_id !== userId : attempt.guest_token !== guestToken)) {
+    return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
+  }
 
   if (attempt.status === "submitted") return NextResponse.json({ error: "This attempt has already been submitted." }, { status: 409 });
   if (attempt.status !== "in_progress") return NextResponse.json({ error: "This attempt is no longer active." }, { status: 409 });
