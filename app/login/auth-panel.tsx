@@ -6,7 +6,7 @@ import { login, signup, requestPasswordReset } from "./actions";
 type Props = { next: string; error: string; message: string };
 
 export default function AuthPanel({ next, error, message }: Props) {
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup">(error === "signup" || message === "check-email" ? "signup" : "login");
 
   return (
     <section className="auth-card auth-card-premium">
