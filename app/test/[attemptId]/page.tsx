@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import TestAuthBox from "./test-auth-box";
 import StartTest from "./start-test";
 
 export const dynamic = "force-dynamic";
@@ -15,8 +13,6 @@ export const metadata: Metadata = {
 export default async function TestInstructionsPage({ params, searchParams }: { params: Promise<{ attemptId: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { attemptId } = await params;
   const search = await searchParams;
-  const error = typeof search.error === "string" ? search.error : "";
-  const message = typeof search.message === "string" ? search.message : "";
   const supabase = createSupabasePublicClient();
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   const isTemplateId = uuidPattern.test(attemptId);
@@ -34,9 +30,6 @@ export default async function TestInstructionsPage({ params, searchParams }: { p
     return <main className="section"><div className="container"><div className="card"><h2>Test unavailable</h2><p className="muted">This test could not be loaded right now. Please try again shortly.</p></div></div></main>;
   }
   if (!test) notFound();
-
-  const serverSupabase = await createSupabaseServerClient();
-  const { data: { user } } = await serverSupabase.auth.getUser();
 
   return (
     <main className="section"><div className="container" style={{maxWidth:820}}>
@@ -57,12 +50,7 @@ export default async function TestInstructionsPage({ params, searchParams }: { p
           <span className="badge">{test.question_count * Number(test.marks_per_question)} marks</span>
           <span className="badge">−{test.negative_marks} negative</span>
         </div>
-        {test.requires_login && !user ? (
-          <TestAuthBox nextPath={"/test/" + attemptId} error={error} message={message} />
-        ) : !test.requires_login ? (
-          <TestAuthBox nextPath={"/test/" + attemptId} error={error} message={message} openInitially={false} />
-        ) : null}
-        <StartTest testTemplateId={test.id} languages={test.supported_languages} requiresLogin={test.requires_login} loggedIn={Boolean(user)} />
+        <StartTest testTemplateId={test.id} languages={test.supported_languages} requiresLogin={test.requires_login} loggedIn={false} />
       </div>
     </div></main>
   );
