@@ -12,8 +12,6 @@ const payloadSchema = z.object({
 export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-
   const parsed = payloadSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid attempt request." }, { status: 400 });
 
@@ -28,7 +26,6 @@ export async function POST(request: Request) {
   if (templateError || !template) return NextResponse.json({ error: "Test not found." }, { status: 404 });
 
   const cookieStore = await cookies();
-  const { data: { user } } = await supabase.auth.getUser();
   let guestToken = cookieStore.get("mock_guest")?.value;
   if (!user && template.requires_login) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
