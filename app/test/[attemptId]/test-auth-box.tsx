@@ -19,7 +19,7 @@ export default function TestAuthBox({
 
   return (
     <details className="auth-dialog" open={initiallyOpen}>
-      {!initiallyOpen && <summary className="auth-trigger">{triggerLabel}</summary>}
+      <summary className="auth-trigger">{initiallyOpen ? "Close" : triggerLabel}</summary>
       <div className="auth-overlay" role="dialog" aria-modal="true" aria-label="Sign in">
         <div className="auth-backdrop" />
         <section className="auth-modal">
