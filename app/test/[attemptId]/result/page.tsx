@@ -85,9 +85,14 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
           })}
         </div>
       </section> : (
-        <section className="panel">
-          <h2>Basic result shown</h2>
-          <p className="muted">This guest result includes a limited performance summary. Sign in to unlock answer review, detailed analysis, history and personalized recommendations.</p>
+        <section className="panel result-unlock-panel">
+          <p className="eyebrow">Keep your progress</p>
+          <h2>Your trial result is ready.</h2>
+          <p className="muted">Create an account or log in now to keep this attempt in your history and unlock detailed analysis, answer review and performance tracking.</p>
+          <div className="button-row">
+            <Link className="button primary" href={"/test/" + attemptId + "/analysis"}>Unlock full analysis</Link>
+            <Link className="button" href="/login">Log in</Link>
+          </div>
         </section>
       )}
       <section className="panel">
