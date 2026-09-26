@@ -40,7 +40,9 @@ export async function POST(
 
   const elapsedSeconds = Math.floor((Date.now() - Date.parse(attempt.started_at)) / 1000);
   if (elapsedSeconds >= Number(template.duration_seconds)) {
-    await supabase.from("test_attempts").update({ status: "expired" })
+    const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+    const admin = createSupabaseAdminClient();
+    await admin.from("test_attempts").update({ status: "expired" })
       .eq("id", attemptId).eq("user_id", user.id).eq("status", "in_progress");
     return NextResponse.json({ error: "Time is over. This attempt has expired." }, { status: 409 });
   }
