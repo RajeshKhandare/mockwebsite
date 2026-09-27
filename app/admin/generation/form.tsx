@@ -33,7 +33,7 @@ export default function QuestionFactory({ exams, stages, subjects, topics }: { e
       const enriched=questions.map((q)=>{
         const source = typeof q === "object" && q !== null ? q as Record<string, unknown> : {};
         return {
-        ...source, examStageId:q.examStageId||stageId, subjectId:q.subjectId||subjectId, topicId:q.topicId||topicId,
+        ...source, examStageId:typeof source.examStageId === "string" ? source.examStageId : stageId, subjectId:typeof source.subjectId === "string" ? source.subjectId : subjectId, topicId:typeof source.topicId === "string" ? source.topicId : topicId,
         language:typeof source.language === "string" ? source.language : language, sourceType:typeof source.sourceType === "string" ? source.sourceType : sourceType,
       }; });
       const response=await fetch("/api/admin/question-batches",{method:"POST",headers:{"Content-Type":"application/json"},
