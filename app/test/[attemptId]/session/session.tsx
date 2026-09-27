@@ -32,8 +32,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const submit = useCallback(async (auto = false) => {
     if (submittingRef.current) return;
     submittingRef.current = true;
-    trackEvent(auto ? "timeout" : "submit");
-    const response = await fetch("/api/attempts/" + attemptId + "/submit", { method: "POST" });
+     const response = await fetch("/api/attempts/" + attemptId + "/submit", { method: "POST" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       submittingRef.current = false;
