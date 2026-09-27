@@ -125,7 +125,9 @@ export async function requestPasswordReset(formData: FormData) {
   const origin = requestHeaders.get("origin");
   const host = requestHeaders.get("host");
   const forwardedProto = requestHeaders.get("x-forwarded-proto") ?? "https";
-  const siteUrl = origin ?? (host ? forwardedProto + "://" + host : process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000");
+  const runtimeEnv = process.env as Record<string, string | undefined>;
+  const configuredSiteUrl = runtimeEnv["NEXT_PUBLIC_SITE_URL"] ?? runtimeEnv["NEXT_PUBLIC_APP_URL"];
+  const siteUrl = configuredSiteUrl ?? origin ?? (host ? forwardedProto + "://" + host : "http://localhost:3000");
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: siteUrl + "/auth/callback?next=" + encodeURIComponent("/reset-password"),
   });
