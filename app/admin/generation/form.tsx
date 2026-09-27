@@ -30,7 +30,7 @@ export default function QuestionFactory({ exams, stages, subjects, topics }: { e
       const parsed=JSON.parse(json);
       const questions=Array.isArray(parsed)?parsed:Array.isArray(parsed.questions)?parsed.questions:[];
       if(!questions.length) throw new Error("Paste a JSON array or an object containing a questions array.");
-      const enriched=questions.map((q:any)=>({
+      const enriched=questions.map((q)=>({
         ...q, examStageId:q.examStageId||stageId, subjectId:q.subjectId||subjectId, topicId:q.topicId||topicId,
         language:q.language||language, sourceType:q.sourceType||sourceType,
       }));
