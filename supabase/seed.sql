@@ -10,10 +10,12 @@ select c.id, 'banking-demo', 'Banking Aptitude Demo', 'A small original mock-tes
 from public.exam_categories c where c.slug = 'banking'
 on conflict (slug) do update set is_active = true;
 
-insert into public.exam_stages (exam_id, slug, name, description, sort_order)
-select e.id, 'prelims', 'Prelims', 'Demo stage for the first end-to-end test flow.', 1
+insert into public.exam_stages (
+  exam_id, slug, name, description, sort_order, duration_seconds, total_questions, total_marks, navigation_rules, is_active
+)
+select e.id, 'prelims', 'Prelims', 'Demo stage for the first end-to-end test flow.', 1, 600, 5, 5, '{}'::jsonb, true
 from public.exams e where e.slug = 'banking-demo'
-on conflict (exam_id, slug) do update set name = excluded.name;
+on conflict (exam_id, slug) do update set name = excluded.name, is_active = true, duration_seconds = excluded.duration_seconds, total_questions = excluded.total_questions;
 
 insert into public.subjects (slug, name)
 values ('quantitative-aptitude', 'Quantitative Aptitude'), ('reasoning-ability', 'Reasoning Ability')
