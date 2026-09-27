@@ -1,5 +1,5 @@
 -- Original demo content only. It is not presented as an official exam paper.
--- Run after supabase/schema.sql (or its migration).
+-- Run after the timestamped Supabase migrations.
 
 insert into public.exam_categories (slug, name, description, sort_order, is_active)
 values ('banking', 'Banking', 'Competitive exam preparation for banking recruitment.', 1, true)
