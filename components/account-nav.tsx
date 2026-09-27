@@ -7,23 +7,6 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type UserState = { email: string; label: string; initial: string } | null;
 
-function readUiUserCookie(): UserState {
-  if (typeof document === "undefined") return null;
-  const entry = document.cookie.split("; ").find((item) => item.startsWith("mock_user="));
-  if (!entry) return null;
-  try {
-    const raw = decodeURIComponent(entry.slice("mock_user=".length));
-    const parsed = JSON.parse(raw) as { email?: unknown; label?: unknown };
-    const email = typeof parsed.email === "string" ? parsed.email : "";
-    const label = typeof parsed.label === "string" && parsed.label.trim()
-      ? parsed.label.trim()
-      : email.split("@")[0] || "Account";
-    return email || label ? { email, label, initial: label.charAt(0).toUpperCase() } : null;
-  } catch {
-    return null;
-  }
-}
-
 function toUserState(user: { email?: string; user_metadata?: Record<string, unknown> } | null): UserState {
   if (!user) return null;
   const email = user.email ?? "";
