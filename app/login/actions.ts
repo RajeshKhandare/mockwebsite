@@ -15,8 +15,8 @@ function authRedirect(path: string, error: string) {
   return redirect(path + (path.includes("?") ? "&" : "?") + "error=" + error);
 }
 
-function setUiUserCookie(user: { email?: string | null; user_metadata?: Record<string, unknown> }) {
-  const cookieStore = cookies();
+async function setUiUserCookie(user: { email?: string | null; user_metadata?: Record<string, unknown> }) {
+  const cookieStore = await cookies();
   const email = user.email ?? "";
   const metadataName = typeof user.user_metadata?.display_name === "string"
     ? user.user_metadata.display_name.trim()
@@ -31,8 +31,8 @@ function setUiUserCookie(user: { email?: string | null; user_metadata?: Record<s
   });
 }
 
-function clearUiUserCookie() {
-  const cookieStore = cookies();
+async function clearUiUserCookie() {
+  const cookieStore = await cookies();
   cookieStore.set("mock_user", "", {
     httpOnly: false,
     secure: true,
@@ -71,7 +71,7 @@ export async function login(formData: FormData) {
 
   if (loginData.user) {
     await claimGuestAttempts(loginData.user.id);
-    setUiUserCookie(loginData.user);
+    await setUiUserCookie(loginData.user);
   }
   revalidatePath("/", "layout");
   redirect(next);
@@ -141,7 +141,7 @@ export async function signup(formData: FormData) {
   const signedInUserId = data.user?.id;
   if (data.session && signedInUserId) {
     await claimGuestAttempts(signedInUserId);
-    if (data.user) setUiUserCookie(data.user);
+    if (data.user) await setUiUserCookie(data.user);
     revalidatePath("/", "layout");
     redirect(inline ? next : "/dashboard");
   }
@@ -152,7 +152,7 @@ export async function signup(formData: FormData) {
 export async function logout() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
-  clearUiUserCookie();
+  await clearUiUserCookie();
   revalidatePath("/", "layout");
   redirect("/login?message=logged-out");
 }
