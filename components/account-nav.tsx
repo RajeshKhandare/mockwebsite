@@ -8,7 +8,7 @@ type UserState = { email: string; label: string; initial: string } | null;
 
 export default function AccountNav() {
   const [user, setUser] = useState<UserState>(null);
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -17,11 +17,10 @@ export default function AccountNav() {
     try {
       supabase = createSupabaseBrowserClient();
     } catch {
-      setReady(true);
       return () => { mounted = false; };
     }
 
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
       const email = data.user?.email ?? "";
       const metadataName = typeof data.user?.user_metadata?.display_name === "string"
@@ -78,7 +77,7 @@ export default function AccountNav() {
           onClick={async () => {
             const supabase = createSupabaseBrowserClient();
             await supabase.auth.signOut();
-            window.location.assign("/login?message=logged-out");
+            window.location.href = "/login?message=logged-out";
           }}
         >
           Log out
