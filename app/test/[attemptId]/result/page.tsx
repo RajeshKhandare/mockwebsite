@@ -49,6 +49,12 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
   for (const option of options ?? []) {
     optionMap.set(option.question_id, [...(optionMap.get(option.question_id) ?? []), option]);
   }
+  const skippedQuestions = (links ?? [])
+    .filter((link) => {
+      const answer = answerMap.get(link.question_id);
+      return answer?.selected_option === null || answer?.selected_option === undefined;
+    })
+    .map((link) => link.position + 1);
 
   return (
     <main className="page-shell">
@@ -61,9 +67,19 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
         <div className="result-card"><span>Accuracy</span><strong>{Number(result.accuracy).toFixed(1)}%</strong></div>
         <div className="result-card"><span>Correct</span><strong>{result.correct_count}</strong></div>
         <div className="result-card"><span>Incorrect</span><strong>{result.incorrect_count}</strong></div>
-        <div className="result-card"><span>Unattempted</span><strong>{result.unattempted_count}</strong></div>
+        <div className="result-card"><span>Skipped</span><strong>{result.unattempted_count}</strong></div>
         <div className="result-card"><span>Time</span><strong>{Math.floor(result.time_taken_seconds / 60)}m {result.time_taken_seconds % 60}s</strong></div>
       </div>
+      {skippedQuestions.length > 0 && (
+        <section className="panel skipped-panel">
+          <p className="eyebrow">Question status</p>
+          <h2>Skipped questions</h2>
+          <p className="muted">These questions were left unanswered and did not add marks to the score.</p>
+          <div className="skipped-list">
+            {skippedQuestions.map((position) => <span key={position}>Q{position}</span>)}
+          </div>
+        </section>
+      )}
       {!isGuest ? <section className="panel">
         <h2>Answer review</h2>
         <div className="list-stack">
