@@ -6,6 +6,9 @@ export async function updateSupabaseSession(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !key) return response;
 
+  const hasSupabaseAuthCookie = request.cookies.getAll().some(({ name }) => name.includes("-auth-token"));
+  if (!hasSupabaseAuthCookie) return response;
+
   const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL, key, {
     cookies: {
       getAll() { return request.cookies.getAll(); },
