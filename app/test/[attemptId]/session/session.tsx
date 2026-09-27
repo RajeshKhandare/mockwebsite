@@ -92,8 +92,8 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   useEffect(() => {
     if (countdown === null || started) return;
     if (countdown === 0) {
-      void startClock();
-      return;
+      const timer = window.setTimeout(() => void startClock(), 0);
+      return () => window.clearTimeout(timer);
     }
     const timer = window.setTimeout(() => setCountdown((value) => value === null ? null : value - 1), 1000);
     return () => window.clearTimeout(timer);
