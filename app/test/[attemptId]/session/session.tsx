@@ -125,8 +125,10 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
             <h2 className="question-title">Q{current + 1}. {question.text}</h2>
             <div className="option-list">
               {question.options.map((option) => (
-                <button key={option.id} onClick={() => void choose(option.index)} className={"option-card " + (answers[question.id] === option.index ? "selected" : "")}>
-                  {String.fromCharCode(65 + option.index)}. {option.text}
+                <button key={option.id} type="button" onClick={() => void choose(option.index)} className={"option-card " + (answers[question.id] === option.index ? "selected" : "")}>
+                  <span className="option-letter">{String.fromCharCode(65 + option.index)}</span>
+                  <span className="option-text">{option.text}</span>
+                  <span className="option-check" aria-hidden="true">{answers[question.id] === option.index ? "✓" : ""}</span>
                 </button>
               ))}
             </div>
