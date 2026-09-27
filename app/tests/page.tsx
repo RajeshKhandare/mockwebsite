@@ -16,8 +16,9 @@ export default async function TestsPage({ searchParams }: { searchParams: Promis
   const allTests = tests ?? [];
   const filteredTests = allTests.filter((test) => {
     const stage = (Array.isArray(test.exam_stages) ? test.exam_stages[0] : test.exam_stages) as { name?: string; exams?: { name?: string; slug?: string } | Array<{ name?: string; slug?: string }> } | null;
-    const exam = stage && Array.isArray(stage.exams) ? stage.exams[0] : stage?.exams;
-    const haystack = [test.title, test.description, test.test_type, stage?.name, exam?.name].filter(Boolean).join(" ").toLowerCase();
+    const exam = stage?.exams;
+    const examName = Array.isArray(exam) ? exam[0]?.name : exam?.name;
+    const haystack = [test.title, test.description, test.test_type, stage?.name, examName].filter(Boolean).join(" ").toLowerCase();
     return (type === "all" || test.test_type === type) && (!q || haystack.includes(q.toLowerCase()));
   });
   const types = Array.from(new Set(allTests.map((test) => test.test_type)));
@@ -52,8 +53,9 @@ export default async function TestsPage({ searchParams }: { searchParams: Promis
               <h3>{test.title}</h3>
               {(() => {
                 const stage = (Array.isArray(test.exam_stages) ? test.exam_stages[0] : test.exam_stages) as { name?: string; exams?: { name?: string; slug?: string } | Array<{ name?: string; slug?: string }> } | null;
-                const exam = stage && Array.isArray(stage.exams) ? stage.exams[0] : stage?.exams;
-                return <p className="test-context">{exam?.name ?? "Exam preparation"}{stage?.name ? " · " + stage.name : ""}</p>;
+                const exam = stage?.exams;
+                const examName = Array.isArray(exam) ? exam[0]?.name : exam?.name;
+                return <p className="test-context">{examName ?? "Exam preparation"}{stage?.name ? " · " + stage.name : ""}</p>;
               })()}
               <p>{test.description}</p>
               <div className="meta">
