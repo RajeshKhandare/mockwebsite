@@ -64,10 +64,21 @@ export async function signup(formData: FormData) {
   }
 
   const supabase = await createSupabaseServerClient();
+  const requestHeaders = await headers();
+  const origin = requestHeaders.get("origin");
+  const host = requestHeaders.get("host");
+  const forwardedProto = requestHeaders.get("x-forwarded-proto") ?? "https";
+  const runtimeEnv = process.env as Record<string, string | undefined>;
+  const configuredSiteUrl = runtimeEnv["NEXT_PUBLIC_SITE_URL"] ?? runtimeEnv["NEXT_PUBLIC_APP_URL"];
+  const siteUrl = (configuredSiteUrl ?? origin ?? (host ? forwardedProto + "://" + host : "http://localhost:3000")).replace(/\\/+$/, "");
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { display_name: displayName || undefined } },
+    options: {
+      emailRedirectTo: siteUrl + "/auth/callback",
+      data: { display_name: displayName || undefined },
+    },
   });
   if (error) {
     if (inline && next !== "/dashboard") authRedirect(next, "signup");
