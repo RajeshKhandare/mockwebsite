@@ -25,6 +25,17 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const [remaining, setRemaining] = useState(0);
   const submittingRef = useRef(false);
 
+  const submit = useCallback(async (auto = false) => {
+    if (submittingRef.current) return;
+    if (!auto && !window.confirm("Submit this test? You will not be able to change answers after submission.")) return;
+    submittingRef.current = true;
+    const response = await fetch("/api/attempts/" + attemptId + "/submit", {method:"POST"});
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) { submittingRef.current = false; setError(data.error ?? "Could not submit test."); return; }
+    router.push("/test/" + attemptId + "/result");
+  }, [attemptId, router]);
+
+
   useEffect(() => {
     fetch("/api/attempts/" + attemptId).then(async (r) => {
       const data = await r.json();
@@ -115,16 +126,6 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
     const ok = await saveAnswer(question.id, answers[question.id] ?? null, next.has(question.id));
     if (ok) setMarked(next);
   }
-
-  const submit = useCallback(async (auto = false) => {
-    if (submittingRef.current) return;
-    if (!auto && !window.confirm("Submit this test? You will not be able to change answers after submission.")) return;
-    submittingRef.current = true;
-    const response = await fetch("/api/attempts/" + attemptId + "/submit", {method:"POST"});
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) { submittingRef.current = false; setError(data.error ?? "Could not submit test."); return; }
-    router.push("/test/" + attemptId + "/result");
-  }, [attemptId, router]);
 
   function goNext() {
     if (!payload || !question || submittingRef.current || saving) return;
