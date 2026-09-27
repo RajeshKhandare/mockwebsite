@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { login, signup, requestPasswordReset } from "./actions";
 
-type Props = { next: string; error: string; message: string };
+type ExamOption = { id: string; name: string };
+type Props = { next: string; error: string; message: string; exams: ExamOption[] };
 
-export default function AuthPanel({ next, error, message }: Props) {
+export default function AuthPanel({ next, error, message, exams }: Props) {
   const [mode, setMode] = useState<"login" | "signup" | "reset">(
     error === "reset" || message === "reset-sent" ? "reset" : error === "signup" || message === "check-email" ? "signup" : "login"
   );
@@ -52,9 +53,55 @@ export default function AuthPanel({ next, error, message }: Props) {
       {mode === "signup" && (
         <form className="auth-form">
           <input type="hidden" name="next" value={next} />
-          <label>Name<input name="display_name" type="text" autoComplete="name" /></label>
-          <label>Email<input name="email" type="email" autoComplete="email" required /></label>
-          <label>Password<input name="password" type="password" autoComplete="new-password" minLength={8} required /></label>
+
+          <div className="auth-field-grid">
+            <label>Name<input name="display_name" type="text" autoComplete="name" placeholder="Your name" /></label>
+            <label>Email<input name="email" type="email" autoComplete="email" placeholder="you@example.com" required /></label>
+            <label>Password<input name="password" type="password" autoComplete="new-password" minLength={8} placeholder="At least 8 characters" required /></label>
+            <label>Target exam
+              <select name="target_exam" defaultValue="">
+                <option value="">Select an exam</option>
+                {exams.map((exam) => <option key={exam.id} value={exam.name}>{exam.name}</option>)}
+              </select>
+            </label>
+            <label>Education
+              <select name="education_level" defaultValue="">
+                <option value="">Select education</option>
+                <option value="10th">Class 10 / SSC</option>
+                <option value="12th">Class 12 / HSC</option>
+                <option value="graduate">Graduate</option>
+                <option value="postgraduate">Postgraduate</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label>Preparation stage
+              <select name="preparation_stage" defaultValue="">
+                <option value="">Select stage</option>
+                <option value="beginner">Just starting</option>
+                <option value="preparing">Preparing</option>
+                <option value="revision">Revision</option>
+                <option value="mock-tests">Mock-test focused</option>
+              </select>
+            </label>
+            <label>State
+              <select name="state" defaultValue="">
+                <option value="">Select state</option>
+                <option>Maharashtra</option><option>Gujarat</option><option>Madhya Pradesh</option><option>Rajasthan</option>
+                <option>Delhi</option><option>Karnataka</option><option>Uttar Pradesh</option><option>Bihar</option>
+                <option>West Bengal</option><option>Tamil Nadu</option><option>Telangana</option><option>Andhra Pradesh</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <label>Preferred language
+              <select name="preferred_language" defaultValue="en">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <option value="mr">Marathi</option>
+              </select>
+            </label>
+          </div>
+
+          <p className="auth-profile-hint">These details help us surface relevant exams, mock tests, practice and future study resources. You can update them later from your profile.</p>
           <button className="button primary" formAction={signup}>Create account</button>
         </form>
       )}
