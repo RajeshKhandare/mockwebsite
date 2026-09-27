@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import StartTest from "./start-test";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,7 @@ export default async function TestInstructionsPage({ params, searchParams }: { p
           <span className="badge">{test.question_count * Number(test.marks_per_question)} marks</span>
           <span className="badge">−{test.negative_marks} negative</span>
         </div>
-        <StartTest testTemplateId={test.id} languages={test.supported_languages} requiresLogin={test.requires_login} loggedIn={false} />
+        <StartTest testTemplateId={test.id} languages={test.supported_languages} requiresLogin={test.requires_login} loggedIn={Boolean(user)} />
       </div>
     </div></main>
   );
