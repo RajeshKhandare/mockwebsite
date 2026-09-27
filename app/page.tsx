@@ -16,7 +16,7 @@ const featuredExams = [
 ] as const;
 
 const featuredTests = [
-  ["Banking 10-Minute Challenge", "banking-10-minute-challenge-01", "A fast ten-question challenge.", "practice", 10, 10],
+  ["Banking 10-Minute Challenge", "banking-10-minute-challenge-01", "A fast five-question challenge.", "practice", 5, 10],
   ["Banking Accuracy Builder", "banking-accuracy-builder-01", "Practice set focused on careful, accurate solving.", "practice", 5, 7],
   ["Banking Aptitude Quick Mock", "banking-demo-quick-01", "Five original questions for verifying the complete mock-test workflow.", "full_mock", 5, 10],
 ] as const;
