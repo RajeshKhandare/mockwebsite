@@ -24,6 +24,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const [reportMessage, setReportMessage] = useState("");
   const [remaining, setRemaining] = useState(0);
   const submittingRef = useRef(false);
+  const submitRef = useRef<(auto?: boolean) => Promise<void>>(async () => {});
 
   useEffect(() => {
     fetch("/api/attempts/" + attemptId).then(async (r) => {
@@ -47,7 +48,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
     const timer = window.setInterval(() => {
       const seconds = Math.max(0, payload.template.duration_seconds - Math.floor((Date.now() - Date.parse(payload.attempt.started_at)) / 1000));
       setRemaining(seconds);
-      if (seconds === 0 && !submittingRef.current) void submit(true);
+      if (seconds === 0 && !submittingRef.current) void submitRef.current(true);
     }, 1000);
     return () => window.clearInterval(timer);
   }, [payload]);
@@ -125,6 +126,8 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
     if (!response.ok) { submittingRef.current = false; setError(data.error ?? "Could not submit test."); return; }
     router.push("/test/" + attemptId + "/result");
   }
+
+  submitRef.current = submit;
 
   function goNext() {
     if (!payload || !question || submittingRef.current || saving) return;
