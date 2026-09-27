@@ -19,6 +19,9 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const [marked, setMarked] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [reporting, setReporting] = useState(false);
+  const [reportReason, setReportReason] = useState("ambiguous");
+  const [reportMessage, setReportMessage] = useState("");
   const [remaining, setRemaining] = useState(0);
   const submittingRef = useRef(false);
 
@@ -52,6 +55,22 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const question = payload?.questions[current];
   const answered = useMemo(() => Object.values(answers).filter((v) => v !== null && v !== undefined).length, [answers]);
 
+  function trackEvent(eventType: "view"|"answer"|"clear"|"mark"|"unmark"|"next"|"previous"|"submit"|"timeout", questionId?: string, selectedOption?: number | null) {
+    void fetch("/api/attempts/" + attemptId + "/event", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({eventType, questionId, selectedOption}) }).catch(() => undefined);
+  }
+
+  async function reportQuestion() {
+    if (!question || reporting) return;
+    setReporting(true); setReportMessage("");
+    try {
+      const response = await fetch("/api/questions/" + question.id + "/report", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({attemptId,reason:reportReason}) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) { setReportMessage(data.error ?? "Could not report this question."); return; }
+      setReportMessage("Thanks. This question has been sent for review.");
+    } catch { setReportMessage("Could not send the report."); }
+    finally { setReporting(false); }
+  }
+
   async function saveAnswer(questionId: string, selectedOption: number | null, markedForReview: boolean) {
     setSaving(true);
     try {
@@ -65,7 +84,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
         setError(data.error ?? "Answer could not be saved.");
         return false;
       }
-      return true;
+      trackEvent(selectedOption === null ? "clear" : "answer", questionId, selectedOption);\n      return true;
     } catch {
       setError("Network error. Your answer could not be saved.");
       return false;
@@ -108,7 +127,10 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
 
   function goNext() {
     if (!payload || submittingRef.current || saving) return;
-    if (current < payload.questions.length - 1) setCurrent((v) => v + 1);
+    if (current < payload.questions.length - 1) {
+      trackEvent("next", question.id, answers[question.id] ?? null);
+      setCurrent((v) => v + 1);
+    }
   }
 
   if (error) return <main className="section"><div className="container"><div className="card"><h2>Test unavailable</h2><p>{error}</p></div></div></main>;
@@ -138,6 +160,11 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
               ))}
             </div>
             <div className="actions">
+              <select aria-label="Report reason" value={reportReason} onChange={(e) => setReportReason(e.target.value)} disabled={reporting}>
+                <option value="ambiguous">Ambiguous question</option><option value="wrong_answer">Possible wrong answer</option><option value="typo">Typo</option><option value="outdated">Outdated</option><option value="duplicate">Duplicate</option><option value="translation">Translation issue</option>
+              </select>
+              <button className="btn btn-secondary" disabled={reporting} onClick={() => void reportQuestion()}>{reporting ? "Reporting…" : "Report question"}</button>
+              {reportMessage && <span style={{fontSize:12,color:"var(--muted)"}}>{reportMessage}</span>}
               <button className="btn btn-secondary" disabled={current === 0 || saving} onClick={() => setCurrent((v) => Math.max(0, v - 1))}>Previous</button>
               <button className="btn btn-secondary" disabled={saving} onClick={() => void clearResponse()}>Clear response</button>
               <button className="btn btn-secondary" disabled={saving} onClick={() => void toggleMark()}>{marked.has(question.id) ? "Unmark" : "Mark for review"}</button>
