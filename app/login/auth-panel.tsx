@@ -27,6 +27,7 @@ export default function AuthPanel({ next, error, message }: Props) {
 
       {error && <p className="form-message error">
         {error === "invalid" ? "Email or password is incorrect." :
+         error === "unconfirmed" ? "Please confirm your email address from the verification email before logging in." :
          error === "signup" ? "We could not create the account. Please check the details and try again." :
          error === "reset" ? "We could not send a reset email. Please try again." :
          error === "exists" ? "An account already exists for this email. Log in or reset your password." :
