@@ -60,9 +60,15 @@ export default async function ExamStagePage({ params }: Props) {
   return (
     <main className="section">
       <div className="container">
+        <div className="breadcrumb-row"><Link href="/exams">Exams</Link><span>›</span><Link href={"/exams/" + exam}>{examData?.name ?? "Exam"}</Link><span>›</span><strong>{stageRow.name}</strong></div>
         <div className="eyebrow">{examData?.name ?? "Exam"} · Stage</div>
         <h1 style={{fontSize:42}}>{stageRow.name}</h1>
         <p style={{maxWidth:720,color:"var(--muted)"}}>{stageRow.description ?? "Prepare with structured subjects and mock tests."}</p>
+        <div className="catalog-stats">
+          <div><strong>{subjectLinks?.length ?? 0}</strong><span>Subjects</span></div>
+          <div><strong>{tests?.length ?? 0}</strong><span>Mock tests</span></div>
+          <div><strong>{new Set((tests ?? []).map((test) => test.test_type)).size}</strong><span>Test formats</span></div>
+        </div>
 
         {(subjectsError || testsError) ? <div className="card"><p className="muted">Stage content could not be loaded completely right now. Please try again shortly.</p></div> : <>
         <section className="section">
@@ -71,10 +77,10 @@ export default async function ExamStagePage({ params }: Props) {
             {(subjectLinks ?? []).map((link) => {
               const subject = Array.isArray(link.subjects) ? link.subjects[0] : link.subjects;
               return subject ? (
-                <article className="card" key={subject.id}>
-                  <h3>{subject.name}</h3>
-                  <p>Practice questions and topic-level preparation for this subject.</p>
-                  <Link className="btn btn-secondary" href={`/exams/${exam}/${stage}/${subject.slug}`}>View subject</Link>
+                <article className="card catalog-card" key={subject.id}>
+                  <div className="catalog-card-icon">{subject.name.slice(0,1).toUpperCase()}</div>
+                  <div><h3>{subject.name}</h3><p>Topics, practice and subject-focused preparation.</p></div>
+                  <Link className="btn btn-secondary" href={"/exams/" + exam + "/" + stage + "/" + subject.slug}>Explore subject</Link>
                 </article>
               ) : null;
             })}
@@ -86,10 +92,11 @@ export default async function ExamStagePage({ params }: Props) {
           <div className="section-header"><div><h2>Mock tests</h2><p>Published tests for this stage.</p></div><Link href="/tests">All tests</Link></div>
           <div className="grid">
             {(tests ?? []).map((test) => (
-              <article className="card" key={test.id}>
+              <article className="card test-card" key={test.id}>
+                <div className="test-card-top"><span className="test-index">{test.test_type.replace("_"," ").slice(0,1).toUpperCase()}</span><span className="badge">{test.supported_languages.map((l: string) => l.toUpperCase()).join(" · ")}</span></div>
                 <div className="eyebrow">{test.test_type.replace("_"," ")}</div>
                 <h3>{test.title}</h3>
-                <p>{test.description}</p>
+                <p>{test.description ?? "Structured practice for this exam stage."}</p>
                 <div className="meta">
                   <span className="badge">{test.question_count} questions</span>
                   <span className="badge">{Math.round(test.duration_seconds / 60)} min</span>
