@@ -24,32 +24,26 @@ export default function AccountNav() {
 
   useEffect(() => {
     let mounted = true;
+    const supabase = createSupabaseBrowserClient();
 
-    try {
-      const supabase = createSupabaseBrowserClient();
-
-      supabase.auth.getUser().then(({ data }) => {
-        if (!mounted) return;
-        setUser(toUserState(data.user));
-        setReady(true);
-      }).catch(() => {
-        if (mounted) setReady(true);
-      });
-
-      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (!mounted) return;
-        setUser(toUserState(session?.user ?? null));
-        setReady(true);
-      });
-
-      return () => {
-        mounted = false;
-        listener.subscription.unsubscribe();
-      };
-    } catch {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!mounted) return;
+      setUser(toUserState(data.user));
+      setReady(true);
+    }).catch(() => {
       if (mounted) setReady(true);
-      return () => { mounted = false; };
-    }
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      setUser(toUserState(session?.user ?? null));
+      setReady(true);
+    });
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   if (!ready && !user) {
