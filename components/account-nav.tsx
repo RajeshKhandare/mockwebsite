@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type UserState = { email: string; label: string; initial: string } | null;
@@ -34,23 +35,19 @@ function toUserState(user: { email?: string; user_metadata?: Record<string, unkn
 }
 
 export default function AccountNav() {
-  const [user, setUser] = useState<UserState>(() => readUiUserCookie());
+  const router = useRouter();
+  const [user, setUser] = useState<UserState>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-
-    const cookieUser = readUiUserCookie();
-    if (cookieUser) setUser(cookieUser);
 
     try {
       const supabase = createSupabaseBrowserClient();
 
       supabase.auth.getUser().then(({ data }) => {
         if (!mounted) return;
-        const verifiedUser = toUserState(data.user);
-        if (verifiedUser) setUser(verifiedUser);
-        else if (!cookieUser) setUser(null);
+        setUser(toUserState(data.user));
         setReady(true);
       }).catch(() => {
         if (mounted) setReady(true);
@@ -103,7 +100,7 @@ export default function AccountNav() {
               const supabase = createSupabaseBrowserClient();
               await supabase.auth.signOut();
             } finally {
-              window.location.href = "/login?message=logged-out";
+              router.push("/login?message=logged-out");
             }
           }}
         >
