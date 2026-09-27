@@ -31,6 +31,7 @@ export default function TestAuthBox({ nextPath, error, message, openInitially = 
         <h2>{mode === "reset" ? "Reset your password." : mode === "login" ? "Welcome back." : "Create your account."}</h2>
 
         {error === "invalid" && <p className="form-message error">Email or password is incorrect.</p>}
+        {error === "unconfirmed" && <p className="form-message error">Please confirm your email address from the verification email before logging in.</p>}
         {error === "signup" && <p className="form-message error">We could not create the account. Please check the details and try again.</p>}
         {error === "exists" && <p className="form-message error">An account already exists for this email. Log in or reset your password.</p>}
         {error === "callback" && <p className="form-message error">The reset link could not be completed. Please request a new reset link in this browser.</p>}
