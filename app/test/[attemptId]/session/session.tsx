@@ -106,6 +106,11 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
     router.push("/test/" + attemptId + "/result");
   }
 
+  function goNext() {
+    if (!payload || submittingRef.current || saving) return;
+    if (current < payload.questions.length - 1) setCurrent((v) => v + 1);
+  }
+
   if (error) return <main className="section"><div className="container"><div className="card"><h2>Test unavailable</h2><p>{error}</p></div></div></main>;
   if (!payload || !question) return <main className="section"><div className="container"><div className="card"><p>Preparing your test…</p></div></div></main>;
 
@@ -136,7 +141,13 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
               <button className="btn btn-secondary" disabled={current === 0 || saving} onClick={() => setCurrent((v) => Math.max(0, v - 1))}>Previous</button>
               <button className="btn btn-secondary" disabled={saving} onClick={() => void clearResponse()}>Clear response</button>
               <button className="btn btn-secondary" disabled={saving} onClick={() => void toggleMark()}>{marked.has(question.id) ? "Unmark" : "Mark for review"}</button>
-              <button className="btn btn-primary" disabled={saving || current === payload.questions.length - 1} onClick={() => setCurrent((v) => Math.min(payload.questions.length - 1, v + 1))}>Save & Next</button>
+              {current === payload.questions.length - 1 ? (
+                <button className="btn btn-primary" disabled={saving} onClick={() => void submit(false)}>Submit test</button>
+              ) : (
+                <button className="btn btn-primary" disabled={saving} onClick={goNext}>
+                  {answers[question.id] === null || answers[question.id] === undefined ? "Skip" : "Save & Next"}
+                </button>
+              )}
             </div>
           </section>
           <aside className="card question-palette">
