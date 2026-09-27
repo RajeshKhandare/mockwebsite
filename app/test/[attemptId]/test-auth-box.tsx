@@ -4,9 +4,9 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { login, signup, requestPasswordReset } from "@/app/login/actions";
 
-type Props = { nextPath: string; error?: string; message?: string; openInitially?: boolean; triggerLabel?: string };
+type ExamOption = { id: string; name: string };\ntype Props = { nextPath: string; error?: string; message?: string; openInitially?: boolean; triggerLabel?: string; exams?: ExamOption[] };
 
-export default function TestAuthBox({ nextPath, error, message, openInitially = true, triggerLabel = "Sign in" }: Props) {
+export default function TestAuthBox({ nextPath, error, message, openInitially = true, triggerLabel = "Sign in", exams = [] }: Props) {
   const [open, setOpen] = useState(openInitially || Boolean(error) || Boolean(message));
   const [mode, setMode] = useState<"login" | "signup" | "reset">(
     error === "reset" || message === "reset-sent" ? "reset" : error === "signup" || message === "check-email" ? "signup" : "login"
@@ -55,9 +55,19 @@ export default function TestAuthBox({ nextPath, error, message, openInitially = 
           <form className="auth-form auth-modal-form">
             <input type="hidden" name="next" value={nextPath} />
             <input type="hidden" name="inline" value="1" />
-            <label>Name<input name="display_name" type="text" autoComplete="name" /></label>
-            <label>Email<input name="email" type="email" autoComplete="email" required /></label>
-            <label>Password<input name="password" type="password" autoComplete="new-password" minLength={8} required /></label>
+            <div className="auth-field-grid">
+              <label>Name<input name="display_name" type="text" autoComplete="name" placeholder="Your name" /></label>
+              <label>Email<input name="email" type="email" autoComplete="email" placeholder="you@example.com" required /></label>
+              <label>Password<input name="password" type="password" autoComplete="new-password" minLength={8} placeholder="At least 8 characters" required /></label>
+              <label>Target exam
+                {exams.length ? <select name="target_exam" defaultValue=""><option value="">Select an exam</option>{exams.map((exam) => <option key={exam.id} value={exam.name}>{exam.name}</option>)}</select> : <input name="target_exam" type="text" placeholder="Target exam" />}
+              </label>
+              <label>Education<select name="education_level" defaultValue=""><option value="">Select education</option><option value="10th">Class 10 / SSC</option><option value="12th">Class 12 / HSC</option><option value="graduate">Graduate</option><option value="postgraduate">Postgraduate</option><option value="other">Other</option></select></label>
+              <label>Preparation stage<select name="preparation_stage" defaultValue=""><option value="">Select stage</option><option value="beginner">Just starting</option><option value="preparing">Preparing</option><option value="revision">Revision</option><option value="mock-tests">Mock-test focused</option></select></label>
+              <label>State<input name="state" type="text" autoComplete="address-level1" placeholder="State / UT" /></label>
+              <label>Preferred language<select name="preferred_language" defaultValue="en"><option value="en">English</option><option value="hi">Hindi</option><option value="mr">Marathi</option></select></label>
+            </div>
+            <p className="auth-profile-hint">Personalize your exams, tests and recommendations. You can change these details later.</p>
             <button className="button primary auth-submit" formAction={signup}>Create account</button>
           </form>
         )}
