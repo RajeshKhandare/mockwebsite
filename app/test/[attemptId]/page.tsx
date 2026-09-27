@@ -32,6 +32,9 @@ export default async function TestInstructionsPage({ params, searchParams }: { p
   }
   if (!test) notFound();
 
+  const supabaseServer = await createSupabaseServerClient();
+  const { data: { user } } = await supabaseServer.auth.getUser();
+
   return (
     <main className="section"><div className="container" style={{maxWidth:820}}>
       <div className="eyebrow">Test instructions</div>
