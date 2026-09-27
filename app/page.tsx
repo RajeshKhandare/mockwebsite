@@ -30,6 +30,11 @@ export default function HomePage() {
             <div className="eyebrow">A modern mock-test workspace</div>
             <h1>Prepare with purpose. <span>Perform with confidence.</span></h1>
             <p>Timed mock tests, focused practice and meaningful performance insights — organised around the way serious aspirants actually prepare.</p>
+            <form className="hero-search" action="/tests" method="get">
+              <span className="hero-search-icon" aria-hidden="true">⌕</span>
+              <input name="q" type="search" placeholder="Search exams, mock tests or subjects…" aria-label="Search exams, mock tests or subjects" />
+              <button type="submit">Search</button>
+            </form>
             <div className="actions">
               <Link className="btn btn-primary" href="/tests">Explore mock tests</Link>
               <Link className="btn btn-secondary" href="/exams">Explore exams</Link>
