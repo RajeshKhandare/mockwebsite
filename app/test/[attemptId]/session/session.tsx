@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Question = { id: string; position: number; text: string; options: { id: string; index: number; text: string }[] };
@@ -24,7 +24,6 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const [reportMessage, setReportMessage] = useState("");
   const [remaining, setRemaining] = useState(0);
   const submittingRef = useRef(false);
-  const submitRef = useRef<(auto?: boolean) => Promise<void>>(async () => {});
 
   useEffect(() => {
     fetch("/api/attempts/" + attemptId).then(async (r) => {
@@ -48,10 +47,10 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
     const timer = window.setInterval(() => {
       const seconds = Math.max(0, payload.template.duration_seconds - Math.floor((Date.now() - Date.parse(payload.attempt.started_at)) / 1000));
       setRemaining(seconds);
-      if (seconds === 0 && !submittingRef.current) void submitRef.current(true);
+      if (seconds === 0 && !submittingRef.current) void submit(true);
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [payload]);
+  }, [payload, submit]);
 
   const question = payload?.questions[current];
   const answered = useMemo(() => Object.values(answers).filter((v) => v !== null && v !== undefined).length, [answers]);
@@ -117,7 +116,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
     if (ok) setMarked(next);
   }
 
-  async function submit(auto = false) {
+  const submit = useCallback(async (auto = false) => {
     if (submittingRef.current) return;
     if (!auto && !window.confirm("Submit this test? You will not be able to change answers after submission.")) return;
     submittingRef.current = true;
@@ -125,9 +124,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) { submittingRef.current = false; setError(data.error ?? "Could not submit test."); return; }
     router.push("/test/" + attemptId + "/result");
-  }
-
-  submitRef.current = submit;
+  }, [attemptId, router]);
 
   function goNext() {
     if (!payload || !question || submittingRef.current || saving) return;
