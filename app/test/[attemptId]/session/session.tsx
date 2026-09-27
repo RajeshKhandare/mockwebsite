@@ -84,7 +84,8 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
         setError(data.error ?? "Answer could not be saved.");
         return false;
       }
-      trackEvent(selectedOption === null ? "clear" : "answer", questionId, selectedOption);\n      return true;
+      trackEvent(selectedOption === null ? "clear" : "answer", questionId, selectedOption);
+      return true;
     } catch {
       setError("Network error. Your answer could not be saved.");
       return false;
