@@ -11,8 +11,15 @@ export default function AccountNav() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
     let mounted = true;
+    let supabase: ReturnType<typeof createSupabaseBrowserClient>;
+
+    try {
+      supabase = createSupabaseBrowserClient();
+    } catch {
+      setReady(true);
+      return () => { mounted = false; };
+    }
 
     supabase.auth.getUser().then(({ data }) => {
       if (!mounted) return;
