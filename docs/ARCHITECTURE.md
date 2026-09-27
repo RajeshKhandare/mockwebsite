@@ -119,3 +119,35 @@ English-only public SEO routes. No language subdirectory system. Unique metadata
 
 ## Delivery
 Foundation -> database/auth -> exam config -> question pipeline -> test engine -> scoring/results -> dashboard -> admin -> SEO -> polish -> security -> performance -> Cloudflare deployment -> production verification.
+
+
+## Scalable question operations
+
+The production question lifecycle is:
+1. Provider/manual batch enters question_batches.
+2. Server validates the candidate schema and exactly four unique options.
+3. A deterministic database validator verifies exactly one answer key, required metadata, explanation presence and near-duplicate similarity.
+4. Questions that pass the deterministic gate are automatically moved into the approved pool; exceptions move to needs_review or rejected.
+5. Every validation and human decision is recorded in question_validation_runs and question_reviews.
+6. question_quality_metrics stores quality/confidence signals and post-publication performance.
+7. Student reports create question_reports; reported or anomalous questions can be removed from the live pool and reviewed.
+8. The AI semantic-review adapter remains provider-agnostic so a paid/external provider can be enabled later without changing the student test engine.
+
+Automatic approval is intentionally limited to deterministic checks. A future semantic AI reviewer can add an additional gate rather than allowing an LLM to publish unverified answer keys.
+
+## Test assembly
+
+test_templates.selection_rules and test_blueprints.rules control section, subject, topic and difficulty distribution. The test engine selects only approved questions and refuses to start a test when the approved pool cannot satisfy the configured blueprint.
+
+## Long-term product readiness
+
+The data model is ready for:
+- personalized weak-topic practice
+- question quality monitoring and student reports
+- premium test series/subscriptions
+- AI analysis/usage credits
+- affiliate placements outside active tests
+- institute/B2B workspaces
+- future question-generation API
+
+These capabilities are kept server-side/data-driven and are not exposed in the public UX until product demand and operational readiness justify activation.
