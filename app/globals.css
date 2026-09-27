@@ -1039,3 +1039,7 @@ html[data-theme="dark"] .visual-focus, html[data-theme="dark"] .hero-float-card 
 html[data-theme="light"] { color-scheme: light; }
 html[data-theme="dark"] { color-scheme: dark; }
 html[data-theme="dark"] #test-language { background: var(--surface) !important; color: var(--text); border-color: var(--border) !important; }
+
+.theme-icon-moon { display:none; }
+html[data-theme="dark"] .theme-icon-sun { display:none; }
+html[data-theme="dark"] .theme-icon-moon { display:inline; }
