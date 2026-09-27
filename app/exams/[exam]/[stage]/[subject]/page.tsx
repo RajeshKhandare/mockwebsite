@@ -59,9 +59,15 @@ export default async function SubjectPage({ params }: Props) {
   return (
     <main className="section">
       <div className="container">
+        <div className="breadcrumb-row"><Link href="/exams">Exams</Link><span>›</span><Link href={"/exams/" + exam}>{examData?.name ?? "Exam"}</Link><span>›</span><Link href={"/exams/" + exam + "/" + stage}>{stageRow.name}</Link><span>›</span><strong>{subjectRow.name}</strong></div>
         <div className="eyebrow">{examData?.name ?? "Exam"} · {stageRow.name}</div>
         <h1 style={{fontSize:42}}>{subjectRow.name}</h1>
-        <p style={{maxWidth:720,color:"var(--muted)"}}>Practice this subject with reusable topic and test configuration.</p>
+        <p style={{maxWidth:720,color:"var(--muted)"}}>Build confidence topic by topic, then move into focused or full mock tests.</p>
+        <div className="catalog-stats">
+          <div><strong>{topics?.length ?? 0}</strong><span>Topics</span></div>
+          <div><strong>Practice</strong><span>Topic-focused learning</span></div>
+          <div><strong>Tests</strong><span>Mock-test pathway</span></div>
+        </div>
         <div className="section">
           <div className="section-header"><div><h2>Topics</h2><p>Topics are managed in the question catalog.</p></div></div>
           {topicsError ? <div className="card"><p className="muted">Topics could not be loaded right now.</p></div> : (
