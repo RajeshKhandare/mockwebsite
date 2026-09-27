@@ -37,8 +37,9 @@ export async function login(formData: FormData) {
   const { data: loginData, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     const inline = formData.get("inline") === "1";
-    if (inline && next !== "/dashboard") authRedirect(next, "invalid");
-    redirect("/login?error=invalid");
+    const errorCode = error.code === "email_not_confirmed" ? "unconfirmed" : "invalid";
+    if (inline && next !== "/dashboard") authRedirect(next, errorCode);
+    redirect("/login?error=" + errorCode);
   }
 
   if (loginData.user) await claimGuestAttempts(loginData.user.id);
