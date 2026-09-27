@@ -34,9 +34,15 @@ export default async function ExamPage({ params }: { params: Promise<{ exam: str
 
   return (
     <main className="section"><div className="container">
-      <div className="eyebrow">Exam</div>
+      <div className="breadcrumb-row"><Link href="/exams">Exams</Link><span>›</span><strong>{item.name}</strong></div>
+      <div className="eyebrow">Exam preparation</div>
       <h1 style={{fontSize:42}}>{item.name}</h1>
       <p style={{maxWidth:720,color:"var(--muted)"}}>{item.description ?? "Structured preparation through configurable stages, subjects and mock tests."}</p>
+      <div className="catalog-stats">
+        <div><strong>{stages.length}</strong><span>Preparation stages</span></div>
+        <div><strong>Structured</strong><span>Subject-wise practice</span></div>
+        <div><strong>Live</strong><span>Published mock tests</span></div>
+      </div>
       <div className="section">
         <div className="section-header"><div><h2>Stages</h2><p>Select a configured stage to view its subjects and published mock tests.</p></div></div>
         <div className="grid">
