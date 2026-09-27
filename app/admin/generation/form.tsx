@@ -27,8 +27,12 @@ export default function QuestionFactory({ exams, stages, subjects, topics }: { e
   async function submit(){
     setLoading(true);setError("");setResult("");
     try{
-      const parsed=JSON.parse(json);
-      const questions=Array.isArray(parsed)?parsed:Array.isArray(parsed.questions)?parsed.questions:[];
+      const parsed: unknown = JSON.parse(json);
+      const questions: unknown[] = Array.isArray(parsed)
+        ? parsed
+        : typeof parsed === "object" && parsed !== null && Array.isArray((parsed as Record<string, unknown>).questions)
+          ? (parsed as Record<string, unknown>).questions as unknown[]
+          : [];
       if(!questions.length) throw new Error("Paste a JSON array or an object containing a questions array.");
       const enriched=questions.map((q)=>{
         const source = typeof q === "object" && q !== null ? q as Record<string, unknown> : {};
