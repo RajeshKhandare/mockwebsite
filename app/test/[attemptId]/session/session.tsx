@@ -127,9 +127,10 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   }
 
   function goNext() {
-    if (!payload || submittingRef.current || saving) return;
+    if (!payload || !question || submittingRef.current || saving) return;
+    const currentQuestion = question;
     if (current < payload.questions.length - 1) {
-      trackEvent("next", question.id, answers[question.id] ?? null);
+      trackEvent("next", currentQuestion.id, answers[currentQuestion.id] ?? null);
       setCurrent((v) => v + 1);
     }
   }
