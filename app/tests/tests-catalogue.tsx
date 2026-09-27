@@ -63,7 +63,7 @@ export default function TestsCatalogue() {
         setTests((data ?? []) as unknown as TestTemplate[]);
         setLoading(false);
       })
-      .catch(() => {
+      .then(undefined, () => {
         if (!mounted) return;
         setError(true);
         setLoading(false);
