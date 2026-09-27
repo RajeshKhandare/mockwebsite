@@ -5,6 +5,13 @@ export async function proxy(request: NextRequest) {
   return updateSupabaseSession(request);
 }
 
+// Keep Supabase session refresh off public/catalog traffic. Public pages are
+// intentionally cache-friendly; only account/admin/callback routes need it.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  matcher: [
+    "/dashboard/:path*",
+    "/profile/:path*",
+    "/admin/:path*",
+    "/auth/callback",
+  ],
 };
