@@ -36,6 +36,7 @@ export default function AuthPanel({ next, error, message, exams }: Props) {
          "Please check the details and try again."}
       </p>}
       {message === "check-email" && <p className="form-message success">Check your email to finish creating your account.</p>}
+      {message === "logged-out" && <p className="form-message success">You have been logged out securely. Sign in again whenever you are ready.</p>}
       {message === "reset-sent" && <p className="form-message success">Password reset instructions have been sent to your email.</p>}
 
       {mode === "login" && (
