@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getCurrentAdmin } from "@/lib/admin";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { deterministicQualityScore, hashQuestion, normalizeQuestionText, validateGeneratedQuestion } from "@/lib/question-validation";
+import { reviewQuestionSemantics } from "@/lib/question-review-provider";
 
 const requestSchema = z.object({
   examStageId: z.string().uuid(),
@@ -121,9 +122,54 @@ export async function POST(request: Request) {
 
     validated += 1;
     if (validation?.passed === true) {
-      approved += 1;
+      try {
+        const semanticReview = await reviewQuestionSemantics(candidate);
+        if (!semanticReview) {
+          approved += 1;
+        } else if (semanticReview.verdict === "approved" && semanticReview.confidence >= 80) {
+          await db.from("questions").update({
+            quality_score: semanticReview.score,
+            quality_confidence: semanticReview.confidence,
+            review_required: false,
+            status: "approved",
+            approved_at: new Date().toISOString(),
+            auto_decision: "approved",
+          }).eq("id", question.id);
+          await db.from("question_validation_runs").insert({
+            question_id: question.id, batch_id: batch.id, validator_type: "ai_review",
+            status: "passed", score: semanticReview.score,
+            checks: { verdict: semanticReview.verdict, confidence: semanticReview.confidence },
+            warnings: semanticReview.reasons,
+          });
+          approved += 1;
+        } else if (semanticReview.verdict === "rejected") {
+          await db.from("questions").update({
+            status: "rejected", validation_status: "failed", review_required: false,
+            quality_score: semanticReview.score, quality_confidence: semanticReview.confidence,
+            auto_decision: "rejected",
+          }).eq("id", question.id);
+          rejected += 1;
+          review.push({ index, reason: semanticReview.reasons.join("; ") || "Semantic reviewer rejected the question." });
+        } else {
+          await db.from("questions").update({
+            status: "needs_review", validation_status: "needs_review", review_required: true,
+            quality_score: semanticReview.score, quality_confidence: semanticReview.confidence,
+            auto_decision: "review",
+          }).eq("id", question.id);
+          await db.from("question_validation_runs").insert({
+            question_id: question.id, batch_id: batch.id, validator_type: "ai_review",
+            status: "warning", score: semanticReview.score,
+            checks: { verdict: semanticReview.verdict, confidence: semanticReview.confidence },
+            warnings: semanticReview.reasons,
+          });
+          review.push({ index, reason: semanticReview.reasons.join("; ") || "Semantic review requires human review." });
+        }
+      } catch (semanticError) {
+        await db.from("questions").update({ status: "needs_review", validation_status: "needs_review", review_required: true, auto_decision: "review" }).eq("id", question.id);
+        review.push({ index, reason: semanticError instanceof Error ? semanticError.message : "Semantic review failed." });
+      }
     } else {
-      review.push({ index, reason: "Validation passed structure but needs review before publication." });
+      review.push({ index, reason: "Deterministic validation requires review." });
     }
   }
 
