@@ -4,7 +4,8 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { login, signup, requestPasswordReset } from "@/app/login/actions";
 
-type ExamOption = { id: string; name: string };\ntype Props = { nextPath: string; error?: string; message?: string; openInitially?: boolean; triggerLabel?: string; exams?: ExamOption[] };
+type ExamOption = { id: string; name: string };
+type Props = { nextPath: string; error?: string; message?: string; openInitially?: boolean; triggerLabel?: string; exams?: ExamOption[] };
 
 export default function TestAuthBox({ nextPath, error, message, openInitially = true, triggerLabel = "Sign in", exams = [] }: Props) {
   const [open, setOpen] = useState(openInitially || Boolean(error) || Boolean(message));
