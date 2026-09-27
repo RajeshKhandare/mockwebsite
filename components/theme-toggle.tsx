@@ -1,30 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-type Theme = "light" | "dark";
+import { useEffect } from "react";
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("light");
-
   useEffect(() => {
-    const saved = window.localStorage.getItem("mocktest-theme") as Theme | null;
+    const saved = window.localStorage.getItem("mocktest-theme");
     const preferred = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    const next = saved === "dark" || saved === "light" ? saved : preferred;
-    setTheme(next);
-    document.documentElement.dataset.theme = next;
+    document.documentElement.dataset.theme = saved === "dark" || saved === "light" ? saved : preferred;
   }, []);
 
   function toggle() {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     window.localStorage.setItem("mocktest-theme", next);
   }
 
   return (
-    <button type="button" className="theme-toggle" onClick={toggle} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} title={theme === "dark" ? "Light mode" : "Dark mode"}>
-      <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+    <button type="button" className="theme-toggle" onClick={toggle} aria-label="Toggle light and dark mode" title="Toggle theme">
+      <span className="theme-icon theme-icon-sun" aria-hidden="true">☀</span>
+      <span className="theme-icon theme-icon-moon" aria-hidden="true">☾</span>
     </button>
   );
 }
