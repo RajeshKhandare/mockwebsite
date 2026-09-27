@@ -530,3 +530,44 @@ h2 { letter-spacing:-.03em; }
   .profile-fields { grid-template-columns:1fr; }
   .profile-number-list { grid-template-columns:1fr 1fr; }
 }
+
+
+/* Compact signup profile fields */
+.auth-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.auth-field-grid label {
+  min-width: 0;
+}
+.auth-field-grid input,
+.auth-field-grid select {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+}
+.auth-field-grid input:focus,
+.auth-field-grid select:focus {
+  outline: 2px solid color-mix(in srgb, var(--primary) 22%, transparent);
+  border-color: var(--primary);
+}
+.auth-profile-hint {
+  margin: 12px 0 2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+@media (max-width: 640px) {
+  .auth-field-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
