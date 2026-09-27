@@ -37,16 +37,7 @@ export default function TestsCatalogue() {
 
   useEffect(() => {
     let mounted = true;
-    let supabase: ReturnType<typeof createSupabaseBrowserClient>;
-    try {
-      supabase = createSupabaseBrowserClient();
-    } catch {
-      if (mounted) {
-        setError(true);
-        setLoading(false);
-      }
-      return () => { mounted = false; };
-    }
+    const supabase = createSupabaseBrowserClient();
 
     supabase
       .from("test_templates")
