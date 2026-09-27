@@ -31,8 +31,8 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
 
   const submit = useCallback(async (auto = false) => {
     if (submittingRef.current) return;
-    if (!auto && !window.confirm("Submit this test? You will not be able to change answers after submission.")) return;
     submittingRef.current = true;
+    trackEvent(auto ? "timeout" : "submit", question?.id, question ? (answers[question.id] ?? null) : null);
     const response = await fetch("/api/attempts/" + attemptId + "/submit", { method: "POST" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
