@@ -15,6 +15,33 @@ function authRedirect(path: string, error: string) {
   return redirect(path + (path.includes("?") ? "&" : "?") + "error=" + error);
 }
 
+function setUiUserCookie(user: { email?: string | null; user_metadata?: Record<string, unknown> }) {
+  const cookieStore = cookies();
+  const email = user.email ?? "";
+  const metadataName = typeof user.user_metadata?.display_name === "string"
+    ? user.user_metadata.display_name.trim()
+    : "";
+  const label = metadataName || email.split("@")[0] || "Account";
+  cookieStore.set("mock_user", JSON.stringify({ email, label }), {
+    httpOnly: false,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 400,
+  });
+}
+
+function clearUiUserCookie() {
+  const cookieStore = cookies();
+  cookieStore.set("mock_user", "", {
+    httpOnly: false,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+}
+
 async function claimGuestAttempts(userId: string) {
   const cookieStore = await cookies();
   const guestToken = cookieStore.get("mock_guest")?.value;
@@ -42,7 +69,10 @@ export async function login(formData: FormData) {
     redirect("/login?error=" + errorCode);
   }
 
-  if (loginData.user) await claimGuestAttempts(loginData.user.id);
+  if (loginData.user) {
+    await claimGuestAttempts(loginData.user.id);
+    setUiUserCookie(loginData.user);
+  }
   revalidatePath("/", "layout");
   redirect(next);
 }
@@ -111,6 +141,7 @@ export async function signup(formData: FormData) {
   const signedInUserId = data.user?.id;
   if (data.session && signedInUserId) {
     await claimGuestAttempts(signedInUserId);
+    if (data.user) setUiUserCookie(data.user);
     revalidatePath("/", "layout");
     redirect(inline ? next : "/dashboard");
   }
@@ -121,6 +152,7 @@ export async function signup(formData: FormData) {
 export async function logout() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
+  clearUiUserCookie();
   revalidatePath("/", "layout");
   redirect("/login?message=logged-out");
 }
