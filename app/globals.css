@@ -1172,3 +1172,90 @@ html[data-theme="dark"] .visual-focus > span {
   background: #143b32;
   color: #65d9b0;
 }
+
+
+/* Account/profile surfaces and catalogue controls: explicit theme-safe contrast. */
+html[data-theme="dark"] .account-hero,
+html[data-theme="dark"] .profile-cover {
+  background: linear-gradient(135deg, #0d1729 0%, #111f35 100%);
+  border-color: #263a59;
+  box-shadow: 0 18px 50px rgba(0,0,0,.24);
+}
+html[data-theme="dark"] .account-hero h1,
+html[data-theme="dark"] .profile-cover h1 {
+  color: #f4f7ff;
+}
+html[data-theme="dark"] .account-hero .muted,
+html[data-theme="dark"] .profile-cover .muted {
+  color: #aebbd0;
+}
+html[data-theme="dark"] .profile-tags span {
+  background: #172641;
+  border-color: #263a59;
+  color: #b9c7dc;
+}
+html[data-theme="dark"] .profile-fields > div,
+html[data-theme="dark"] .profile-number-list > div {
+  background: #111e33;
+  border-color: #263a59;
+}
+html[data-theme="dark"] .profile-fields span,
+html[data-theme="dark"] .profile-number-list span {
+  color: #9eacc2;
+}
+html[data-theme="dark"] .profile-fields strong {
+  color: #edf3ff;
+}
+html[data-theme="dark"] .account-hero .button:not(.primary),
+html[data-theme="dark"] .profile-cover .button:not(.primary) {
+  background: #111e33;
+  border-color: #49617f;
+  color: #dbe6f7;
+}
+html[data-theme="dark"] .test-filter-bar {
+  background: #0d1729;
+  border-color: #263a59;
+}
+html[data-theme="dark"] .test-filter-bar input,
+html[data-theme="dark"] .test-filter-bar select {
+  background: #111e33;
+  border-color: #3a4f6d;
+  color: #edf3ff;
+}
+html[data-theme="dark"] .test-filter-bar input::placeholder {
+  color: #93a3ba;
+}
+html[data-theme="dark"] .test-filter-bar select option {
+  background: #111e33;
+  color: #edf3ff;
+}
+html[data-theme="dark"] .test-filter-pills a {
+  background: #111e33;
+  border-color: #2e4361;
+  color: #b9c7dc;
+}
+html[data-theme="dark"] .test-filter-pills a:hover,
+html[data-theme="dark"] .test-filter-pills a.active {
+  background: #1a2a45;
+  border-color: #5575b0;
+  color: #a9c1ff;
+}
+.attempt-card {
+  grid-template-columns: 42px minmax(0,1fr) minmax(92px,120px);
+}
+.attempt-card > div:last-child {
+  min-width: 0;
+  text-align: right;
+}
+.attempt-card > div:last-child strong {
+  display: block;
+  color: var(--brand);
+  font-size: 15px;
+}
+.attempt-card > div:last-child p {
+  margin: 3px 0 0;
+}
+html[data-theme="dark"] .attempt-card:hover {
+  background: #111e33;
+  border-color: #263a59;
+}
