@@ -22,12 +22,13 @@ export default function AccountNav() {
 
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
-      const email = data.user?.email ?? "";
-      const metadataName = typeof data.user?.user_metadata?.display_name === "string"
-        ? data.user.user_metadata.display_name.trim()
+      const user = data.session?.user;
+      const email = user?.email ?? "";
+      const metadataName = typeof user?.user_metadata?.display_name === "string"
+        ? user.user_metadata.display_name.trim()
         : "";
       const label = metadataName || email.split("@")[0] || "Account";
-      setUser(data.user ? { email, label, initial: label.charAt(0).toUpperCase() } : null);
+      setUser(user ? { email, label, initial: label.charAt(0).toUpperCase() } : null);
       setReady(true);
     }).catch(() => {
       if (mounted) setReady(true);
