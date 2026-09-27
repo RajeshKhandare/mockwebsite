@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { logout } from "@/app/login/actions";
 
 type UserState = { email: string; label: string; initial: string } | null;
 
@@ -66,9 +65,17 @@ export default function AccountNav() {
         <Link href="/dashboard/history">Test history</Link>
         <Link href="/dashboard/analytics">Analytics</Link>
         <div className="account-divider" />
-        <form action={logout}>
-          <button className="account-logout" type="submit">Log out</button>
-        </form>
+        <button
+          className="account-logout"
+          type="button"
+          onClick={async () => {
+            const supabase = createSupabaseBrowserClient();
+            await supabase.auth.signOut();
+            window.location.assign("/login?message=logged-out");
+          }}
+        >
+          Log out
+        </button>
       </div>
     </details>
   );
