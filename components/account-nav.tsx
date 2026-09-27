@@ -48,7 +48,9 @@ export default function AccountNav() {
 
       supabase.auth.getUser().then(({ data }) => {
         if (!mounted) return;
-        setUser(toUserState(data.user));
+        const verifiedUser = toUserState(data.user);
+        if (verifiedUser) setUser(verifiedUser);
+        else if (!cookieUser) setUser(null);
         setReady(true);
       }).catch(() => {
         if (mounted) setReady(true);
