@@ -6,52 +6,73 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type UserState = { email: string; label: string; initial: string } | null;
 
+function readUiUserCookie(): UserState {
+  if (typeof document === "undefined") return null;
+  const entry = document.cookie.split("; ").find((item) => item.startsWith("mock_user="));
+  if (!entry) return null;
+  try {
+    const raw = decodeURIComponent(entry.slice("mock_user=".length));
+    const parsed = JSON.parse(raw) as { email?: unknown; label?: unknown };
+    const email = typeof parsed.email === "string" ? parsed.email : "";
+    const label = typeof parsed.label === "string" && parsed.label.trim()
+      ? parsed.label.trim()
+      : email.split("@")[0] || "Account";
+    return email || label ? { email, label, initial: label.charAt(0).toUpperCase() } : null;
+  } catch {
+    return null;
+  }
+}
+
+function toUserState(user: { email?: string; user_metadata?: Record<string, unknown> } | null): UserState {
+  if (!user) return null;
+  const email = user.email ?? "";
+  const metadataName = typeof user.user_metadata?.display_name === "string"
+    ? user.user_metadata.display_name.trim()
+    : "";
+  const label = metadataName || email.split("@")[0] || "Account";
+  return { email, label, initial: label.charAt(0).toUpperCase() };
+}
+
 export default function AccountNav() {
-  const [user, setUser] = useState<UserState>(null);
-  const [ready, setReady] = useState(true);
+  const [user, setUser] = useState<UserState>(() => readUiUserCookie());
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-    let supabase: ReturnType<typeof createSupabaseBrowserClient>;
+
+    const cookieUser = readUiUserCookie();
+    if (cookieUser) setUser(cookieUser);
 
     try {
-      supabase = createSupabaseBrowserClient();
+      const supabase = createSupabaseBrowserClient();
+
+      supabase.auth.getUser().then(({ data }) => {
+        if (!mounted) return;
+        setUser(toUserState(data.user));
+        setReady(true);
+      }).catch(() => {
+        if (mounted) setReady(true);
+      });
+
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (!mounted) return;
+        setUser(toUserState(session?.user ?? null));
+        setReady(true);
+      });
+
+      return () => {
+        mounted = false;
+        listener.subscription.unsubscribe();
+      };
     } catch {
+      if (mounted) setReady(true);
       return () => { mounted = false; };
     }
-
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      const user = data.session?.user;
-      const email = user?.email ?? "";
-      const metadataName = typeof user?.user_metadata?.display_name === "string"
-        ? user.user_metadata.display_name.trim()
-        : "";
-      const label = metadataName || email.split("@")[0] || "Account";
-      setUser(user ? { email, label, initial: label.charAt(0).toUpperCase() } : null);
-      setReady(true);
-    }).catch(() => {
-      if (mounted) setReady(true);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      const email = session?.user?.email ?? "";
-      const metadataName = typeof session?.user?.user_metadata?.display_name === "string"
-        ? session.user.user_metadata.display_name.trim()
-        : "";
-      const label = metadataName || email.split("@")[0] || "Account";
-      setUser(session?.user ? { email, label, initial: label.charAt(0).toUpperCase() } : null);
-      setReady(true);
-    });
-
-    return () => {
-      mounted = false;
-      listener.subscription.unsubscribe();
-    };
   }, []);
 
-  if (!ready) return <Link href="/login" className="nav-cta nav-cta-loading" aria-label="Account">Sign in</Link>;
+  if (!ready && !user) {
+    return <span className="nav-cta nav-cta-loading" aria-hidden="true">Account</span>;
+  }
 
   if (!user) return <Link href="/login" className="nav-cta">Sign in</Link>;
 
@@ -76,9 +97,12 @@ export default function AccountNav() {
           className="account-logout"
           type="button"
           onClick={async () => {
-            const supabase = createSupabaseBrowserClient();
-            await supabase.auth.signOut();
-            window.location.href = "/login?message=logged-out";
+            try {
+              const supabase = createSupabaseBrowserClient();
+              await supabase.auth.signOut();
+            } finally {
+              window.location.href = "/login?message=logged-out";
+            }
           }}
         >
           Log out
