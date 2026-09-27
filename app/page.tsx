@@ -49,7 +49,10 @@ export default function HomePage() {
               <div className="visual-score"><div><small>Latest mock</small><strong>78%</strong><span>Accuracy</span></div><div className="mini-ring">↑ 12%</div></div>
               <div className="visual-bars"><i style={{height:"58%"}}/><i style={{height:"76%"}}/><i style={{height:"43%"}}/><i style={{height:"88%"}}/><i style={{height:"68%"}}/></div>
               <div className="visual-list"><span>Quantitative Aptitude</span><b>84%</b><span>Reasoning</span><b>72%</b><span>Time efficiency</span><b>91%</b></div>
+              <div className="visual-focus"><span>✓</span><div><strong>Ready to improve</strong><small>3 weak topics identified</small></div></div>
             </div>
+            <div className="hero-float-card hero-float-one"><span>⚡</span><div><strong>Fast feedback</strong><small>Results in seconds</small></div></div>
+            <div className="hero-float-card hero-float-two"><span>✓</span><div><strong>Focused practice</strong><small>Built around your goals</small></div></div>
           </div>
         </div>
       </section>
