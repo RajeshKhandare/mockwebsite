@@ -353,3 +353,33 @@ h2 { letter-spacing:-.03em; }
 .auth-modal .auth-close { right:10px; top:10px; width:32px; height:32px; }
 .auth-modal .auth-mode-link { margin-top:12px; font-size:12px; }
 .result-unlock-panel { border-color:#cbd9e9; background:#fbfdff; }
+
+
+/* Stable exam option layout: keep letter, answer text and state in separate columns. */
+.option-card {
+  grid-template-columns: 38px minmax(0, 1fr) 24px;
+  align-items: center;
+  min-height: 64px;
+}
+.option-text {
+  min-width: 0;
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+  font-weight: 650;
+}
+.option-letter {
+  flex: 0 0 34px;
+}
+.option-check {
+  width: 24px;
+  min-width: 24px;
+  text-align: center;
+}
+@media (max-width: 700px) {
+  .test-layout { grid-template-columns: 1fr; }
+  .question-palette { position: static; }
+  .option-card { grid-template-columns: 34px minmax(0, 1fr) 22px; padding: 10px 12px; }
+  .option-text { font-size: 14px; }
+}
