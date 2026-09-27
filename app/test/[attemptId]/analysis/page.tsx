@@ -23,11 +23,13 @@ export default async function AnalysisPage(props: { params: Promise<{ attemptId:
     .select("id,status,test_template_id,language,user_id,guest_token").eq("id",attemptId).maybeSingle();
   if (!attempt || (owner.userId ? attempt.user_id !== owner.userId : attempt.guest_token !== owner.guestToken)) notFound();
 
+  const { data: exams } = await supabase.from("exams").select("id,name").eq("is_active", true).order("name").limit(100);
+
   if (!owner.userId) {
     return <main className="page-shell"><div className="section-heading"><div>
       <p className="eyebrow">Full analysis locked</p><h1>Sign in to unlock detailed performance analysis</h1>
       <p className="muted">Your basic result is available without an account. Sign in to see subject and topic breakdowns, history and personalized recommendations.</p>
-    </div></div><TestAuthBox nextPath={"/test/"+attemptId+"/analysis"} error={error} message={message}/></main>;
+    </div></div><TestAuthBox nextPath={"/test/"+attemptId+"/analysis"} error={error} message={message} exams={exams ?? []}/></main>;
   }
   if (attempt.status !== "submitted") redirect("/test/"+attemptId);
 
