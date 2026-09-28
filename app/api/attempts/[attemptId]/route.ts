@@ -12,7 +12,7 @@ export async function GET(
   const supabase = createSupabaseAdminClient();
   const { data: attempt, error } = await supabase
     .from("test_attempts")
-    .select("id,status,language,started_at,test_template_id,user_id,guest_token,duration_seconds")
+    .select("id,status,language,started_at,test_template_id,user_id,guest_token,duration_seconds,question_count")
     .eq("id", attemptId).single();
 
   if (error || !attempt || (userId ? attempt.user_id !== userId : attempt.guest_token !== guestToken)) {
