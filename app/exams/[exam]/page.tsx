@@ -32,18 +32,38 @@ export default async function ExamPage({ params }: { params: Promise<{ exam: str
 
   if (!item) notFound();
 
+  let firstTest: { slug: string; title: string } | null = null;
+  if (stages.length) {
+    try {
+      const tests = await supabaseRestGet<Array<{slug:string;title:string}>>("test_templates", {
+        select: "slug,title",
+        exam_stage_id: "in.(" + stages.map((stage) => stage.id).join(",") + ")",
+        is_active: "eq.true",
+        order: "title.asc",
+        limit: "1",
+      });
+      firstTest = tests[0] ?? null;
+    } catch {
+      firstTest = null;
+    }
+  }
+
   return (
     <main className="section"><div className="container">
       <div className="breadcrumb-row"><Link href="/exams">Exams</Link><span>›</span><strong>{item.name}</strong></div>
       <div className="eyebrow">Exam preparation</div>
       <h1 style={{fontSize:42}}>{item.name}</h1>
       <p style={{maxWidth:720,color:"var(--muted)"}}>{item.description ?? "Structured preparation through configurable stages, subjects and mock tests."}</p>
+      <div className="button-row exam-quick-actions">
+        {firstTest && <Link className="btn btn-primary" href={"/test/" + firstTest.slug}>Start a mock test</Link>}
+        <Link className="btn btn-secondary" href="#stages">Choose a stage</Link>
+      </div>
       <div className="catalog-stats">
         <div><strong>{stages.length}</strong><span>Preparation stages</span></div>
         <div><strong>Structured</strong><span>Subject-wise practice</span></div>
         <div><strong>Live</strong><span>Published mock tests</span></div>
       </div>
-      <div className="section">
+      <div className="section" id="stages">
         <div className="section-header"><div><h2>Stages</h2><p>Select a configured stage to view its subjects and published mock tests.</p></div></div>
         <div className="grid">
           {stages.map((stage) => (
