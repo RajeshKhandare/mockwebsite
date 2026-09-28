@@ -74,7 +74,7 @@ export default async function TestInstructionsPage({
         <div className="container test-launch-container">
           <div className="test-launch-error">
             <span className="test-launch-kicker">MOCK TEST</span>
-            <h1>We couldn't load this test.</h1>
+            <h1>We could not load this test.</h1>
             <p>
               The test service is temporarily unavailable. Please return to the
               test library and try again.
