@@ -10,7 +10,7 @@ export default async function HistoryPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return <main className="page-shell narrow-shell"><section className="auth-card"><p className="eyebrow">Test history</p><h1>Sign in required</h1><p className="muted">Sign in to view your completed and in-progress tests.</p><Link className="button primary" href="/login?next=/dashboard/history">Go to login</Link></section></main>;
 
-  const { data: attempts } = await supabase.from("test_attempts").select("id,status,language,started_at,submitted_at,test_template_id").eq("user_id", user.id).order("started_at", { ascending: false }).limit(50);
+  const { data: attempts } = await supabase.from("test_attempts").select("id,status,language,started_at,submitted_at,test_template_id,question_count").eq("user_id", user.id).order("started_at", { ascending: false }).limit(50);
   const templateIds=[...new Set((attempts??[]).map(a=>a.test_template_id))];
   const {data:templates}=templateIds.length ? await supabase.from("test_templates").select("id,title,question_count").in("id",templateIds) : {data:[] as Array<{id:string;title:string;question_count:number}>};
   const templateMap=new Map((templates??[]).map(t=>[t.id,t]));
