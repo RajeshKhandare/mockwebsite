@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import AccountNav from "@/components/account-nav";
-import ThemeToggle from "@/components/theme-toggle";
+import PrimaryNav from "@/components/primary-nav";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -27,14 +26,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Link href="/" className="logo" aria-label="MockTest home">
               <span className="logo-mark">M</span><span>MockTest</span>
             </Link>
-            <nav className="nav-links" aria-label="Primary navigation">
-              <Link href="/exams">Exams</Link>
-              <Link href="/tests">Mock Tests</Link>
-              <Link href="/practice">Practice</Link>
-              <Link href="/resources">Resources</Link>
-              <ThemeToggle />
-              <AccountNav />
-            </nav>
+            <PrimaryNav />
           </div>
         </header>
         {children}
