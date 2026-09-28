@@ -1564,3 +1564,26 @@ html[data-theme="dark"] .matrix-negative { color:#ff8fa0 !important; }
 .page-shell h1,.section > .container > h1 { font-size:clamp(32px,4vw,46px) !important; }
 .page-shell h2 { font-size:clamp(22px,2.4vw,30px); }
 .page-shell p { line-height:1.6; }
+
+
+html[data-theme="dark"] .score-banner {
+  background:linear-gradient(135deg,#10271e,#122d23);
+  border-color:#234c3c;
+}
+html[data-theme="dark"] .score-ring { background:#0d1729; border-color:#3bd394; border-right-color:#1d5844; }
+html[data-theme="dark"] .score-ring strong { color:#edf3ff; }
+html[data-theme="dark"] .score-ring span,
+html[data-theme="dark"] .score-banner p,
+html[data-theme="dark"] .report-label { color:#aebbd0; }
+html[data-theme="dark"] .report-mini-grid .yellow { background:#2c2716; color:#f0bf63; }
+html[data-theme="dark"] .report-mini-grid .red { background:#2a1720; color:#ff8fa0; }
+html[data-theme="dark"] .report-mini-grid .blue { background:#172641; color:#91adff; }
+html[data-theme="dark"] .comparison-chart { background:repeating-linear-gradient(to top, transparent 0, transparent 44px, rgba(34,52,80,.7) 45px); }
+html[data-theme="dark"] .comparison-bar.you { background:#3c82e8; }
+html[data-theme="dark"] .comparison-bar.average { background:#ef5269; }
+html[data-theme="dark"] .comparison-bar.best { background:#e4b64d; }
+html[data-theme="dark"] .profile-cover { background:linear-gradient(135deg,#0d1729,#111f35); }
+html[data-theme="dark"] .profile-email { color:#aebbd0; }
+html[data-theme="dark"] .profile-edit-form input,
+html[data-theme="dark"] .profile-edit-form select { background:#111e33; color:#edf3ff; border-color:#3a4f6d; }
+html[data-theme="dark"] .profile-edit-form select option { background:#111e33; color:#edf3ff; }
