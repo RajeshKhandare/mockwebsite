@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { selectApprovedQuestions } from "@/lib/test-selection";
 
@@ -20,7 +21,8 @@ export async function POST(request:Request){
   // Read the template with the same authenticated/public client used by the
   // instructions page. This prevents a misleading 404 when the server-only
   // Supabase secret is unavailable or misconfigured.
-  const {data:template,error:templateError}=await supabase.from("test_templates")
+  const publicDb = createSupabasePublicClient();
+  const {data:template,error:templateError}=await publicDb.from("test_templates")
     .select("id,exam_stage_id,question_count,duration_seconds,supported_languages,is_active,requires_login,selection_rules")
     .eq("id",parsed.data.testTemplateId).eq("is_active",true).maybeSingle();
   if(templateError){
