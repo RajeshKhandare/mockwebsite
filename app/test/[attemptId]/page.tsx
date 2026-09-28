@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { supabaseRestGet } from "@/lib/supabase/rest";
 import StartTest from "./start-test";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Test Instructions | MockTest",
