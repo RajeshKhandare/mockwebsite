@@ -46,11 +46,17 @@ async function claimGuestAttempts(userId: string) {
   const cookieStore = await cookies();
   const guestToken = cookieStore.get("mock_guest")?.value;
   if (!guestToken) return;
-  const admin = createSupabaseAdminClient();
-  await admin.from("test_attempts")
-    .update({ user_id: userId, guest_token: null })
-    .eq("guest_token", guestToken)
-    .is("user_id", null);
+  try {
+    const admin = createSupabaseAdminClient();
+    await admin.from("test_attempts")
+      .update({ user_id: userId, guest_token: null })
+      .eq("guest_token", guestToken)
+      .is("user_id", null);
+  } catch (error) {
+    // Guest-to-account claiming is best-effort. A missing server secret must
+    // never turn an otherwise successful login into a failed login.
+    console.error("Could not claim guest attempts", error);
+  }
   cookieStore.set("mock_guest", "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 });
 }
 
@@ -126,8 +132,9 @@ export async function signup(formData: FormData) {
   }
 
   if (data.user) {
-    const admin = createSupabaseAdminClient();
-    await admin.from("profiles").upsert({
+    // Profile creation is permitted for the authenticated owner by RLS.
+    // Do not make signup depend on the server-only service key.
+    const { error: profileError } = await supabase.from("profiles").upsert({
       id: data.user.id,
       display_name: displayName || null,
       target_exam: targetExam || null,
@@ -136,6 +143,10 @@ export async function signup(formData: FormData) {
       preparation_stage: preparationStage || null,
       preferred_language: preferredLanguage || null,
     }, { onConflict: "id" });
+
+    if (profileError) {
+      console.error("Profile creation after signup failed", profileError);
+    }
   }
 
   const signedInUserId = data.user?.id;
