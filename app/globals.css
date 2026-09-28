@@ -1587,3 +1587,14 @@ html[data-theme="dark"] .profile-email { color:#aebbd0; }
 html[data-theme="dark"] .profile-edit-form input,
 html[data-theme="dark"] .profile-edit-form select { background:#111e33; color:#edf3ff; border-color:#3a4f6d; }
 html[data-theme="dark"] .profile-edit-form select option { background:#111e33; color:#edf3ff; }
+
+
+.exam-category-stack { display:grid; gap:26px; }
+.exam-category-section { padding:22px; border:1px solid var(--border); border-radius:20px; background:var(--surface-soft); }
+.exam-category-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:18px; }
+.exam-category-heading h2 { margin:3px 0 5px; font-size:25px; }
+.exam-category-heading p { margin:0; color:var(--muted); font-size:12px; max-width:680px; }
+.exam-category-heading > span { flex:0 0 auto; padding:6px 9px; border:1px solid var(--border); border-radius:999px; color:var(--muted); font-size:10px; font-weight:800; }
+.exam-category-section .exam-card-grid { margin:0; }
+html[data-theme="dark"] .exam-category-section { background:#0b1628; border-color:#263a59; }
+@media(max-width:680px){ .exam-category-section{padding:16px;border-radius:16px}.exam-category-heading{align-items:flex-start;flex-direction:column;gap:10px} }
