@@ -6,6 +6,7 @@ import { updateProfile } from "./actions";
 type Props = {
   initial: {
     displayName: string;
+    email: string;
     targetExam: string;
     educationLevel: string;
     state: string;
@@ -85,7 +86,7 @@ export default function ProfileEditor({ initial, exams, error, saved }: Props) {
       ) : (
         <div className="profile-fields profile-fields-readable">
           <div><span>Name</span><strong>{initial.displayName}</strong></div>
-          <div><span>Email</span><strong>{/* email is rendered by the server card */}</strong></div>
+          <div><span>Email</span><strong>{initial.email}</strong></div>
           <div><span>Target exam</span><strong>{initial.targetExam || "Not set"}</strong></div>
           <div><span>Preparation stage</span><strong>{initial.preparationStage || "Not set"}</strong></div>
           <div><span>Education</span><strong>{initial.educationLevel || "Not set"}</strong></div>
