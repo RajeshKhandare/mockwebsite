@@ -1806,3 +1806,22 @@ h3 { font-size: 16px; }
   .stats-strip .stats-wide strong { font-size: 24px !important; }
   .stats-strip .stats-wide span { font-size: 9px; }
 }
+
+
+/* Consistent compact premium cards across catalogue, resources, dashboard and profile */
+.card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: none;
+  transition: transform .16s ease, border-color .16s ease, background-color .16s ease;
+}
+.card:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--brand) 34%, var(--border));
+}
+.exam-card, .test-card, .resource-card, .resource-link-grid .card, .resource-preview-grid .card {
+  min-height: 0;
+}
+.exam-card .card-link, .test-card .card-link, .resource-card-action, .resource-preview-grid .card-link {
+  font-size: 11px;
+}
