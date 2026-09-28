@@ -29,9 +29,7 @@ export default function ProfileEditor({ initial, exams, error, saved }: Props) {
           <h2>Your study details</h2>
           <p className="muted">Keep your exam goal and preparation preferences up to date.</p>
         </div>
-        <button className="button" type="button" onClick={() => setEditing((value) => !value)}>
-          {editing ? "Cancel" : "Edit profile"}
-        </button>
+        {!editing && <button className="button" type="button" onClick={() => setEditing(true)}>Edit profile</button>}
       </div>
 
       {saved && <p className="form-message success">Profile updated successfully.</p>}
