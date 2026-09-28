@@ -118,6 +118,8 @@ export default async function AnalyticsPage() {
           bestScore={bestScore}
           timeSeconds={latestTime}
           percentile={percentile}
+          correct={numeric(latestResult?.correct_count)}
+          incorrect={numeric(latestResult?.incorrect_count)}
           subjects={[...subjects.values()]}
         />
       ) : (
