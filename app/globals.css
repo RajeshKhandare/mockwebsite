@@ -1608,3 +1608,129 @@ h1 { font-size: clamp(36px,4.5vw,56px); }
 .hero h1 { font-size: clamp(38px,4.8vw,58px); }
 .section { padding-top: 56px; padding-bottom: 56px; }
 .card { padding: 21px; }
+
+
+/* Active primary navigation + compact account control */
+.nav-links > a.active {
+  color: var(--text);
+  font-weight: 800;
+}
+.nav-links > a.active::after {
+  content: "";
+  display: block;
+  height: 2px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: var(--brand);
+}
+.account-avatar-icon {
+  color: var(--muted);
+}
+.account-avatar-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.account-chip.account-chip-avatar-only {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+}
+.account-chip.account-chip-avatar-only .account-avatar {
+  width: 38px !important;
+  height: 38px !important;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+/* Resources */
+.resources-page { padding-top: 48px; }
+.resources-hero { align-items: flex-end; margin-bottom: 28px; }
+.resources-hero h1 { max-width: 760px; }
+.resources-hero p { max-width: 760px; }
+.resource-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.resource-card { min-height:190px; }
+.resource-card h2 { margin:10px 0 8px; font-size:21px; }
+.resource-card p { margin:0; color:var(--muted); font-size:13px; line-height:1.7; }
+.resource-label {
+  display:inline-flex;
+  padding:5px 8px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  color:var(--brand);
+  background:var(--accent-soft);
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.resource-workflow {
+  display:grid;
+  grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);
+  gap:28px;
+  margin-top:38px;
+  padding:26px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  background:var(--surface-soft);
+}
+.resource-workflow h2 { margin:5px 0 8px; font-size:28px; }
+.resource-workflow p { max-width:620px; }
+.resource-steps { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.resource-steps div {
+  padding:15px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--surface);
+}
+.resource-steps strong { display:block; color:var(--brand); font-size:12px; margin-bottom:7px; }
+.resource-steps span { display:block; color:var(--muted); font-size:12px; line-height:1.55; }
+.resource-links { margin-top:46px; }
+.resource-link-grid .card { transition:transform .18s ease,border-color .18s ease; }
+.resource-link-grid .card:hover { transform:translateY(-2px); border-color:color-mix(in srgb,var(--brand) 45%,var(--border)); }
+.resource-preview-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.resource-preview-grid .card h3 { margin:10px 0 7px; }
+.resource-preview-grid .card p { color:var(--muted); font-size:12px; line-height:1.65; }
+
+.stats-strip .stats-wide > div {
+  padding:24px 18px;
+}
+.stats-strip .stats-wide strong {
+  display:block;
+  font-size:clamp(30px,3.2vw,46px) !important;
+  line-height:1;
+  letter-spacing:-.045em;
+}
+.stats-strip .stats-wide span {
+  display:block;
+  margin-top:9px;
+  font-size:11px;
+  font-weight:750;
+}
+
+/* Compact exam-platform type scale. This is intentionally closer to a one-step browser zoom-out,
+   while keeping trust metrics and primary headings prominent. */
+body { font-size: 14px; }
+h1 { font-size: clamp(30px, 3.8vw, 48px) !important; line-height:1.08; }
+h2 { font-size: clamp(21px, 2.3vw, 30px); }
+h3 { font-size: 17px; }
+.hero h1 { font-size: clamp(34px, 4.2vw, 52px) !important; }
+.hero p, .section-header p { font-size: 14px; }
+.section { padding-top: 48px; padding-bottom: 48px; }
+.card { padding: 18px; }
+
+@media (max-width: 900px) {
+  .resource-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .resource-preview-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .resource-workflow { grid-template-columns:1fr; }
+}
+@media (max-width: 620px) {
+  .resource-grid,.resource-preview-grid { grid-template-columns:1fr; }
+  .resources-hero { align-items:flex-start; }
+  .resource-workflow { padding:20px; }
+  .resource-steps { grid-template-columns:1fr; }
+}
