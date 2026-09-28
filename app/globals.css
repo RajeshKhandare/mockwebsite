@@ -1357,3 +1357,63 @@ html[data-theme="dark"] .test-filter-pills button.active {
 @media (max-width:640px) {
   .question-count-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
+
+
+.performance-matrix {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin:18px 0 22px;
+}
+.performance-matrix-card {
+  padding:18px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--surface-soft);
+}
+.performance-matrix-card span,
+.performance-matrix-card small {
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+}
+.performance-matrix-card strong {
+  display:block;
+  margin:5px 0;
+  font-size:28px;
+  color:var(--text);
+}
+.subject-matrix {
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:14px;
+}
+.subject-matrix-head,
+.subject-matrix-row {
+  display:grid;
+  grid-template-columns:minmax(0,1.8fr) repeat(3,minmax(90px,1fr));
+  gap:12px;
+  align-items:center;
+  padding:12px 14px;
+}
+.subject-matrix-head {
+  background:var(--surface-soft);
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+.subject-matrix-row {
+  border-top:1px solid var(--border);
+  color:var(--text);
+}
+.subject-matrix-row span { color:var(--muted); }
+.matrix-positive { color:#16804a !important; font-weight:800; }
+.matrix-negative { color:#d0445b !important; font-weight:800; }
+html[data-theme="dark"] .matrix-positive { color:#6ee7a6 !important; }
+html[data-theme="dark"] .matrix-negative { color:#ff8fa0 !important; }
+@media (max-width:720px) {
+  .performance-matrix { grid-template-columns:1fr; }
+  .subject-matrix { overflow-x:auto; }
+  .subject-matrix-head,
+  .subject-matrix-row { min-width:520px; }
+}
