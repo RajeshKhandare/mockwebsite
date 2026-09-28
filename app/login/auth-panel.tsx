@@ -26,15 +26,17 @@ export default function AuthPanel({ next, error, message, exams }: Props) {
         {mode === "reset" ? "Enter your account email and we’ll send you a secure password reset link." : mode === "login" ? "Continue your preparation from where you left off." : "Keep your attempts, results and preparation history together."}
       </p>
 
-      {error && <p className="form-message error">
-        {error === "invalid" ? "Email or password is incorrect." :
-         error === "unconfirmed" ? "Please confirm your email address from the verification email before logging in." :
-         error === "signup" ? "We could not create the account. Please check the details and try again." :
-         error === "reset" ? "We could not send a reset email. Please try again." :
-         error === "exists" ? "An account already exists for this email. Log in or reset your password." :
-         error === "callback" ? "The reset link could not be completed. Please request a new reset link in this browser." :
-         "Please check the details and try again."}
-      </p>}
+      {error && ((mode === "login" && !["signup"].includes(error)) || (mode === "signup" && error === "signup") || (mode === "reset" && error === "reset")) && (
+        <p className="form-message error">
+          {error === "invalid" ? "Email or password is incorrect." :
+           error === "unconfirmed" ? "Please confirm your email address from the verification email before logging in." :
+           error === "signup" ? "We could not create the account. Please check the details and try again." :
+           error === "reset" ? "We could not send a reset email. Please try again." :
+           error === "exists" ? "An account already exists for this email. Log in or reset your password." :
+           error === "callback" ? "The reset link could not be completed. Please request a new reset link in this browser." :
+           "Please check the details and try again."}
+        </p>
+      )}
       {message === "check-email" && <p className="form-message success">Check your email to finish creating your account.</p>}
       {message === "logged-out" && <p className="form-message success">You have been logged out securely. Sign in again whenever you are ready.</p>}
       {message === "reset-sent" && <p className="form-message success">Password reset instructions have been sent to your email.</p>}
