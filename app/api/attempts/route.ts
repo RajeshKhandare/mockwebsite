@@ -19,7 +19,7 @@ export async function POST(request:Request){
 
   const admin=createSupabaseAdminClient();
   const {data:template,error:templateError}=await admin.from("test_templates")
-    .select("id,exam_stage_id,question_count,supported_languages,is_active,requires_login,selection_rules")
+    .select("id,exam_stage_id,question_count,duration_seconds,supported_languages,is_active,requires_login,selection_rules")
     .eq("id",parsed.data.testTemplateId).eq("is_active",true).single();
   if(templateError||!template)return NextResponse.json({error:"Test not found."},{status:404});
 
@@ -60,7 +60,7 @@ export async function POST(request:Request){
   const readyQuestions=selection.questionIds.filter(id=>{
     const stats=optionStats.get(id); return stats?.count===4&&stats.correct===1;
   });
-  if(readyQuestions.length<template.question_count)return NextResponse.json({error:"This test is not ready yet. Every live question must have exactly four options and one correct answer."},{status:422});
+  if(readyQuestions.length<requestedCount)return NextResponse.json({error:"This test is not ready yet. Every live question must have exactly four options and one correct answer."},{status:422});
 
   const {data:attempt,error:attemptError}=await admin.from("test_attempts").insert({
     user_id:user?.id??null,guest_token:user?null:guestToken,test_template_id:template.id,language:parsed.data.language,
