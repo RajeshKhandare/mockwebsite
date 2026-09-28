@@ -56,12 +56,16 @@ export default function ResourcesPage() {
         </div>
 
         <section className="resource-grid" aria-label="Preparation guides">
-          {resources.map((item) => (
-            <article className="card resource-card" key={item.title}>
+          {resources.map((item, index) => (
+            <Link className="card resource-card" href={index === 0 ? "/tests" : index === 2 ? "/test/banking-speed-10m" : "/tests"} key={item.title}>
               <span className="resource-label">{item.label}</span>
               <h2>{item.title}</h2>
               <p>{item.text}</p>
-            </article>
+              <div className="resource-card-meta">
+                <span>{index === 0 ? "Choose → Test → Review" : index === 1 ? "Score · accuracy · time" : index === 2 ? "5 · 10 · 15 · 20 questions" : index === 3 ? "Subject-focused" : index === 4 ? "After every submission" : "English · Hindi · Marathi"}</span>
+              </div>
+              <span className="resource-card-action">Open related practice →</span>
+            </Link>
           ))}
         </section>
 
