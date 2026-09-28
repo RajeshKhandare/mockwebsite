@@ -1600,3 +1600,11 @@ html[data-theme="dark"] .exam-category-section { background:#0b1628; border-colo
 @media(max-width:680px){ .exam-category-section{padding:16px;border-radius:16px}.exam-category-heading{align-items:flex-start;flex-direction:column;gap:10px} }
 
 .exam-quick-actions { margin:18px 0 8px; }
+
+
+/* Global type scale: compact enough for a dense exam-prep workspace. */
+body { font-size: 14px; }
+h1 { font-size: clamp(36px,4.5vw,56px); }
+.hero h1 { font-size: clamp(38px,4.8vw,58px); }
+.section { padding-top: 56px; padding-bottom: 56px; }
+.card { padding: 21px; }
