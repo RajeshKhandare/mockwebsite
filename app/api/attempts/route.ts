@@ -5,7 +5,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { selectApprovedQuestions } from "@/lib/test-selection";
 
-const payloadSchema=z.object({testTemplateId:z.string().uuid(),language:z.enum(["en","hi","mr"])});
+const payloadSchema=z.object({
+  testTemplateId:z.string().uuid(),
+  language:z.enum(["en","hi","mr"]),
+  questionCount:z.number().int().min(1).max(100).optional(),
+});
 
 export async function POST(request:Request){
   const supabase=await createSupabaseServerClient();
@@ -25,8 +29,21 @@ export async function POST(request:Request){
   if(!user&&!guestToken)guestToken=crypto.randomUUID()+"-"+crypto.randomUUID();
   if(!template.supported_languages.includes(parsed.data.language))return NextResponse.json({error:"Selected language is not available for this test."},{status:400});
 
+  const requestedCount = parsed.data.questionCount ?? template.question_count;
+  const speedCounts = [5, 10, 15, 20];
+  const isSpeedTest = template.duration_seconds === 600;
+  if (isSpeedTest && !speedCounts.includes(requestedCount)) {
+    return NextResponse.json({error:"For the 10-minute speed test, choose 5, 10, 15 or 20 questions."},{status:400});
+  }
+  if (!isSpeedTest && requestedCount !== template.question_count) {
+    return NextResponse.json({error:"This test uses its configured question count."},{status:400});
+  }
+  if (requestedCount > template.question_count) {
+    return NextResponse.json({error:"The selected question count exceeds this test's configured pool size."},{status:400});
+  }
+
   const selection=await selectApprovedQuestions(admin,{
-    examStageId:template.exam_stage_id,language:parsed.data.language,count:template.question_count,
+    examStageId:template.exam_stage_id,language:parsed.data.language,count:requestedCount,
     rules:(template.selection_rules??{}) as {buckets?:Array<{sectionId?:string;subjectId?:string;topicId?:string;difficulty?:string;count:number}>;difficulty?:Record<string,number>},
   });
   if(!selection.ok)return NextResponse.json({error:selection.error},{status:422});
@@ -46,7 +63,8 @@ export async function POST(request:Request){
   if(readyQuestions.length<template.question_count)return NextResponse.json({error:"This test is not ready yet. Every live question must have exactly four options and one correct answer."},{status:422});
 
   const {data:attempt,error:attemptError}=await admin.from("test_attempts").insert({
-    user_id:user?.id??null,guest_token:user?null:guestToken,test_template_id:template.id,language:parsed.data.language,duration_seconds:null,
+    user_id:user?.id??null,guest_token:user?null:guestToken,test_template_id:template.id,language:parsed.data.language,
+    question_count:requestedCount,duration_seconds:null,
   }).select("id").single();
   if(attemptError||!attempt)return NextResponse.json({error:"Could not start the test."},{status:500});
 
