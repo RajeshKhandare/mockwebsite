@@ -57,7 +57,7 @@ export default function ResourcesPage() {
 
         <section className="resource-grid" aria-label="Preparation guides">
           {resources.map((item, index) => (
-            <Link className="card resource-card" href={index === 0 ? "/tests" : index === 2 ? "/test/banking-speed-10m" : "/tests"} key={item.title}>
+            <Link className="card resource-card" href={index === 0 ? "/tests" : index === 1 ? "/dashboard/analytics" : index === 2 ? "/test/banking-speed-10m" : index === 3 ? "/practice" : "/tests"} prefetch={false} key={item.title}>
               <span className="resource-label">{item.label}</span>
               <h2>{item.title}</h2>
               <p>{item.text}</p>
