@@ -25,9 +25,10 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
   if (!attempt || (owner.userId ? attempt.user_id !== owner.userId : attempt.guest_token !== owner.guestToken)) notFound();
   if (attempt.status !== "submitted") redirect("/test/" + attemptId);
 
-  const [{ data: result }, { data: template }, { data: links }] = await Promise.all([
+  const [{ data: result }, { data: template }, { data: links }, { data: profile }] = await Promise.all([
     supabase.from("results").select("correct_count,incorrect_count,unattempted_count,score,accuracy,time_taken_seconds").eq("attempt_id", attemptId).single(),
     supabase.from("test_templates").select("title,question_count,marks_per_question,negative_marks").eq("id", attempt.test_template_id).single(),
+    supabase.from("profiles").select("display_name").eq("id", attempt.user_id ?? "").maybeSingle(),
     supabase.from("test_attempt_questions").select("question_id,position").eq("attempt_id", attemptId).order("position"),
   ]);
 
@@ -59,7 +60,7 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
     <main className="page-shell result-page">
       <section className="result-hero">
         <div>
-          <p className="eyebrow">Test completed</p>
+          <p className="eyebrow">Test completed · {profile?.display_name || "Student"}</p>
           <h1>{template.title}</h1>
           <div className="result-meta">
             <span>{attempt.language.toUpperCase()}</span>
