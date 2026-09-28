@@ -50,6 +50,7 @@ export async function scoreAttempt(attemptId: string, owner: { userId: string | 
   });
 
   const sectionMetrics: Record<string, { total:number; correct:number; incorrect:number; unattempted:number }> = {};
+  const subjectMetrics: Record<string, { total:number; correct:number; incorrect:number; unattempted:number }> = {};
   const topicMetrics: Record<string, { total:number; correct:number; incorrect:number; unattempted:number }> = {};
   for (const question of questionMeta ?? []) {
     const selected = answerMap[question.id];
@@ -64,6 +65,7 @@ export async function scoreAttempt(attemptId: string, owner: { userId: string | 
       target[key] = stats;
     };
     update(sectionMetrics, question.section_id);
+    update(subjectMetrics, question.subject_id);
     update(topicMetrics, question.topic_id);
   }
 
@@ -88,7 +90,7 @@ export async function scoreAttempt(attemptId: string, owner: { userId: string | 
   const result = {
     attempt_id:attemptId, correct_count:calculated.correctCount, incorrect_count:calculated.incorrectCount,
     unattempted_count:calculated.unattemptedCount, score:calculated.score, accuracy:calculated.accuracy,
-    time_taken_seconds:timeTaken, section_metrics:sectionMetrics, topic_metrics:topicMetrics,
+    time_taken_seconds:timeTaken, section_metrics:sectionMetrics, subject_metrics:subjectMetrics, topic_metrics:topicMetrics,
     score_breakdown:{
       marksPerQuestion:Number(template.marks_per_question), negativeMarks:Number(template.negative_marks),
       attempted:calculated.correctCount+calculated.incorrectCount, totalQuestions:questionIds.length,
