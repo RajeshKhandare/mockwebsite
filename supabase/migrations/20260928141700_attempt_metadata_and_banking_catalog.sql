@@ -8,3 +8,8 @@ update public.test_templates
 set title='Banking Aptitude Full Mock — 100 Questions',
     description='Full-length banking aptitude mock with 100 questions selected from a 103+ approved question pool across quantitative aptitude and reasoning ability.'
 where slug='banking-demo-quick-01';
+
+update public.test_templates
+set question_count=50,
+    description='A 10-minute speed practice pool with 50+ approved questions. Choose 5, 10, 15 or 20 questions for each session.'
+where slug='banking-speed-10m';
