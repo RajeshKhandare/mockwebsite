@@ -46,12 +46,22 @@ export async function updateProfile(formData: FormData) {
   if (updateError) redirect("/profile?error=save");
 
   if (!updatedProfile) {
-    try {
-      const admin = createSupabaseAdminClient();
-      const { error: insertError } = await admin.from("profiles").upsert(profilePayload, { onConflict: "id" });
-      if (insertError) redirect("/profile?error=save");
-    } catch {
-      redirect("/profile?error=save");
+    // Prefer a normal authenticated insert when the profile row was never
+    // created (for example, an account created before the profile trigger).
+    const { data: insertedProfile, error: insertError } = await supabase
+      .from("profiles")
+      .insert(profilePayload)
+      .select("id")
+      .maybeSingle();
+
+    if (!insertedProfile && insertError) {
+      try {
+        const admin = createSupabaseAdminClient();
+        const { error: adminInsertError } = await admin.from("profiles").upsert(profilePayload, { onConflict: "id" });
+        if (adminInsertError) redirect("/profile?error=save");
+      } catch {
+        redirect("/profile?error=save");
+      }
     }
   }
 
