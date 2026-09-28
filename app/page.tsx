@@ -19,6 +19,7 @@ const featuredTests = [
   ["10-Minute Speed Practice", "banking-speed-10m", "Choose 5, 10, 15 or 20 questions for a focused ten-minute session.", "practice", 20, 10],
   ["Banking Quantitative Aptitude Sectional", "banking-quant-sectional-50", "50-question quantitative aptitude sectional test.", "sectional", 50, 30],
   ["Banking Aptitude Full Mock — 100 Questions", "banking-demo-quick-01", "Full-length banking aptitude mock with 100 questions.", "full_mock", 100, 60],
+  ["Banking Reasoning Ability Sectional", "banking-reasoning-sectional-50", "50-question reasoning ability sectional test.", "sectional", 50, 30],
 ] as const;
 
 export default function HomePage() {
@@ -103,6 +104,25 @@ export default function HomePage() {
                 <span className="card-link">View test <b>→</b></span>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section resource-preview-section">
+        <div className="container">
+          <div className="section-header">
+            <div>
+              <div className="eyebrow">Preparation resources</div>
+              <h2>Know what to do before and after every mock.</h2>
+              <p>Short, practical guidance for choosing a test, managing time and turning your result into the next study action.</p>
+            </div>
+            <Link className="button secondary" href="/resources">Explore resources</Link>
+          </div>
+          <div className="grid resource-preview-grid">
+            <Link className="card" href="/resources"><span className="resource-label">Strategy</span><h3>Build a mock-test routine</h3><p>Choose a timed test, review it properly, then target the weak area.</p><span className="card-link">Read guide →</span></Link>
+            <Link className="card" href="/resources"><span className="resource-label">Review</span><h3>Understand your score</h3><p>Use accuracy, time and attempted questions together instead of looking only at marks.</p><span className="card-link">Review guide →</span></Link>
+            <Link className="card" href="/resources"><span className="resource-label">Speed</span><h3>Improve pacing</h3><p>Use short speed sessions to practise question selection and time control.</p><span className="card-link">See speed tips →</span></Link>
+            <Link className="card" href="/resources"><span className="resource-label">Languages</span><h3>Prepare in your language</h3><p>Supported tests can be taken in English, Hindi or Marathi.</p><span className="card-link">Learn more →</span></Link>
           </div>
         </div>
       </section>
