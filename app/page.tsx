@@ -1,25 +1,19 @@
 import Link from "next/link";
 
 const featuredExams = [
-  ["Banking", "banking-demo", "Banking exam preparation with full mocks, sectional tests and speed practice."],
-  ["CDS", "cds", "Combined Defence Services preparation."],
-  ["CTET", "ctet", "Central Teacher Eligibility Test preparation."],
-  ["CUET UG", "cuet-ug", "Common University Entrance Test preparation."],
-  ["GATE CSE", "gate-cse", "Computer Science engineering entrance preparation."],
-  ["IBPS PO", "ibps-po", "Probationary Officer practice and mock-test preparation."],
-  ["JEE Main", "jee-main", "Engineering entrance preparation."],
-  ["Judiciary", "judiciary", "State judiciary and judicial services preparation."],
-  ["NDA", "nda", "National Defence Academy and Naval Academy preparation."],
-  ["NEET UG", "neet-ug", "Medical entrance preparation."],
-  ["Police Constable", "police-constable", "General police recruitment preparation."],
-  ["RBI Grade B", "rbi-grade-b", "Reserve Bank Grade B preparation."],
+  ["Banking Aptitude", "banking-demo", "Banking aptitude preparation with full mocks, sectional tests and speed practice."],
+  ["SSC CGL", "ssc-cgl", "SSC CGL Tier 1 foundation practice across aptitude, reasoning, English and awareness."],
+  ["IBPS PO", "ibps-po", "IBPS PO foundation mock practice with 100-question preparation tests."],
+  ["RRB NTPC", "rrb-ntpc", "Railway NTPC foundation practice with reasoning, mathematics and awareness."],
+  ["UPSC Civil Services", "upsc-civil-services", "UPSC Civil Services Preliminary foundation practice."],
+  ["CTET", "ctet", "CTET Paper 1 foundation practice and teacher-eligibility preparation."],
 ] as const;
 
 const featuredTests = [
   ["10-Minute Speed Practice", "banking-speed-10m", "Choose 5, 10, 15 or 20 questions for a focused ten-minute session.", "practice", 20, 10],
-  ["Banking Quantitative Aptitude Sectional", "banking-quant-sectional-50", "50-question quantitative aptitude sectional test.", "sectional", 50, 30],
+  ["Banking Quantitative Aptitude Sectional — 50 Questions", "banking-quant-sectional-50", "50-question quantitative aptitude sectional test.", "sectional", 50, 30],
+  ["Banking Reasoning Ability Sectional — 50 Questions", "banking-reasoning-sectional-50", "50-question reasoning ability sectional test.", "sectional", 50, 30],
   ["Banking Aptitude Full Mock — 100 Questions", "banking-demo-quick-01", "Full-length banking aptitude mock with 100 questions.", "full_mock", 100, 60],
-  ["Banking Reasoning Ability Sectional", "banking-reasoning-sectional-50", "50-question reasoning ability sectional test.", "sectional", 50, 30],
 ] as const;
 
 export default function HomePage() {
@@ -60,9 +54,9 @@ export default function HomePage() {
 
       <section className="stats-strip">
         <div className="container stats-wide">
-          <div><strong>20+</strong><span>exam tracks in the library</span></div>
-          <div><strong>4</strong><span>published mock tests</span></div>
-          <div><strong>100+</strong><span>approved live questions</span></div>
+          <div><strong>27</strong><span>active exam tracks</span></div>
+          <div><strong>30</strong><span>published mock tests</span></div>
+          <div><strong>2,500+</strong><span>approved live questions</span></div>
           <div><strong>3</strong><span>test languages available</span></div>
         </div>
       </section>
