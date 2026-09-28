@@ -58,7 +58,7 @@ export default function StartTest({ testTemplateId, languages, requiresLogin, lo
       )}
       <label htmlFor="test-language" style={{display:"block",fontWeight:700,marginBottom:8}}>Test language</label>
       <select id="test-language" value={language} onChange={(e) => setLanguage(e.target.value)}
-        style={{width:"100%",height:46,border:"1px solid var(--border)",borderRadius:8,padding:"0 12px",background:"white"}}>
+        style={{width:"100%",height:46,border:"1px solid var(--border)",borderRadius:8,padding:"0 12px",background:"var(--surface)"}}>
         {languages.map((value) => <option key={value} value={value}>{value === "en" ? "English" : value === "hi" ? "Hindi" : "Marathi"}</option>)}
       </select>
       {error && <p style={{color:"var(--danger)",marginTop:10}}>{error}</p>}
