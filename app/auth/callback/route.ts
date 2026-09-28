@@ -33,6 +33,16 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && data.user) {
+      // Email-confirmation callbacks can be the first successful authenticated
+      // request after signup. Ensure the profile row exists without requiring
+      // the server-only admin key.
+      await supabase.from("profiles").upsert({
+        id: data.user.id,
+        display_name: typeof data.user.user_metadata?.display_name === "string"
+          ? data.user.user_metadata.display_name.trim() || null
+          : null,
+      }, { onConflict: "id" });
+
       const email = data.user.email ?? "";
       const metadataName = typeof data.user.user_metadata?.display_name === "string"
         ? data.user.user_metadata.display_name.trim()
