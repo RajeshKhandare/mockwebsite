@@ -18,6 +18,8 @@ type Props = {
   bestScore: number;
   timeSeconds: number;
   percentile: number | null;
+  correct: number;
+  incorrect: number;
   subjects: Subject[];
 };
 
@@ -30,8 +32,8 @@ export default function PerformanceMatrix(props: Props) {
   const [metric, setMetric] = useState<"score" | "correct" | "incorrect" | "accuracy">("score");
   const max = useMemo(() => {
     if (!props.subjects.length) return 100;
-    if (metric === "score") return Math.max(100, props.subjects.reduce((m, s) => Math.max(m, accuracyOf(s)), 0));
-    return Math.max(1, ...props.subjects.map((s) => metric === "correct" ? s.correct : metric === "incorrect" ? s.incorrect : accuracyOf(s)));
+    if (metric === "score" || metric === "accuracy") return 100;
+    return Math.max(1, props.correct, props.incorrect);
   }, [metric, props.subjects]);
 
   return (
@@ -60,9 +62,9 @@ export default function PerformanceMatrix(props: Props) {
         </div>
         <div className="comparison-chart">
           {[
-            ["You", metric === "score" ? props.score : metric === "accuracy" ? props.accuracy : 0, "you"],
+            ["You", metric === "score" ? props.score : metric === "accuracy" ? props.accuracy : metric === "correct" ? props.correct : props.incorrect, "you"],
             ["Average", metric === "score" ? props.averageScore : metric === "accuracy" ? props.averageAccuracy : 0, "average"],
-            ["Best", metric === "score" ? props.bestScore : metric === "accuracy" ? 100 : 0, "best"],
+            ["Best", metric === "score" ? props.bestScore : metric === "accuracy" ? 100 : metric === "correct" ? props.correct : props.incorrect, "best"],
           ].map(([label,value,key]) => {
             const n = Number(value);
             return <div className="comparison-column" key={String(key)}>
