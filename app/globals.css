@@ -1417,3 +1417,26 @@ html[data-theme="dark"] .matrix-negative { color:#ff8fa0 !important; }
   .subject-matrix-head,
   .subject-matrix-row { min-width:520px; }
 }
+
+
+.account-chip.account-chip-avatar-only {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 50% !important;
+  background: transparent !important;
+  box-shadow: none;
+}
+.account-chip.account-chip-avatar-only:hover {
+  background: transparent !important;
+  border-color: transparent;
+}
+.account-chip.account-chip-avatar-only .account-avatar {
+  width: 42px;
+  height: 42px;
+}
+.account-menu[open] > .account-chip-avatar-only .account-avatar {
+  box-shadow: 0 0 0 3px rgba(91,118,220,.14), 0 5px 13px rgba(40,86,215,.22);
+}
