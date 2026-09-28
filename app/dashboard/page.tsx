@@ -24,7 +24,7 @@ export default async function DashboardPage() {
   const [{ data: profile }, { data: stats }, { data: attempts }] = await Promise.all([
     supabase.from("profiles").select("display_name,target_exam,preparation_stage,preferred_language").eq("user_id", user.id).maybeSingle(),
     supabase.from("performance_stats").select("attempts_count,completed_count,average_accuracy,average_score,total_time_seconds").eq("user_id", user.id).maybeSingle(),
-    supabase.from("test_attempts").select("id,status,language,started_at,submitted_at,test_template_id").eq("user_id", user.id).order("started_at", { ascending: false }).limit(6),
+    supabase.from("test_attempts").select("id,status,language,started_at,submitted_at,test_template_id,question_count").eq("user_id", user.id).order("started_at", { ascending: false }).limit(6),
   ]);
 
   const templateIds = [...new Set((attempts ?? []).map((attempt) => attempt.test_template_id))];
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
                     <div className="attempt-icon">M</div>
                     <div className="attempt-content">
                       <div className="attempt-title-row"><strong>{template?.title ?? "Mock test"}</strong><span className={"status-pill " + attempt.status}>{attempt.status.replace("_"," ")}</span></div>
-                      <p>{template?.question_count ?? 0} questions · {attempt.language.toUpperCase()} · {new Date(attempt.started_at).toLocaleDateString()}</p>
+                      <p>{attempt.question_count ?? template?.question_count ?? 0} questions · {attempt.language.toUpperCase()} · {new Date(attempt.started_at).toLocaleDateString()}</p>
                     </div>
                     <span className="attempt-arrow">→</span>
                   </Link>
