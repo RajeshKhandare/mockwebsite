@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -19,6 +19,7 @@ function toUserState(user: { email?: string; user_metadata?: Record<string, unkn
 
 export default function AccountNav() {
   const router = useRouter();
+  const menuRef = useRef<HTMLDetailsElement>(null);
   const [user, setUser] = useState<UserState>(null);
   const [ready, setReady] = useState(false);
 
@@ -40,9 +41,27 @@ export default function AccountNav() {
       setReady(true);
     });
 
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const menu = menuRef.current;
+      if (menu?.open && event.target instanceof Node && !menu.contains(event.target)) {
+        menu.open = false;
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && menuRef.current?.open) {
+        menuRef.current.open = false;
+        menuRef.current.querySelector("summary")?.focus();
+      }
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    document.addEventListener("keydown", closeOnEscape);
+
     return () => {
       mounted = false;
       listener.subscription.unsubscribe();
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+      document.removeEventListener("keydown", closeOnEscape);
     };
   }, []);
 
@@ -53,11 +72,9 @@ export default function AccountNav() {
   if (!user) return <Link href="/login" className="nav-cta">Sign in</Link>;
 
   return (
-    <details className="account-menu">
-      <summary className="account-chip" aria-label="Open account menu">
+    <details className="account-menu" ref={menuRef}>
+      <summary className="account-chip account-chip-avatar-only" aria-label={"Open profile menu for " + user.label}>
         <span className="account-avatar">{user.initial}</span>
-        <span className="account-name">{user.label}</span>
-        <span className="account-chevron" aria-hidden="true">⌄</span>
       </summary>
       <div className="account-dropdown">
         <div className="account-dropdown-head">
