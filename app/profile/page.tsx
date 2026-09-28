@@ -11,7 +11,14 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const search = await searchParams;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return <main className="page-shell narrow-shell"><section className="auth-card"><p className="eyebrow">My profile</p><h1>Sign in required</h1><p className="muted">Sign in to view your student profile.</p><Link className="button primary" href="/login?next=/profile">Go to login</Link></section></main>;
+
+  if (!user) {
+    return <main className="page-shell narrow-shell"><section className="auth-card">
+      <p className="eyebrow">My profile</p><h1>Sign in required</h1>
+      <p className="muted">Sign in to view your student profile.</p>
+      <Link className="button primary" href="/login?next=/profile">Go to login</Link>
+    </section></main>;
+  }
 
   const [{ data: profile }, { data: stats }] = await Promise.all([
     supabase.from("profiles").select("display_name,target_exam,education_level,state,preparation_stage,preferred_language").eq("id", user.id).maybeSingle(),
@@ -24,9 +31,26 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   return (
     <main className="page-shell profile-page">
       <section className="profile-cover">
-        <div className="profile-avatar large">{name.charAt(0).toUpperCase()}</div>
-        <div><p className="eyebrow">My profile</p><h1>{name}</h1><p className="muted">{user.email}</p></div>
-        <Link className="button" href="/dashboard">Back to dashboard</Link>        <ProfileEditor
+        <div className="profile-identity">
+          <div className="profile-avatar large">{name.charAt(0).toUpperCase()}</div>
+          <div>
+            <p className="eyebrow">My profile</p>
+            <h1>{name}</h1>
+            <p className="profile-email">{user.email}</p>
+          </div>
+        </div>
+        <Link className="button" href="/dashboard">Back to dashboard</Link>
+      </section>
+
+      <div className="dashboard-nav profile-page-nav">
+        <Link href="/dashboard">Overview</Link>
+        <Link href="/dashboard/history">Test history</Link>
+        <Link href="/dashboard/analytics">Analytics</Link>
+        <Link className="active" href="/profile">Profile</Link>
+      </div>
+
+      <div className="profile-grid">
+        <ProfileEditor
           initial={{
             displayName: name,
             email: user.email ?? "",
@@ -40,13 +64,10 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           error={typeof search.error === "string" ? search.error : undefined}
           saved={search.saved === "1"}
         />
-?.education_level || "Not set"}</strong></div>
-            <div><span>State</span><strong>{profile?.state || "Not set"}</strong></div>
-            <div><span>Preferred language</span><strong>{profile?.preferred_language?.toUpperCase() || "EN"}</strong></div>
-          </div>
-        </section>
-        <section className="panel">
-          <p className="eyebrow">Your numbers</p><h2>Performance snapshot</h2>
+
+        <section className="panel profile-numbers-panel">
+          <p className="eyebrow">Your numbers</p>
+          <h2>Performance snapshot</h2>
           <div className="profile-number-list">
             <div><strong>{stats?.attempts_count ?? 0}</strong><span>Total attempts</span></div>
             <div><strong>{stats?.completed_count ?? 0}</strong><span>Completed</span></div>
