@@ -1,38 +1,46 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
+import ProfileEditor from "./profile-editor";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My Profile | MockTest", robots: { index: false, follow: false } };
 
-export default async function ProfilePage() {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const search = await searchParams;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return <main className="page-shell narrow-shell"><section className="auth-card"><p className="eyebrow">My profile</p><h1>Sign in required</h1><p className="muted">Sign in to view your student profile.</p><Link className="button primary" href="/login?next=/profile">Go to login</Link></section></main>;
 
   const [{ data: profile }, { data: stats }] = await Promise.all([
-    supabase.from("profiles").select("display_name,target_exam,education_level,state,preparation_stage,preferred_language").eq("user_id", user.id).maybeSingle(),
+    supabase.from("profiles").select("display_name,target_exam,education_level,state,preparation_stage,preferred_language").eq("id", user.id).maybeSingle(),
     supabase.from("performance_stats").select("attempts_count,completed_count,average_accuracy,average_score").eq("user_id", user.id).maybeSingle(),
   ]);
   const name = profile?.display_name || user.email?.split("@")[0] || "Student";
+  const publicSupabase = createSupabasePublicClient();
+  const { data: exams } = await publicSupabase.from("exams").select("name").eq("is_active", true).order("name");
 
   return (
     <main className="page-shell profile-page">
       <section className="profile-cover">
         <div className="profile-avatar large">{name.charAt(0).toUpperCase()}</div>
         <div><p className="eyebrow">My profile</p><h1>{name}</h1><p className="muted">{user.email}</p></div>
-        <Link className="button" href="/dashboard">Back to dashboard</Link>
-      </section>
-      <div className="dashboard-nav"><Link href="/dashboard">Overview</Link><Link href="/dashboard/history">Test history</Link><Link href="/dashboard/analytics">Analytics</Link><Link className="active" href="/profile">Profile</Link></div>
-
-      <div className="profile-grid">
-        <section className="panel">
-          <p className="eyebrow">Preparation profile</p><h2>About your preparation</h2>
-          <div className="profile-fields">
-            <div><span>Email</span><strong>{user.email}</strong></div>
-            <div><span>Target exam</span><strong>{profile?.target_exam || "Not set"}</strong></div>
-            <div><span>Preparation stage</span><strong>{profile?.preparation_stage || "Not set"}</strong></div>
-            <div><span>Education</span><strong>{profile?.education_level || "Not set"}</strong></div>
+        <Link className="button" href="/dashboard">Back to dashboard</Link>        <ProfileEditor
+          initial={{
+            displayName: name,
+            email: user.email ?? "",
+            targetExam: profile?.target_exam ?? "",
+            educationLevel: profile?.education_level ?? "",
+            state: profile?.state ?? "",
+            preparationStage: profile?.preparation_stage ?? "",
+            preferredLanguage: profile?.preferred_language ?? "en",
+          }}
+          exams={(exams ?? []).map((exam) => exam.name)}
+          error={typeof search.error === "string" ? search.error : undefined}
+          saved={search.saved === "1"}
+        />
+?.education_level || "Not set"}</strong></div>
             <div><span>State</span><strong>{profile?.state || "Not set"}</strong></div>
             <div><span>Preferred language</span><strong>{profile?.preferred_language?.toUpperCase() || "EN"}</strong></div>
           </div>
