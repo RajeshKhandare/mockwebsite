@@ -1598,3 +1598,5 @@ html[data-theme="dark"] .profile-edit-form select option { background:#111e33; c
 .exam-category-section .exam-card-grid { margin:0; }
 html[data-theme="dark"] .exam-category-section { background:#0b1628; border-color:#263a59; }
 @media(max-width:680px){ .exam-category-section{padding:16px;border-radius:16px}.exam-category-heading{align-items:flex-start;flex-direction:column;gap:10px} }
+
+.exam-quick-actions { margin:18px 0 8px; }
