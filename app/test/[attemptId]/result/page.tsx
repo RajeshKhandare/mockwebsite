@@ -19,7 +19,7 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
   const supabase = createSupabaseAdminClient();
   const { data: attempt } = await supabase
     .from("test_attempts")
-    .select("id,status,language,test_template_id,started_at,submitted_at,user_id,guest_token")
+    .select("id,status,language,test_template_id,started_at,submitted_at,user_id,guest_token,question_count")
     .eq("id", attemptId).maybeSingle();
 
   if (!attempt || (owner.userId ? attempt.user_id !== owner.userId : attempt.guest_token !== owner.guestToken)) notFound();
