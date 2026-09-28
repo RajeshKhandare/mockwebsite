@@ -10,7 +10,7 @@ export default async function AnalyticsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return <main className="page-shell narrow-shell"><section className="auth-card"><p className="eyebrow">Analytics</p><h1>Sign in required</h1><p className="muted">Log in to view your performance analytics.</p><Link className="button primary" href="/login?next=/dashboard/analytics">Go to login</Link></section></main>;
 
-  const [{ data: stats }, { data: attempts }] = await Promise.all([
+  const [{ data: profile }, { data: stats }, { data: attempts }] = await Promise.all([
     supabase.from("performance_stats").select("attempts_count,completed_count,average_accuracy,average_score,total_time_seconds").eq("user_id", user.id).maybeSingle(),
     supabase.from("test_attempts").select("id,status,language,started_at,test_template_id").eq("user_id", user.id).eq("status","submitted").order("started_at",{ascending:false}).limit(20),
   ]);
@@ -27,7 +27,7 @@ export default async function AnalyticsPage() {
   const answered=completed.reduce((sum,a)=>{const r=resultMap.get(a.id);return sum+Number(r?.correct_count??0)+Number(r?.incorrect_count??0)},0);
 
   return <main className="page-shell">
-    <div className="section-heading"><div><p className="eyebrow">Student performance</p><h1>Analytics</h1><p className="muted">Turn every mock test into a clear picture of accuracy, speed and consistency.</p></div><Link className="button" href="/dashboard">Dashboard</Link></div>
+    <div className="section-heading"><div><p className="eyebrow">Student performance</p><h1>{profile?.display_name || "Student"} · Analytics</h1><p className="muted">Turn every mock test into a clear picture of accuracy, speed and consistency.</p></div><Link className="button" href="/dashboard">Dashboard</Link></div>
     <div className="dashboard-nav"><Link href="/dashboard">Overview</Link><Link href="/dashboard/history">Test history</Link><Link className="active" href="/dashboard/analytics">Analytics</Link><Link href="/profile">Profile</Link></div>
     <div className="stat-grid"><div className="stat-card"><span>Total attempts</span><strong>{stats?.attempts_count??0}</strong><small>All recorded attempts</small></div><div className="stat-card"><span>Completed</span><strong>{stats?.completed_count??0}</strong><small>Submitted tests</small></div><div className="stat-card"><span>Average accuracy</span><strong>{Number(stats?.average_accuracy??0).toFixed(1)}%</strong><small>Across completed tests</small></div><div className="stat-card"><span>Average score</span><strong>{Number(stats?.average_score??0).toFixed(1)}</strong><small>Across completed tests</small></div></div>
     <div className="grid"><section className="panel"><p className="eyebrow">Attempt profile</p><h2>Questions answered</h2><p className="muted">{answered} answered questions across {completed.length} completed tests.</p><div className="meta"><span className="badge">{totalQuestions} total questions</span><span className="badge">{totalQuestions?((answered/totalQuestions)*100).toFixed(1):"0.0"}% attempted</span></div></section><section className="panel"><p className="eyebrow">Time</p><h2>Study time in mocks</h2><p className="muted">{Math.floor(Number(stats?.total_time_seconds??0)/60)} minutes recorded across completed attempts.</p></section></div>
