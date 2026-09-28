@@ -79,7 +79,7 @@ export default async function AnalysisPage(props: { params: Promise<{ attemptId:
 
   const benchmarkSubjectMetrics = new Map<string, { total:number; correct:number; incorrect:number; unattempted:number }>();
   for (const benchmark of benchmarkResults ?? []) {
-    const metrics = benchmark.subject_metrics ?? {};
+    const metrics = (benchmark.subject_metrics ?? {}) as Record<string, Metric>;
     for (const [subjectId, metric] of Object.entries(metrics)) {
       const currentMetric = benchmarkSubjectMetrics.get(subjectId) ?? { total:0, correct:0, incorrect:0, unattempted:0 };
       currentMetric.total += Number(metric.total ?? 0);
