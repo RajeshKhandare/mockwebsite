@@ -12,7 +12,7 @@ type Props = {
   questionCount: number;
 };
 
-export default function StartTest({ testTemplateId, languages, requiresLogin, loggedIn }: Props) {
+export default function StartTest({ testTemplateId, languages, requiresLogin, loggedIn, durationSeconds, questionCount }: Props) {
   const router = useRouter();
   const [language, setLanguage] = useState(languages[0] ?? "en");
   const isSpeedTest = durationSeconds === 600;
