@@ -16,15 +16,16 @@ export default async function TestInstructionsPage({ params, searchParams }: { p
   const search = await searchParams;
   const supabase = createSupabasePublicClient();
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  const isTemplateId = uuidPattern.test(attemptId);
+  const legacySlug = attemptId === "banking-10-minute-challenge-01" ? "banking-speed-10m" : attemptId;
+  const isTemplateId = uuidPattern.test(legacySlug);
   const query = supabase
     .from("test_templates")
     .select("id,slug,title,description,question_count,duration_seconds,marks_per_question,negative_marks,supported_languages,requires_login")
     .eq("is_active", true);
 
   const { data: test, error: templateError } = isTemplateId
-    ? await query.eq("id", attemptId).maybeSingle()
-    : await query.eq("slug", attemptId).maybeSingle();
+    ? await query.eq("id", legacySlug).maybeSingle()
+    : await query.eq("slug", legacySlug).maybeSingle();
 
   if (templateError) {
     console.error("Test template load failed", templateError);
