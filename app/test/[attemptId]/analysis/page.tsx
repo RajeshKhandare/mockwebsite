@@ -26,15 +26,15 @@ export default async function AnalysisPage(props: { params: Promise<{ attemptId:
   const { data: exams } = await supabase.from("exams").select("id,name").eq("is_active", true).order("name").limit(100);
 
   if (!owner.userId) {
-    const profileResult = await supabase.from("profiles").select("display_name").eq("id", owner.userId).maybeSingle();
-  const displayName = profileResult.data?.display_name || "Student";
-
-  return <main className="page-shell"><div className="section-heading"><div>
+    return <main className="page-shell"><div className="section-heading"><div>
       <p className="eyebrow">Full analysis locked</p><h1>Sign in to unlock detailed performance analysis</h1>
       <p className="muted">Your basic result is available without an account. Sign in to see subject and topic breakdowns, history and personalized recommendations.</p>
     </div></div><TestAuthBox nextPath={"/test/"+attemptId+"/analysis"} error={error} message={message} exams={exams ?? []}/></main>;
   }
   if (attempt.status !== "submitted") redirect("/test/"+attemptId);
+
+  const profileResult = await supabase.from("profiles").select("display_name").eq("id", owner.userId).maybeSingle();
+  const displayName = profileResult.data?.display_name || "Student";
 
   const [{data:result},{data:template},{data:links},{data:answers}] = await Promise.all([
     supabase.from("results").select("correct_count,incorrect_count,unattempted_count,score,accuracy,time_taken_seconds,section_metrics,subject_metrics,topic_metrics").eq("attempt_id",attemptId).single(),
@@ -140,8 +140,8 @@ export default async function AnalysisPage(props: { params: Promise<{ attemptId:
         {[...subjectMetrics.entries()].map(([id, metric]) => {
           const attempted = metric.correct + metric.incorrect;
           const yours = attempted ? (metric.correct / attempted) * 100 : 0;
-          const aggregate = benchmarkSubjectMetrics.get(id);
-          const aggregateAttempted = aggregate ? aggregate.correct + aggregate.incorrect : 0;
+          const aggregate = benchmarkSubjectMetrics.get(id) ?? { total:0, correct:0, incorrect:0, unattempted:0 };
+          const aggregateAttempted = aggregate.correct + aggregate.incorrect;
           const average = aggregateAttempted ? (aggregate.correct / aggregateAttempted) * 100 : yours;
           const difference = yours - average;
           return <div className="subject-matrix-row" key={id}>
