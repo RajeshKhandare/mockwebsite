@@ -63,7 +63,7 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
           <h1>{template.title}</h1>
           <div className="result-meta">
             <span>{attempt.language.toUpperCase()}</span>
-            <span>{template.question_count} questions</span>
+            <span>{attempt.question_count ?? (links ?? []).length} questions</span>
             <span>{new Date(attempt.submitted_at ?? attempt.started_at).toLocaleDateString()}</span>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
       )}
 
       <section className="panel scoring-panel">
-        <div><p className="eyebrow">Scoring</p><h2>How this score was calculated</h2><p className="muted">{template.question_count} questions · +{template.marks_per_question} for correct · −{template.negative_marks} for incorrect.</p></div>
+        <div><p className="eyebrow">Scoring</p><h2>How this score was calculated</h2><p className="muted">{attempt.question_count ?? (links ?? []).length} questions · +{template.marks_per_question} for correct · −{template.negative_marks} for incorrect.</p></div>
         <div className="button-row"><Link className="button primary" href="/tests">Browse mock tests</Link></div>
       </section>
     </main>
