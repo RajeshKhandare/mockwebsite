@@ -17,11 +17,25 @@ export async function POST(request:Request){
   const parsed=payloadSchema.safeParse(await request.json().catch(()=>null));
   if(!parsed.success)return NextResponse.json({error:"Invalid attempt request."},{status:400});
 
-  const admin=createSupabaseAdminClient();
-  const {data:template,error:templateError}=await admin.from("test_templates")
+  // Read the template with the same authenticated/public client used by the
+  // instructions page. This prevents a misleading 404 when the server-only
+  // Supabase secret is unavailable or misconfigured.
+  const {data:template,error:templateError}=await supabase.from("test_templates")
     .select("id,exam_stage_id,question_count,duration_seconds,supported_languages,is_active,requires_login,selection_rules")
-    .eq("id",parsed.data.testTemplateId).eq("is_active",true).single();
-  if(templateError||!template)return NextResponse.json({error:"Test not found."},{status:404});
+    .eq("id",parsed.data.testTemplateId).eq("is_active",true).maybeSingle();
+  if(templateError){
+    console.error("Test template lookup failed", templateError);
+    return NextResponse.json({error:"The test could not be loaded. Please try again."},{status:500});
+  }
+  if(!template)return NextResponse.json({error:"Test not found."},{status:404});
+
+  let admin;
+  try {
+    admin = createSupabaseAdminClient();
+  } catch (error) {
+    console.error("Supabase admin client unavailable", error);
+    return NextResponse.json({error:"The test engine is not configured on the server yet."},{status:500});
+  }
 
   const cookieStore=await cookies();
   let guestToken=cookieStore.get("mock_guest")?.value;
