@@ -26,7 +26,7 @@ export default function AuthPanel({ next, error, message, exams }: Props) {
         {mode === "reset" ? "Enter your account email and we’ll send you a secure password reset link." : mode === "login" ? "Continue your preparation from where you left off." : "Keep your attempts, results and preparation history together."}
       </p>
 
-      {error && ((mode === "login" && !["signup"].includes(error)) || (mode === "signup" && error === "signup") || (mode === "reset" && error === "reset")) && (
+      {error && ((mode === "login" && !["signup"].includes(error)) || (mode === "signup" && (error === "signup" || error === "exists")) || (mode === "reset" && error === "reset")) && (
         <p className="form-message error">
           {error === "invalid" ? "Email or password is incorrect." :
            error === "unconfirmed" ? "Please confirm your email address from the verification email before logging in." :
