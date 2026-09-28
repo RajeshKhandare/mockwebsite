@@ -33,9 +33,8 @@ export async function updateProfile(formData: FormData) {
     updated_at: new Date().toISOString(),
   };
 
-  // Most accounts already have a profile row, so keep normal edits inside the
-  // user's RLS scope. New/legacy accounts can be backfilled with the server-only
-  // client after the caller has been authenticated above.
+  let profileSaved = false;
+
   const { data: updatedProfile, error: updateError } = await supabase
     .from("profiles")
     .update(profilePayload)
@@ -43,30 +42,38 @@ export async function updateProfile(formData: FormData) {
     .select("id")
     .maybeSingle();
 
-  if (updateError) redirect("/profile?error=save");
-
-  if (!updatedProfile) {
-    // Prefer a normal authenticated insert when the profile row was never
-    // created (for example, an account created before the profile trigger).
+  if (!updateError && updatedProfile) {
+    profileSaved = true;
+  } else {
     const { data: insertedProfile, error: insertError } = await supabase
       .from("profiles")
       .insert(profilePayload)
       .select("id")
       .maybeSingle();
 
-    if (!insertedProfile && insertError) {
+    if (!insertError && insertedProfile) {
+      profileSaved = true;
+    } else {
+      // The caller is already authenticated. Use the server-only admin client
+      // as a final fallback for legacy accounts or an RLS/session edge case.
       try {
         const admin = createSupabaseAdminClient();
-        const { error: adminInsertError } = await admin.from("profiles").upsert(profilePayload, { onConflict: "id" });
-        if (adminInsertError) redirect("/profile?error=save");
+        const { error: adminError } = await admin
+          .from("profiles")
+          .upsert(profilePayload, { onConflict: "id" });
+        profileSaved = !adminError;
       } catch {
-        redirect("/profile?error=save");
+        profileSaved = false;
       }
     }
   }
 
-  const { error: authError } = await supabase.auth.updateUser({ data: { display_name: displayName } });
-  if (authError) redirect("/profile?error=save");
+  if (!profileSaved) redirect("/profile?error=save");
+
+  // The profile row is the source of truth for the editor. Keep auth metadata
+  // synchronized when possible, but do not turn a successful profile save into
+  // a failure if Supabase Auth rejects a metadata update.
+  await supabase.auth.updateUser({ data: { display_name: displayName } });
 
   revalidatePath("/profile");
   revalidatePath("/dashboard");
