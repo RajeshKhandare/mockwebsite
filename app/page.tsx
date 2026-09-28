@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const featuredExams = [
-  ["Banking Aptitude Demo", "banking-demo", "A small original mock-test dataset used to verify the complete test flow."],
+  ["Banking", "banking-demo", "Banking exam preparation with full mocks, sectional tests and speed practice."],
   ["CDS", "cds", "Combined Defence Services preparation."],
   ["CTET", "ctet", "Central Teacher Eligibility Test preparation."],
   ["CUET UG", "cuet-ug", "Common University Entrance Test preparation."],
@@ -16,9 +16,9 @@ const featuredExams = [
 ] as const;
 
 const featuredTests = [
-  ["Banking 10-Minute Challenge", "banking-10-minute-challenge-01", "A fast five-question challenge.", "practice", 5, 10],
-  ["Banking Accuracy Builder", "banking-accuracy-builder-01", "Practice set focused on careful, accurate solving.", "practice", 5, 7],
-  ["Banking Aptitude Quick Mock", "banking-demo-quick-01", "Five original questions for verifying the complete mock-test workflow.", "full_mock", 5, 10],
+  ["10-Minute Speed Practice", "banking-speed-10m", "Choose 5, 10, 15 or 20 questions for a focused ten-minute session.", "practice", 20, 10],
+  ["Banking Quantitative Aptitude Sectional", "banking-quant-sectional-50", "50-question quantitative aptitude sectional test.", "sectional", 50, 30],
+  ["Banking Aptitude Full Mock — 100 Questions", "banking-demo-quick-01", "Full-length banking aptitude mock with 100 questions.", "full_mock", 100, 60],
 ] as const;
 
 export default function HomePage() {
@@ -36,7 +36,7 @@ export default function HomePage() {
               <button type="submit">Search</button>
             </form>
             <div className="actions">
-              <Link className="btn btn-primary" href="/tests">Explore mock tests</Link>
+              <Link className="btn btn-primary" href="/exams">Choose an exam</Link>
               <Link className="btn btn-secondary" href="/exams">Explore exams</Link>
             </div>
             <div className="hero-proof">
@@ -60,8 +60,8 @@ export default function HomePage() {
       <section className="stats-strip">
         <div className="container stats-wide">
           <div><strong>20+</strong><span>exam tracks in the library</span></div>
-          <div><strong>5</strong><span>published mock tests</span></div>
-          <div><strong>15</strong><span>approved practice questions</span></div>
+          <div><strong>4</strong><span>published mock tests</span></div>
+          <div><strong>100+</strong><span>approved live questions</span></div>
           <div><strong>3</strong><span>test languages available</span></div>
         </div>
       </section>
@@ -70,7 +70,7 @@ export default function HomePage() {
         <div className="container">
           <div className="section-header">
             <div><div className="eyebrow">Exam library</div><h2>Choose your preparation track</h2><p>Start with an exam, then move into its stage, subjects and available tests.</p></div>
-            <Link className="button secondary" href="/exams">View full library</Link>
+            <Link className="button secondary" href="/exams">Browse by category</Link>
           </div>
           <div className="grid exam-card-grid">
             {featuredExams.slice(0, 6).map(([name, slug, description], index) => (
