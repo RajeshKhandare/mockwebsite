@@ -74,7 +74,11 @@ export default function AccountNav() {
   return (
     <details className="account-menu" ref={menuRef}>
       <summary className="account-chip account-chip-avatar-only" aria-label={"Open profile menu for " + user.label}>
-        <span className="account-avatar">{user.initial}</span>
+        <span className="account-avatar account-avatar-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </span>
       </summary>
       <div className="account-dropdown">
         <div className="account-dropdown-head">
