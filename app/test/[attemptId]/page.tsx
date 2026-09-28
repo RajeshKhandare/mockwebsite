@@ -54,7 +54,14 @@ export default async function TestInstructionsPage({ params, searchParams }: { p
           <span className="badge">{test.question_count * Number(test.marks_per_question)} marks</span>
           <span className="badge">−{test.negative_marks} negative</span>
         </div>
-        <StartTest testTemplateId={test.id} languages={test.supported_languages} requiresLogin={test.requires_login} loggedIn={Boolean(user)} />
+        <StartTest
+          testTemplateId={test.id}
+          languages={test.supported_languages}
+          requiresLogin={test.requires_login}
+          loggedIn={Boolean(user)}
+          durationSeconds={test.duration_seconds}
+          questionCount={test.question_count}
+        />
       </div>
     </div></main>
   );
