@@ -11,6 +11,7 @@ export default async function AnalyticsPage() {
   if (!user) return <main className="page-shell narrow-shell"><section className="auth-card"><p className="eyebrow">Analytics</p><h1>Sign in required</h1><p className="muted">Log in to view your performance analytics.</p><Link className="button primary" href="/login?next=/dashboard/analytics">Go to login</Link></section></main>;
 
   const [{ data: profile }, { data: stats }, { data: attempts }] = await Promise.all([
+    supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
     supabase.from("performance_stats").select("attempts_count,completed_count,average_accuracy,average_score,total_time_seconds").eq("user_id", user.id).maybeSingle(),
     supabase.from("test_attempts").select("id,status,language,started_at,test_template_id").eq("user_id", user.id).eq("status","submitted").order("started_at",{ascending:false}).limit(20),
   ]);
