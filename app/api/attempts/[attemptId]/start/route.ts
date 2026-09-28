@@ -42,7 +42,10 @@ export async function POST(
     .from("test_attempts")
     .update({ started_at: startedAt, duration_seconds: template.duration_seconds })
     .eq("id", attemptId)
-    .eq("status", "in_progress");
+    .eq("status", "in_progress")
+    .is("started_at", null)
+    .select("started_at,duration_seconds")
+    .maybeSingle();
 
   if (updateError) {
     return NextResponse.json({ error: "Could not start the test clock." }, { status: 500 });
