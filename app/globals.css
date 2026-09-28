@@ -1325,3 +1325,35 @@ html[data-theme="dark"] .test-filter-pills button.active {
   border-color: #5575b0;
   box-shadow: 0 0 0 3px rgba(91,118,220,.12);
 }
+
+
+.question-count-options {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+}
+.question-count-option {
+  min-height:72px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--surface);
+  color:var(--text);
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  font:inherit;
+}
+.question-count-option strong { font-size:20px; color:var(--brand); }
+.question-count-option span { font-size:10px; color:var(--muted); font-weight:700; }
+.question-count-option:hover,
+.question-count-option.active {
+  border-color:#5575b0;
+  background:var(--surface-soft);
+  box-shadow:0 0 0 3px rgba(91,118,220,.10);
+}
+@media (max-width:640px) {
+  .question-count-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
