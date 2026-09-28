@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   }
 
   const [{ data: profile }, { data: stats }, { data: attempts }] = await Promise.all([
-    supabase.from("profiles").select("display_name,target_exam,preparation_stage,preferred_language").eq("user_id", user.id).maybeSingle(),
+    supabase.from("profiles").select("display_name,target_exam,preparation_stage,preferred_language").eq("id", user.id).maybeSingle(),
     supabase.from("performance_stats").select("attempts_count,completed_count,average_accuracy,average_score,total_time_seconds").eq("user_id", user.id).maybeSingle(),
     supabase.from("test_attempts").select("id,status,language,started_at,submitted_at,test_template_id,question_count").eq("user_id", user.id).order("started_at", { ascending: false }).limit(6),
   ]);
