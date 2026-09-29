@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getSupabaseAuthHeaders } from "@/lib/supabase/browser-auth";
 
 type Question = { id: string; position: number; text: string; options: { id: string; index: number; text: string }[] };
 type Payload = {
@@ -12,6 +13,10 @@ type Payload = {
 };
 
 export default function TestSession({ attemptId }: { attemptId: string }) {
+  const apiFetch = useCallback(async (input: RequestInfo | URL, init: RequestInit = {}) => {
+    const auth = await getSupabaseAuthHeaders();
+    return fetch(input, { ...init, headers: { ...auth, ...(init.headers ?? {}) } });
+  }, []);
   const router = useRouter();
   const [payload, setPayload] = useState<Payload | null>(null);
   const [current, setCurrent] = useState(0);
@@ -32,7 +37,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const submit = useCallback(async (auto = false) => {
     if (submittingRef.current) return;
     submittingRef.current = true;
-     const response = await fetch("/api/attempts/" + attemptId + "/submit", { method: "POST" });
+     const response = await apiFetch("/api/attempts/" + attemptId + "/submit", { method: "POST" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       submittingRef.current = false;
@@ -44,7 +49,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   }, [attemptId, router]);
 
   useEffect(() => {
-    fetch("/api/attempts/" + attemptId)
+    apiFetch("/api/attempts/" + attemptId)
       .then(async (response) => {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error ?? "Unable to load test.");
@@ -72,7 +77,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
     if (startingRef.current || started) return;
     startingRef.current = true;
     try {
-      const response = await fetch("/api/attempts/" + attemptId + "/start", { method: "POST" });
+      const response = await apiFetch("/api/attempts/" + attemptId + "/start", { method: "POST" });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error ?? "Could not start the test clock.");
       setPayload((previous) => previous ? {
@@ -116,7 +121,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   const seconds = (remaining % 60).toString().padStart(2, "0");
 
   function trackEvent(eventType: "view"|"answer"|"clear"|"mark"|"unmark"|"next"|"previous"|"submit"|"timeout", questionId?: string, selectedOption?: number | null) {
-    void fetch("/api/attempts/" + attemptId + "/event", {
+    void apiFetch("/api/attempts/" + attemptId + "/event", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ eventType, questionId, selectedOption }),
@@ -128,7 +133,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
     setReporting(true);
     setReportMessage("");
     try {
-      const response = await fetch("/api/questions/" + question.id + "/report", {
+      const response = await apiFetch("/api/questions/" + question.id + "/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ attemptId, reason: reportReason }),
@@ -146,7 +151,7 @@ export default function TestSession({ attemptId }: { attemptId: string }) {
   async function saveAnswer(questionId: string, selectedOption: number | null, markedForReview: boolean) {
     setSaving(true);
     try {
-      const response = await fetch("/api/attempts/" + attemptId + "/answer", {
+      const response = await apiFetch("/api/attempts/" + attemptId + "/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questionId, selectedOption, markedForReview }),
