@@ -31,7 +31,7 @@ function examDisplayName(name: string) {
 }
 
 function categoryDisplayName(name: string) {
-  return /\\bexam\\b$/i.test(name.trim()) ? name : name + " Exam";
+  return /\bexam\b$/i.test(name.trim()) ? name : name + " Exam";
 }
 
 function ExamCard({ exam, categoryName }: {
