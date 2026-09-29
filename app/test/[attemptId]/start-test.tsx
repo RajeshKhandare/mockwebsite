@@ -45,7 +45,7 @@ export default function StartTest({ testTemplateId, language, requiresLogin, dur
     if (!requiresLogin || isSpeedTest) return;
     if (new URLSearchParams(window.location.search).get("autostart") !== "1") return;
     window.history.replaceState({}, "", window.location.pathname);
-    void start();
+    window.setTimeout(() => { void start(); }, 0);
     // The query flag is intentionally consumed once after successful authentication.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
