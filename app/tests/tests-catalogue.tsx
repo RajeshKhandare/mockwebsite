@@ -18,6 +18,7 @@ type TestTemplate = {
   negative_marks: number;
   supported_languages: string[];
   requires_login: boolean;
+  selection_rules: { variant?: string; catalog_order?: number } | null;
   exam_stages: StageRef | StageRef[] | null;
 };
 
@@ -41,7 +42,7 @@ export default function TestsCatalogue() {
 
     supabase
       .from("test_templates")
-      .select("id,slug,title,description,test_type,question_count,duration_seconds,marks_per_question,negative_marks,supported_languages,requires_login,exam_stages(name,slug,exams(name,slug))")
+      .select("id,slug,title,description,test_type,question_count,duration_seconds,marks_per_question,negative_marks,supported_languages,requires_login,selection_rules,exam_stages(name,slug,exams(name,slug))")
       .eq("is_active", true)
       .order("title")
       .then(({ data, error: queryError }) => {
@@ -64,6 +65,15 @@ export default function TestsCatalogue() {
   }, []);
 
   const types = useMemo(() => Array.from(new Set(tests.map((test) => test.test_type))), [tests]);
+  function variantLabel(test: TestTemplate) {
+    const variant = test.selection_rules?.variant;
+    if (variant === "level_1") return "Level 1 · Easy";
+    if (variant === "level_2") return "Level 2 · Medium";
+    if (variant === "level_3") return "Level 3 · Hard";
+    if (variant === "prelims") return "Prelims-style";
+    if (variant === "full_mock") return "Full Mock";
+    return test.test_type.replaceAll("_", " ");
+  }
   const filteredTests = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return tests.filter((test) => {
@@ -145,7 +155,7 @@ export default function TestsCatalogue() {
                   <span className="test-index">{String(index + 1).padStart(2, "0")}</span>
                   <span className="badge">{test.requires_login ? "Account" : "Free to try"}</span>
                 </div>
-                <div className="eyebrow">{test.test_type.replaceAll("_", " ")}</div>
+                <div className="eyebrow">{variantLabel(test)}</div>
                 <h3>{test.title}</h3>
                 <p className="test-context">
                   {examName ?? "Exam preparation"}{stage?.name ? " · " + stage.name : ""}
