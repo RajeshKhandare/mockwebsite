@@ -38,7 +38,7 @@ export async function POST(
   // The countdown is a client-side preparation period. The authoritative test clock
   // starts here, immediately before the student sees the live test controls.
   const startedAt = new Date().toISOString();
-  const { error: updateError } = await supabase
+  const { data: startedAttempt, error: updateError } = await supabase
     .from("test_attempts")
     .update({ started_at: startedAt, duration_seconds: template.duration_seconds })
     .eq("id", attemptId)
@@ -48,8 +48,35 @@ export async function POST(
     .maybeSingle();
 
   if (updateError) {
+    console.error("Test clock start failed", updateError);
     return NextResponse.json({ error: "Could not start the test clock." }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, startedAt, durationSeconds: template.duration_seconds });
+  // If another request already started the attempt, return its authoritative
+  // timestamp instead of silently resetting the browser countdown.
+  if (!startedAttempt) {
+    const { data: existing } = await supabase
+      .from("test_attempts")
+      .select("started_at,duration_seconds,status")
+      .eq("id", attemptId)
+      .single();
+
+    if (!existing?.started_at || existing.status !== "in_progress") {
+      return NextResponse.json({ error: "Could not start the test clock." }, { status: 409 });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      startedAt: existing.started_at,
+      durationSeconds: existing.duration_seconds ?? template.duration_seconds,
+      alreadyStarted: true,
+    });
+  }
+
+  return NextResponse.json({
+    ok: true,
+    startedAt: startedAttempt.started_at,
+    durationSeconds: startedAttempt.duration_seconds ?? template.duration_seconds,
+    alreadyStarted: false,
+  });
 }
