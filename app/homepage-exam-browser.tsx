@@ -26,6 +26,10 @@ const popularSlugs = [
   "jee-main","neet-ug","cat","ctet",
 ];
 
+function examDisplayName(name: string) {
+  return /\bexam\b$/i.test(name.trim()) ? name : name + " Exam";
+}
+
 function ExamCard({ exam, categoryName }: {
   exam: HomepageExam;
   categoryName: string;
@@ -33,7 +37,7 @@ function ExamCard({ exam, categoryName }: {
   return (
     <Link className="card exam-card homepage-exam-card" href={"/exams/" + exam.slug}>
       <div className="eyebrow">{categoryName}</div>
-      <h3>{exam.name}</h3>
+      <h3>{examDisplayName(exam.name)}</h3>
       <p>{exam.description ?? "Structured stages, subjects and mock tests."}</p>
       <span className="card-link">Open exam <b>→</b></span>
     </Link>
@@ -75,14 +79,14 @@ export default function HomepageExamBrowser({ categories }: { categories: Homepa
 
         <div className="homepage-category-tabs" role="tablist" aria-label="Exam categories">
           <button type="button" role="tab" aria-selected={activeCategory === "popular"} className={activeCategory === "popular" ? "active" : ""} onClick={() => selectCategory("popular")}>
-            <span className="category-tab-icon">★</span><strong>Popular</strong><small>{popularExams.length}</small>
+            <strong>Popular</strong><small>{popularExams.length}</small>
           </button>
           <button type="button" role="tab" aria-selected={activeCategory === "recent"} className={activeCategory === "recent" ? "active" : ""} onClick={() => selectCategory("recent")}>
-            <span className="category-tab-icon">✦</span><strong>Recently Added</strong><small>{recentExams.length}</small>
+            <strong>Recently Added</strong><small>{recentExams.length}</small>
           </button>
           {categories.map((category) => (
             <button type="button" role="tab" aria-selected={activeCategory === category.slug} className={activeCategory === category.slug ? "active" : ""} onClick={() => selectCategory(category.slug)} key={category.id}>
-              <span className="category-tab-icon">{category.name.slice(0, 1)}</span><strong>{category.name}</strong><small>{category.exams.length}</small>
+              <strong>{category.name}</strong><small>{category.exams.length}</small>
             </button>
           ))}
         </div>
