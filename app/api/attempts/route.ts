@@ -4,7 +4,6 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { selectApprovedQuestions } from "@/lib/test-selection";
 
 const payloadSchema=z.object({
   testTemplateId:z.string().uuid(),
@@ -58,25 +57,81 @@ export async function POST(request:Request){
     return NextResponse.json({error:"The selected question count exceeds this test's configured pool size."},{status:400});
   }
 
-  const selection=await selectApprovedQuestions(admin,{
-    examStageId:template.exam_stage_id,language:parsed.data.language,count:requestedCount,
-    rules:(template.selection_rules??{}) as {buckets?:Array<{sectionId?:string;subjectId?:string;topicId?:string;difficulty?:string;count:number}>;difficulty?:Record<string,number>},
-  });
-  if(!selection.ok)return NextResponse.json({error:selection.error},{status:422});
+  // Question selection is prebuilt in Supabase. This removes runtime
+  // difficulty/pool scanning from the start path and makes each test variant
+  // deterministic and production-safe.
+  const { data:questionSet, error:setError } = await admin
+    .from("test_question_sets")
+    .select("id,question_count")
+    .eq("test_template_id", template.id)
+    .eq("language", parsed.data.language)
+    .eq("question_count", requestedCount)
+    .eq("set_number", 1)
+    .eq("is_active", true)
+    .limit(1)
+    .maybeSingle();
 
-  const {data:optionRows,error:optionError}=await admin.from("question_options")
-    .select("question_id,option_index,is_correct").in("question_id",selection.questionIds);
-  if(optionError)return NextResponse.json({error:"Question options could not be validated."},{status:500});
+  if (setError) {
+    console.error("Prebuilt question set lookup failed", {
+      testTemplateId: template.id,
+      language: parsed.data.language,
+      requestedCount,
+      error: { message: setError.message, code: setError.code, details: setError.details, hint: setError.hint },
+    });
+    return NextResponse.json({error:"The prepared question set could not be loaded. Please try again."},{status:500});
+  }
+  if (!questionSet) {
+    return NextResponse.json({error:"This test does not have a prepared question set for the selected question count yet."},{status:422});
+  }
+
+  const { data:setItems, error:itemError } = await admin
+    .from("test_question_set_items")
+    .select("question_id,position")
+    .eq("set_id", questionSet.id)
+    .order("position", { ascending: true });
+
+  if (itemError) {
+    console.error("Prebuilt question set items lookup failed", {
+      setId: questionSet.id,
+      error: { message: itemError.message, code: itemError.code, details: itemError.details, hint: itemError.hint },
+    });
+    return NextResponse.json({error:"The prepared questions could not be loaded. Please try again."},{status:500});
+  }
+
+  if (!setItems || setItems.length !== requestedCount) {
+    return NextResponse.json({error:"This prepared test set is incomplete. Please try another test."},{status:422});
+  }
+
+  const questionIds = setItems.map((item) => item.question_id);
+  const {data:optionRows,error:optionError}=await admin
+    .from("question_options")
+    .select("question_id,option_index,is_correct")
+    .in("question_id",questionIds);
+
+  if(optionError) {
+    console.error("Prepared question option validation failed", {
+      setId: questionSet.id,
+      error: { message: optionError.message, code: optionError.code, details: optionError.details, hint: optionError.hint },
+    });
+    return NextResponse.json({error:"Question options could not be validated."},{status:500});
+  }
 
   const optionStats=new Map<string,{count:number;correct:number}>();
   for(const option of optionRows??[]){
     const stats=optionStats.get(option.question_id)??{count:0,correct:0};
-    stats.count++; if(option.is_correct)stats.correct++; optionStats.set(option.question_id,stats);
+    stats.count++;
+    if(option.is_correct)stats.correct++;
+    optionStats.set(option.question_id,stats);
   }
-  const readyQuestions=selection.questionIds.filter(id=>{
-    const stats=optionStats.get(id); return stats?.count===4&&stats.correct===1;
+
+  const readyQuestions=questionIds.filter((id)=>{
+    const stats=optionStats.get(id);
+    return stats?.count===4 && stats.correct===1;
   });
-  if(readyQuestions.length<requestedCount)return NextResponse.json({error:"This test is not ready yet. Every live question must have exactly four options and one correct answer."},{status:422});
+
+  if(readyQuestions.length !== requestedCount) {
+    return NextResponse.json({error:"This prepared test set contains an invalid question. Please try another test."},{status:422});
+  }
 
   const {data:attempt,error:attemptError}=await admin.from("test_attempts").insert({
     user_id:user?.id??null,guest_token:user?null:guestToken,test_template_id:template.id,language:parsed.data.language,
