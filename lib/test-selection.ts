@@ -62,7 +62,15 @@ export async function selectApprovedQuestions(
   const remaining = args.count - selected.length;
   if(remaining>0){
     const {data,error}=await db.from("questions").select("id").eq("exam_stage_id",args.examStageId).eq("language",args.language).eq("status","approved").limit(Math.min(2000,Math.max(remaining*10,remaining)));
-    if(error||!data)return {ok:false as const,error:"Approved question pool could not be loaded."};
+    if(error || !data) {
+      console.error("Approved question pool query failed", {
+        examStageId: args.examStageId,
+        language: args.language,
+        requestedCount: remaining,
+        error: error ? { message: error.message, code: error.code, details: error.details, hint: error.hint } : null,
+      });
+      return {ok:false as const,error:"The approved question pool could not be loaded. Please try again."};
+    }
     const available=shuffle(data.map(row=>row.id).filter(id=>!selectedSet.has(id))).slice(0,remaining);
     if(available.length<remaining)return {ok:false as const,error:"The approved question pool is smaller than the configured test size."};
     available.forEach(id=>{selectedSet.add(id);selected.push(id);});
