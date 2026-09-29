@@ -45,6 +45,7 @@ export async function POST(request:Request){
   if(!template.supported_languages.includes(parsed.data.language))return NextResponse.json({error:"Selected language is not available for this test."},{status:400});
 
   const requestedCount = parsed.data.questionCount ?? template.question_count;
+  const configuredSetNumber = Number((template.selection_rules as { set_number?: number } | null)?.set_number ?? 1);
   const speedCounts = [5, 10, 15, 20];
   const isSpeedTest = template.duration_seconds === 600;
   if (isSpeedTest && !speedCounts.includes(requestedCount)) {
@@ -66,7 +67,7 @@ export async function POST(request:Request){
     .eq("test_template_id", template.id)
     .eq("language", parsed.data.language)
     .eq("question_count", requestedCount)
-    .eq("set_number", 1)
+    .eq("set_number", configuredSetNumber)
     .eq("is_active", true)
     .limit(1)
     .maybeSingle();
