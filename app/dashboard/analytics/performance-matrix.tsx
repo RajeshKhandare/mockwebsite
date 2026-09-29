@@ -34,7 +34,7 @@ export default function PerformanceMatrix(props: Props) {
     if (!props.subjects.length) return 100;
     if (metric === "score" || metric === "accuracy") return 100;
     return Math.max(1, props.correct, props.incorrect);
-  }, [metric, props.subjects]);
+  }, [metric, props.subjects, props.correct, props.incorrect]);
 
   return (
     <div className="performance-report">
