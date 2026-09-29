@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
-import { getAttemptOwner } from "@/lib/attempt-owner";
-import { scoreAttempt } from "@/lib/attempt-scoring";
+import { cookies } from "next/headers";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 
-export async function POST(
-  _request: Request,
-  context: { params: Promise<{ attemptId: string }> },
-) {
-  const { attemptId } = await context.params;
-  const owner = await getAttemptOwner();
-  if (!owner.userId && !owner.guestToken) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
-
-  const result = await scoreAttempt(attemptId, owner);
-  if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
-  return NextResponse.json({ ok: true, result: result.result });
+export async function POST(_request:Request,context:{params:Promise<{attemptId:string}>}){
+  const {attemptId}=await context.params;
+  const guestToken=(await cookies()).get("mock_guest")?.value??null;
+  const supabase=createSupabasePublicClient();
+  const {data,error}=await supabase.rpc("mock_submit_attempt",{p_attempt_id:attemptId,p_guest_token:guestToken});
+  if(error||!data){
+    console.error("Test submit failed",{attemptId,error});
+    return NextResponse.json({error:error?.message??"Could not submit test."},{status:409});
+  }
+  return NextResponse.json({ok:true,result:data});
 }
