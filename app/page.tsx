@@ -67,46 +67,68 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section homepage-exam-library">
         <div className="container">
           <div className="section-header">
             <div>
               <div className="eyebrow">Exam library</div>
               <h2>Find your exam by category</h2>
-              <p>Choose the area you are preparing for, then open a specific exam and continue to its stages and tests.</p>
+              <p>Start with the field you are preparing for, then open the exact exam.</p>
             </div>
             <Link className="button secondary" href="/exams">View full library</Link>
           </div>
 
-          <div className="exam-category-stack">
+          <div className="category-directory">
             {grouped.map((category) => (
-              <section className="exam-category-section" key={category.id}>
-                <div className="exam-category-heading">
-                  <div>
-                    <p className="eyebrow">{category.name}</p>
-                    <h2>{category.name} exams</h2>
-                    <p>{category.description ?? "Choose an exam to continue into its stages and mock tests."}</p>
-                  </div>
-                  <span>{category.exams.length} exams</span>
-                </div>
-                <div className="grid exam-card-grid">
-                  {category.exams.map((exam, index) => (
-                    <Link className="card exam-card" key={exam.id} href={"/exams/" + exam.slug}>
-                      <div className="exam-art"><span>{exam.name.split(" ").map((x: string) => x[0]).slice(0,2).join("")}</span><small>{String(index + 1).padStart(2,"0")}</small></div>
-                      <div className="eyebrow">{category.name}</div>
-                      <h3>{exam.name}</h3>
-                      <p>{exam.description ?? "Structured stages, subjects and mock tests."}</p>
-                      <span className="card-link">Open exam <b>→</b></span>
-                    </Link>
-                  ))}
-                </div>
-              </section>
+              <a className="category-directory-item" href={`#category-${category.slug}`} key={category.id}>
+                <span className="category-directory-icon">{category.name.slice(0,1)}</span>
+                <span><strong>{category.name}</strong><small>{category.exams.length} exams</small></span>
+                <b>↓</b>
+              </a>
             ))}
+          </div>
+
+          <div className="exam-category-stack">
+            {grouped.map((category) => {
+              const visibleExams = category.exams.slice(0, 6);
+              const remaining = category.exams.length - visibleExams.length;
+              return (
+                <section className="exam-category-section homepage-category" id={`category-${category.slug}`} key={category.id}>
+                  <div className="exam-category-heading">
+                    <div>
+                      <p className="eyebrow">{category.name}</p>
+                      <h2>{category.name} exams</h2>
+                      <p>{category.description ?? "Choose an exam to continue into its stages and mock tests."}</p>
+                    </div>
+                    <Link className="category-view-all" href={`/exams#category-${category.slug}`}>
+                      <span>{category.exams.length} exams</span><b>View all →</b>
+                    </Link>
+                  </div>
+                  <div className="grid exam-card-grid">
+                    {visibleExams.map((exam, index) => (
+                      <Link className="card exam-card" key={exam.id} href={"/exams/" + exam.slug}>
+                        <div className="exam-art"><span>{exam.name.split(" ").map((x: string) => x[0]).slice(0,2).join("")}</span><small>{String(index + 1).padStart(2,"0")}</small></div>
+                        <div className="eyebrow">{category.name}</div>
+                        <h3>{exam.name}</h3>
+                        <p>{exam.description ?? "Structured stages, subjects and mock tests."}</p>
+                        <span className="card-link">Open exam <b>→</b></span>
+                      </Link>
+                    ))}
+                  </div>
+                  {remaining > 0 && (
+                    <div className="category-more-row">
+                      <span>Showing 6 of {category.exams.length} exams</span>
+                      <Link href={`/exams#category-${category.slug}`}>See {remaining} more in {category.name} →</Link>
+                    </div>
+                  )}
+                </section>
+              );
+            })}
             {!!uncategorised.length && (
-              <section className="exam-category-section">
+              <section className="exam-category-section homepage-category">
                 <div className="exam-category-heading"><div><p className="eyebrow">More preparation</p><h2>Other exams</h2></div><span>{uncategorised.length} exams</span></div>
                 <div className="grid exam-card-grid">
-                  {uncategorised.map((exam) => <Link className="card exam-card" key={exam.id} href={"/exams/" + exam.slug}><h3>{exam.name}</h3><p>{exam.description ?? "Structured preparation."}</p><span className="card-link">Open exam <b>→</b></span></Link>)}
+                  {uncategorised.slice(0,6).map((exam) => <Link className="card exam-card" key={exam.id} href={"/exams/" + exam.slug}><h3>{exam.name}</h3><p>{exam.description ?? "Structured preparation."}</p><span className="card-link">Open exam <b>→</b></span></Link>)}
                 </div>
               </section>
             )}
@@ -138,11 +160,7 @@ export default async function HomePage() {
       <section className="section resource-preview-section">
         <div className="container">
           <div className="section-header">
-            <div>
-              <div className="eyebrow">Preparation resources</div>
-              <h2>Know what to do before and after every mock.</h2>
-              <p>Short, practical guidance for choosing a test, managing time and turning your result into the next study action.</p>
-            </div>
+            <div><div className="eyebrow">Preparation resources</div><h2>Know what to do before and after every mock.</h2><p>Short, practical guidance for choosing a test, managing time and turning your result into the next study action.</p></div>
             <Link className="button secondary" href="/resources">Explore resources</Link>
           </div>
           <div className="grid resource-preview-grid">
