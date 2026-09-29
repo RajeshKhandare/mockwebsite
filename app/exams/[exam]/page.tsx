@@ -5,7 +5,7 @@ import { supabaseRestGet } from "@/lib/supabase/rest";
 export const dynamic = "force-dynamic";
 
 type Exam = { id: string; name: string; slug: string; description: string | null };
-type Stage = { id: string; slug: string; name: string; description: string | null; sort_order: number };
+type Stage = { id: string; slug: string; name: string; description: string | null; sort_order: number; navigation_rules?: Record<string, unknown> | null };
 
 export default async function ExamPage({ params }: { params: Promise<{ exam: string }> }) {
   const { exam } = await params;
@@ -21,8 +21,9 @@ export default async function ExamPage({ params }: { params: Promise<{ exam: str
     }, { single: true });
 
     stages = await supabaseRestGet<Stage[]>("exam_stages", {
-      select: "id,slug,name,description,sort_order",
+      select: "id,slug,name,description,sort_order,navigation_rules",
       exam_id: `eq.${item.id}`,
+      is_active: "eq.true",
       order: "sort_order.asc",
     });
   } catch (error) {
@@ -61,18 +62,22 @@ export default async function ExamPage({ params }: { params: Promise<{ exam: str
       <div className="catalog-stats">
         <div><strong>{stages.length}</strong><span>Preparation stages</span></div>
         <div><strong>Structured</strong><span>Subject-wise practice</span></div>
-        <div><strong>Live</strong><span>Published mock tests</span></div>
+        <div><strong>Published</strong><span>Verified catalogue entries</span></div>
       </div>
       <div className="section" id="stages">
-        <div className="section-header"><div><h2>Stages</h2><p>Select a configured stage to view its subjects and published mock tests.</p></div></div>
+        <div className="section-header"><div><h2>Stages</h2><p>Official stages and clearly labelled practice banks are shown separately.</p></div></div>
         <div className="grid">
-          {stages.map((stage) => (
-            <article className="card" key={stage.id}>
-              <h3>{stage.name}</h3>
-              <p>{stage.description ?? "Stage-specific subjects and mock tests."}</p>
-              <Link className="btn btn-primary" href={`/exams/${item.slug}/${stage.slug}`}>View stage</Link>
-            </article>
-          ))}
+          {stages.map((stage) => {
+            const isPractice = stage.navigation_rules?.practice_format === true || stage.slug === "foundation-100";
+            return (
+              <article className="card" key={stage.id}>
+                <div className="eyebrow">{isPractice ? "Practice bank" : "Official stage"}</div>
+                <h3>{stage.name}</h3>
+                <p>{stage.description ?? "Stage-specific subjects and mock tests."}</p>
+                <Link className="btn btn-primary" href={`/exams/${item.slug}/${stage.slug}`}>View stage</Link>
+              </article>
+            );
+          })}
           {!stages.length && <p className="muted">No stages are configured for this exam yet.</p>}
         </div>
       </div>
