@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { supabaseRestGet } from "@/lib/supabase/rest";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import StartTest from "./start-test";
 
 export const dynamic = "force-dynamic";
@@ -97,28 +96,9 @@ export default async function TestInstructionsPage({
     .some(({ name }) => name.startsWith("sb-") && name.includes("auth-token"));
 
   const totalMarks = test.question_count * Number(test.marks_per_question);
-  // Only expose languages for which a complete prebuilt question set exists.
-  // This keeps the selector aligned with the server-side test engine and prevents
-  // a language choice from leading to an empty prepared pool.
-  let availableLanguageCodes: string[] = [];
-  try {
-    const admin = createSupabaseAdminClient();
-    const { data: languageSets } = await admin
-      .from("test_question_sets")
-      .select("language,question_count")
-      .eq("test_template_id", test.id)
-      .eq("is_active", true);
-    const requiredCounts = test.duration_seconds === 600 ? [5, 10, 15, 20] : [test.question_count];
-    const languagesWithCompleteSets = new Set<string>();
-    for (const code of test.supported_languages) {
-      const counts = new Set((languageSets ?? []).filter((row) => row.language === code).map((row) => row.question_count));
-      if (requiredCounts.every((count) => counts.has(count))) languagesWithCompleteSets.add(code);
-    }
-    availableLanguageCodes = [...languagesWithCompleteSets];
-  } catch (error) {
-    console.error("Test language coverage lookup failed", error);
-  }
-  const languages = availableLanguageCodes.map(languageName);
+  // Language is a property of the published test, not another student choice.
+  const examLanguage = test.supported_languages[0] ?? "en";
+  const languageLabel = languageName(examLanguage);
 
   return (
     <main className="test-launch-page">
@@ -162,19 +142,18 @@ export default async function TestInstructionsPage({
             <span className="test-launch-panel-label">START YOUR SESSION</span>
             <h2>Set your preferences</h2>
             <p>
-              Choose your language and question count, then begin a timed
-              session with server-side scoring.
+              This test is published in <strong>{languageLabel}</strong>. Choose a question count only for the free 10-minute speed test, then begin your timed session with server-side scoring.
             </p>
 
             <div className="test-launch-chips">
               <span>{test.requires_login ? "Account required" : "Free to try"}</span>
-              <span>{languages.join(" · ")}</span>
+              <span>{languageLabel}</span>
               <span>Secure scoring</span>
             </div>
 
             <StartTest
               testTemplateId={test.id}
-              languages={availableLanguageCodes}
+              language={examLanguage}
               requiresLogin={test.requires_login}
               loggedIn={hasAuthCookie}
               durationSeconds={test.duration_seconds}
