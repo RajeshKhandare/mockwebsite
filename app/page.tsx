@@ -1,22 +1,28 @@
 import Link from "next/link";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 
-const featuredExams = [
-  ["Banking Aptitude", "banking-demo", "Banking aptitude preparation with full mocks, sectional tests and speed practice."],
-  ["SSC CGL", "ssc-cgl", "SSC CGL Tier 1 foundation practice across aptitude, reasoning, English and awareness."],
-  ["IBPS PO", "ibps-po", "IBPS PO foundation mock practice with 100-question preparation tests."],
-  ["RRB NTPC", "rrb-ntpc", "Railway NTPC foundation practice with reasoning, mathematics and awareness."],
-  ["UPSC Civil Services", "upsc-civil-services", "UPSC Civil Services Preliminary foundation practice."],
-  ["CTET", "ctet", "CTET Paper 1 foundation practice and teacher-eligibility preparation."],
-] as const;
+export const dynamic = "force-dynamic";
 
-const featuredTests = [
-  ["10-Minute Speed Practice", "banking-speed-10m", "Choose 5, 10, 15 or 20 questions for a focused ten-minute session.", "practice", 20, 10],
-  ["Banking Quantitative Aptitude Sectional — 50 Questions", "banking-quant-sectional-50", "50-question quantitative aptitude sectional test.", "sectional", 50, 30],
-  ["Banking Reasoning Ability Sectional — 50 Questions", "banking-reasoning-sectional-50", "50-question reasoning ability sectional test.", "sectional", 50, 30],
-  ["Banking Aptitude Full Mock — 100 Questions", "banking-demo-quick-01", "Full-length banking aptitude mock with 100 questions.", "full_mock", 100, 60],
-] as const;
+export default async function HomePage() {
+  const supabase = createSupabasePublicClient();
+  const [{ data: categories }, { data: exams }] = await Promise.all([
+    supabase.from("exam_categories").select("id,name,slug,description").eq("is_active", true).order("sort_order"),
+    supabase.from("exams").select("id,name,slug,description,category_id").eq("is_active", true).order("name"),
+  ]);
 
-export default function HomePage() {
+  const grouped = (categories ?? []).map((category) => ({
+    ...category,
+    exams: (exams ?? []).filter((exam) => exam.category_id === category.id),
+  })).filter((category) => category.exams.length > 0);
+  const uncategorised = (exams ?? []).filter((exam) => !exam.category_id);
+
+  const featuredTests = [
+    ["10-Minute Speed Practice", "banking-speed-10m", "Choose 5, 10, 15 or 20 questions for a focused ten-minute session.", "practice", 20, 10],
+    ["Banking Quantitative Aptitude Sectional — 50 Questions", "banking-quant-sectional-50", "50-question quantitative aptitude sectional test.", "sectional", 50, 30],
+    ["Banking Reasoning Ability Sectional — 50 Questions", "banking-reasoning-sectional-50", "50-question reasoning ability sectional test.", "sectional", 50, 30],
+    ["Banking Aptitude Full Mock — 100 Questions", "banking-demo-quick-01", "Full-length banking aptitude mock with 100 questions.", "full_mock", 100, 60],
+  ] as const;
+
   return (
     <main>
       <section className="hero hero-premium">
@@ -24,7 +30,7 @@ export default function HomePage() {
           <div className="hero-content">
             <div className="eyebrow">A modern mock-test workspace</div>
             <h1>Prepare with purpose. <span>Perform with confidence.</span></h1>
-            <p>Timed mock tests, focused practice and meaningful performance insights — organised around the way serious aspirants actually prepare.</p>
+            <p>Find your exam faster, practise by stage and difficulty, and turn every attempt into a useful next step.</p>
             <form className="hero-search" action="/tests" method="get">
               <span className="hero-search-icon" aria-hidden="true">⌕</span>
               <input name="q" type="search" placeholder="Search exams, mock tests or subjects…" aria-label="Search exams, mock tests or subjects" />
@@ -32,7 +38,7 @@ export default function HomePage() {
             </form>
             <div className="actions">
               <Link className="btn btn-primary" href="/exams">Choose an exam</Link>
-              <Link className="btn btn-secondary" href="/exams">Explore exams</Link>
+              <Link className="btn btn-secondary" href="/exams">Explore categories</Link>
             </div>
             <div className="hero-proof">
               <span>English · Hindi · Marathi</span><span>Server-scored</span><span>Exam-style interface</span>
@@ -54,8 +60,8 @@ export default function HomePage() {
 
       <section className="stats-strip">
         <div className="container stats-wide">
-          <div><strong>27</strong><span>active exam tracks</span></div>
-          <div><strong>30</strong><span>published mock tests</span></div>
+          <div><strong>{exams?.length ?? 0}</strong><span>active exam tracks</span></div>
+          <div><strong>{grouped.length}</strong><span>preparation categories</span></div>
           <div><strong>2,500+</strong><span>approved live questions</span></div>
           <div><strong>3</strong><span>test languages available</span></div>
         </div>
@@ -64,19 +70,46 @@ export default function HomePage() {
       <section className="section">
         <div className="container">
           <div className="section-header">
-            <div><div className="eyebrow">Exam library</div><h2>Choose your preparation track</h2><p>Start with an exam, then move into its stage, subjects and available tests.</p></div>
-            <Link className="button secondary" href="/exams">Browse by category</Link>
+            <div>
+              <div className="eyebrow">Exam library</div>
+              <h2>Find your exam by category</h2>
+              <p>Choose the area you are preparing for, then open a specific exam and continue to its stages and tests.</p>
+            </div>
+            <Link className="button secondary" href="/exams">View full library</Link>
           </div>
-          <div className="grid exam-card-grid">
-            {featuredExams.slice(0, 6).map(([name, slug, description], index) => (
-              <Link className="card exam-card" key={slug} href={`/exams/${slug}`}>
-                <div className="exam-art"><span>{name.split(" ").map((x) => x[0]).slice(0,2).join("")}</span><small>{String(index + 1).padStart(2,"0")}</small></div>
-                <div className="eyebrow">Exam track</div>
-                <h3>{name}</h3>
-                <p>{description}</p>
-                <span className="card-link">Explore track <b>→</b></span>
-              </Link>
+
+          <div className="exam-category-stack">
+            {grouped.map((category) => (
+              <section className="exam-category-section" key={category.id}>
+                <div className="exam-category-heading">
+                  <div>
+                    <p className="eyebrow">{category.name}</p>
+                    <h2>{category.name} exams</h2>
+                    <p>{category.description ?? "Choose an exam to continue into its stages and mock tests."}</p>
+                  </div>
+                  <span>{category.exams.length} exams</span>
+                </div>
+                <div className="grid exam-card-grid">
+                  {category.exams.map((exam, index) => (
+                    <Link className="card exam-card" key={exam.id} href={"/exams/" + exam.slug}>
+                      <div className="exam-art"><span>{exam.name.split(" ").map((x: string) => x[0]).slice(0,2).join("")}</span><small>{String(index + 1).padStart(2,"0")}</small></div>
+                      <div className="eyebrow">{category.name}</div>
+                      <h3>{exam.name}</h3>
+                      <p>{exam.description ?? "Structured stages, subjects and mock tests."}</p>
+                      <span className="card-link">Open exam <b>→</b></span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
             ))}
+            {!!uncategorised.length && (
+              <section className="exam-category-section">
+                <div className="exam-category-heading"><div><p className="eyebrow">More preparation</p><h2>Other exams</h2></div><span>{uncategorised.length} exams</span></div>
+                <div className="grid exam-card-grid">
+                  {uncategorised.map((exam) => <Link className="card exam-card" key={exam.id} href={"/exams/" + exam.slug}><h3>{exam.name}</h3><p>{exam.description ?? "Structured preparation."}</p><span className="card-link">Open exam <b>→</b></span></Link>)}
+                </div>
+              </section>
+            )}
           </div>
         </div>
       </section>
@@ -89,7 +122,7 @@ export default function HomePage() {
           </div>
           <div className="grid">
             {featuredTests.map(([title, slug, description, testType, questionCount, durationMinutes]) => (
-              <Link className="card test-card" key={slug} href={`/test/${slug}`}>
+              <Link className="card test-card" key={slug} href={"/test/" + slug}>
                 <div className="test-card-top"><span className="test-index">LIVE</span><span className="badge">Free to try</span></div>
                 <div className="eyebrow">{testType.replace("_"," ")}</div>
                 <h3>{title}</h3>
@@ -138,7 +171,7 @@ export default function HomePage() {
 
       <section className="section cta-section">
         <div className="container cta-panel">
-          <div><div className="eyebrow">Start today</div><h2>One focused mock can tell you a lot.</h2><p>Pick a test, choose English, Hindi or Marathi, and begin.</p></div>
+          <div><div className="eyebrow">Start today</div><h2>One focused mock can tell you a lot.</h2><p>Pick a test, then begin your preparation session.</p></div>
           <Link className="btn btn-primary" href="/tests">Browse mock tests</Link>
         </div>
       </section>
