@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
+import HomepageExamBrowser from "./homepage-exam-browser";
+
 
 export const dynamic = "force-dynamic";
 
@@ -7,7 +9,7 @@ export default async function HomePage() {
   const supabase = createSupabasePublicClient();
   const [{ data: categories }, { data: exams }] = await Promise.all([
     supabase.from("exam_categories").select("id,name,slug,description").eq("is_active", true).order("sort_order"),
-    supabase.from("exams").select("id,name,slug,description,category_id").eq("is_active", true).order("name"),
+    supabase.from("exams").select("id,name,slug,description,category_id,created_at").eq("is_active", true).order("name"),
   ]);
 
   const grouped = (categories ?? []).map((category) => ({
@@ -78,61 +80,7 @@ export default async function HomePage() {
             <Link className="button secondary" href="/exams">View full library</Link>
           </div>
 
-          <div className="category-directory">
-            {grouped.map((category) => (
-              <a className="category-directory-item" href={`#category-${category.slug}`} key={category.id}>
-                <span className="category-directory-icon">{category.name.slice(0,1)}</span>
-                <span><strong>{category.name}</strong><small>{category.exams.length} exams</small></span>
-                <b>↓</b>
-              </a>
-            ))}
-          </div>
-
-          <div className="exam-category-stack">
-            {grouped.map((category) => {
-              const visibleExams = category.exams.slice(0, 6);
-              const remaining = category.exams.length - visibleExams.length;
-              return (
-                <section className="exam-category-section homepage-category" id={`category-${category.slug}`} key={category.id}>
-                  <div className="exam-category-heading">
-                    <div>
-                      <p className="eyebrow">{category.name}</p>
-                      <h2>{category.name} exams</h2>
-                      <p>{category.description ?? "Choose an exam to continue into its stages and mock tests."}</p>
-                    </div>
-                    <Link className="category-view-all" href={`/exams#category-${category.slug}`}>
-                      <span>{category.exams.length} exams</span><b>View all →</b>
-                    </Link>
-                  </div>
-                  <div className="grid exam-card-grid">
-                    {visibleExams.map((exam, index) => (
-                      <Link className="card exam-card" key={exam.id} href={"/exams/" + exam.slug}>
-                        <div className="exam-art"><span>{exam.name.split(" ").map((x: string) => x[0]).slice(0,2).join("")}</span><small>{String(index + 1).padStart(2,"0")}</small></div>
-                        <div className="eyebrow">{category.name}</div>
-                        <h3>{exam.name}</h3>
-                        <p>{exam.description ?? "Structured stages, subjects and mock tests."}</p>
-                        <span className="card-link">Open exam <b>→</b></span>
-                      </Link>
-                    ))}
-                  </div>
-                  {remaining > 0 && (
-                    <div className="category-more-row">
-                      <span>Showing 6 of {category.exams.length} exams</span>
-                      <Link href={`/exams#category-${category.slug}`}>See {remaining} more in {category.name} →</Link>
-                    </div>
-                  )}
-                </section>
-              );
-            })}
-            {!!uncategorised.length && (
-              <section className="exam-category-section homepage-category">
-                <div className="exam-category-heading"><div><p className="eyebrow">More preparation</p><h2>Other exams</h2></div><span>{uncategorised.length} exams</span></div>
-                <div className="grid exam-card-grid">
-                  {uncategorised.slice(0,6).map((exam) => <Link className="card exam-card" key={exam.id} href={"/exams/" + exam.slug}><h3>{exam.name}</h3><p>{exam.description ?? "Structured preparation."}</p><span className="card-link">Open exam <b>→</b></span></Link>)}
-                </div>
-              </section>
-            )}
-          </div>
+          <HomepageExamBrowser categories={grouped} />
         </div>
       </section>
 
