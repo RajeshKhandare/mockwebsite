@@ -26,19 +26,12 @@ const popularSlugs = [
   "jee-main","neet-ug","cat","ctet",
 ];
 
-function initials(name: string) {
-  return name.split(/\s+/).map((part) => part[0]).slice(0, 2).join("").toUpperCase();
-}
-
-function ExamCard({ exam, categoryName, index, compact = false }: {
+function ExamCard({ exam, categoryName }: {
   exam: HomepageExam;
   categoryName: string;
-  index: number;
-  compact?: boolean;
 }) {
   return (
-    <Link className={"card exam-card homepage-exam-card" + (compact ? " homepage-exam-card-compact" : "")} href={"/exams/" + exam.slug}>
-      <div className="exam-art"><span>{initials(exam.name)}</span><small>{String(index + 1).padStart(2, "0")}</small></div>
+    <Link className="card exam-card homepage-exam-card" href={"/exams/" + exam.slug}>
       <div className="eyebrow">{categoryName}</div>
       <h3>{exam.name}</h3>
       <p>{exam.description ?? "Structured stages, subjects and mock tests."}</p>
@@ -67,9 +60,6 @@ export default function HomepageExamBrowser({ categories }: { categories: Homepa
 
   function selectCategory(slug: string) {
     setActiveCategory(slug);
-    requestAnimationFrame(() => {
-      document.getElementById("homepage-category-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
   }
 
   return (
@@ -105,9 +95,9 @@ export default function HomepageExamBrowser({ categories }: { categories: Homepa
                 <Link className="category-view-all" href="/exams"><span>{popularExams.length} featured</span><b>View all exams →</b></Link>
               </div>
               <div className="grid exam-card-grid">
-                {popularExams.map((exam, index) => {
+                {popularExams.map((exam) => {
                   const category = categories.find((item) => item.id === exam.category_id);
-                  return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Exam"} index={index} />;
+                  return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Exam"} />;
                 })}
               </div>
             </>
@@ -118,9 +108,9 @@ export default function HomepageExamBrowser({ categories }: { categories: Homepa
                 <span>{recentExams.length} recent exams</span>
               </div>
               <div className="grid exam-card-grid">
-                {recentExams.map((exam, index) => {
+                {recentExams.map((exam) => {
                   const category = categories.find((item) => item.id === exam.category_id);
-                  return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Exam"} index={index} />;
+                  return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Exam"} />;
                 })}
               </div>
             </>
@@ -135,7 +125,7 @@ export default function HomepageExamBrowser({ categories }: { categories: Homepa
                 <Link className="category-view-all" href={"/exams?category=" + selectedCategory.slug}><span>{selectedExams.length} exams</span><b>View full library →</b></Link>
               </div>
               <div className="grid exam-card-grid">
-                {selectedExams.map((exam, index) => <ExamCard key={exam.id} exam={exam} categoryName={selectedCategory.name} index={index} />)}
+                {selectedExams.map((exam) => <ExamCard key={exam.id} exam={exam} categoryName={selectedCategory.name} />)}
               </div>
             </>
           ) : null}
