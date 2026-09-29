@@ -140,7 +140,7 @@ export default async function TestInstructionsPage({
             </p>
 
             <div className="test-launch-chips">
-              <span>{test.requires_login ? "Account required" : "Free to try"}</span>
+              <span>{test.requires_login ? "100-question mock" : "Free to try"}</span>
               <span>{languageLabel}</span>
               <span>Secure scoring</span>
             </div>
