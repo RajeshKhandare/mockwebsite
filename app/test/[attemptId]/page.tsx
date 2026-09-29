@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cookies } from "next/headers";
 import { supabaseRestGet } from "@/lib/supabase/rest";
 import StartTest from "./start-test";
 
@@ -90,11 +89,6 @@ export default async function TestInstructionsPage({
 
   if (!test) notFound();
 
-  const cookieStore = await cookies();
-  const hasAuthCookie = cookieStore
-    .getAll()
-    .some(({ name }) => name.startsWith("sb-") && name.includes("auth-token"));
-
   const totalMarks = test.question_count * Number(test.marks_per_question);
   // Language is a property of the published test, not another student choice.
   const examLanguage = test.supported_languages[0] ?? "en";
@@ -155,7 +149,6 @@ export default async function TestInstructionsPage({
               testTemplateId={test.id}
               language={examLanguage}
               requiresLogin={test.requires_login}
-              loggedIn={hasAuthCookie}
               durationSeconds={test.duration_seconds}
               questionCount={test.question_count}
             />
