@@ -34,19 +34,18 @@ export default async function ExamPage({ params }: { params: Promise<{ exam: str
   if (!item) notFound();
 
   let firstTest: { slug: string; title: string } | null = null;
-  if (stages.length) {
-    try {
-      const tests = await supabaseRestGet<Array<{slug:string;title:string}>>("test_templates", {
-        select: "slug,title",
-        exam_stage_id: "in.(" + stages.map((stage) => stage.id).join(",") + ")",
-        is_active: "eq.true",
-        order: "title.asc",
-        limit: "1",
-      });
-      firstTest = tests[0] ?? null;
-    } catch {
-      firstTest = null;
-    }
+  try {
+    const freeSpeed = await supabaseRestGet<Array<{slug:string;title:string}>>("test_templates", {
+      select: "slug,title",
+      slug: "eq." + item.slug + "-speed-10m",
+      is_active: "eq.true",
+      requires_login: "eq.false",
+      duration_seconds: "eq.600",
+      limit: "1",
+    });
+    firstTest = freeSpeed[0] ?? null;
+  } catch {
+    firstTest = null;
   }
 
   return (
@@ -56,7 +55,7 @@ export default async function ExamPage({ params }: { params: Promise<{ exam: str
       <h1 style={{fontSize:42}}>{item.name}</h1>
       <p style={{maxWidth:720,color:"var(--muted)"}}>{item.description ?? "Structured preparation through configurable stages, subjects and mock tests."}</p>
       <div className="button-row exam-quick-actions">
-        {firstTest && <Link className="btn btn-primary" href={"/test/" + firstTest.slug}>Start a mock test</Link>}
+        {firstTest && <Link className="btn btn-primary" href={"/test/" + firstTest.slug}>Start 10-minute free test</Link>}
         <Link className="btn btn-secondary" href="#stages">Choose a stage</Link>
       </div>
       <div className="catalog-stats">
