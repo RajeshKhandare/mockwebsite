@@ -103,7 +103,7 @@ export default async function ExamStagePage({ params }: Props) {
             supported_languages: string[];
             requires_login: boolean;
             selection_rules: { variant?: string; catalog_order?: number; difficulty?: Record<string, number>; difficulty_focus?: string; phase?: string } | null;
-          }>} />          </div>
+          }>} />
         </section>
         </>}
       </div>
