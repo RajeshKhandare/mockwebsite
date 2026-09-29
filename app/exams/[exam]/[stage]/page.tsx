@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
+import TestCatalogue from "./test-catalogue";
 
 export const dynamic = "force-dynamic";
 
@@ -89,23 +90,20 @@ export default async function ExamStagePage({ params }: Props) {
         </section>
 
         <section className="section">
-          <div className="section-header"><div><h2>Mock tests</h2><p>Five core performance levels are available: Easy → Medium → Hard → Prelims-style → Full Mock.</p></div><Link href="/tests">All tests</Link></div>
-          <div className="grid">
-            {([...(tests ?? [])].sort((a, b) => Number((a.selection_rules as { catalog_order?: number } | null)?.catalog_order ?? 99) - Number((b.selection_rules as { catalog_order?: number } | null)?.catalog_order ?? 99))).map((test) => (
-              <article className="card test-card" key={test.id}>
-                <div className="test-card-top"><span className="test-index">{test.test_type.replace("_"," ").slice(0,1).toUpperCase()}</span><span className="badge">{test.supported_languages.map((l: string) => l.toUpperCase()).join(" · ")}</span></div>
-                <div className="eyebrow">{(() => { const v = (test.selection_rules as { variant?: string } | null)?.variant; return v === "level_1" ? "Level 1 · Easy" : v === "level_2" ? "Level 2 · Medium" : v === "level_3" ? "Level 3 · Hard" : v === "prelims" ? "Prelims-style" : v === "full_mock" ? "Full Mock" : test.test_type.replace("_"," "); })()}</div>
-                <h3>{test.title}</h3>
-                <p>{test.description ?? "Structured practice for this exam stage."}</p>
-                <div className="meta">
-                  <span className="badge">{test.question_count} questions</span>
-                  <span className="badge">{Math.round(test.duration_seconds / 60)} min</span>
-                </div>
-                <Link className="btn btn-primary" href={`/test/${test.slug ?? test.id}`}>View instructions</Link>
-              </article>
-            ))}
-            {!tests?.length && <p className="muted">No published mock tests are available for this stage yet.</p>}
-          </div>
+          <div className="section-header"><div><h2>Mock tests</h2><p>Choose a difficulty without mixing question levels. Published 100-question tests are shown only when their prepared set is complete.</p></div><Link href="/tests">All tests</Link></div>
+          <TestCatalogue tests={(tests ?? []) as Array<{
+            id: string;
+            slug: string;
+            title: string;
+            description: string | null;
+            test_type: string;
+            question_count: number;
+            duration_seconds: number;
+            marks_per_question: number;
+            supported_languages: string[];
+            requires_login: boolean;
+            selection_rules: { variant?: string; catalog_order?: number; difficulty?: Record<string, number>; difficulty_focus?: string; phase?: string } | null;
+          }>} />          </div>
         </section>
         </>}
       </div>
