@@ -136,7 +136,7 @@ export async function POST(request:Request){
 
   const {data:attempt,error:attemptError}=await admin.from("test_attempts").insert({
     user_id:user?.id??null,guest_token:user?null:guestToken,test_template_id:template.id,language:parsed.data.language,
-    question_count:requestedCount,duration_seconds:null,
+    question_count:requestedCount,duration_seconds:template.duration_seconds,
   }).select("id").single();
   if(attemptError||!attempt)return NextResponse.json({error:"Could not start the test."},{status:500});
 
