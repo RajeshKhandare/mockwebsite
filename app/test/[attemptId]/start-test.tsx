@@ -14,13 +14,14 @@ type Props = {
 
 export default function StartTest({ testTemplateId, languages, requiresLogin, loggedIn, durationSeconds, questionCount }: Props) {
   const router = useRouter();
-  const [language, setLanguage] = useState(languages[0] ?? "en");
+  const [language, setLanguage] = useState(languages[0] ?? "");
   const isSpeedTest = durationSeconds === 600;
   const [selectedCount, setSelectedCount] = useState(questionCount);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function start() {
+    if (!language) { setError("No complete question set is available for this test yet."); return; }
     setLoading(true); setError("");
     const response = await fetch("/api/attempts", {
       method: "POST",
@@ -57,12 +58,12 @@ export default function StartTest({ testTemplateId, languages, requiresLogin, lo
         </div>
       )}
       <label htmlFor="test-language" style={{display:"block",fontWeight:700,marginBottom:8}}>Test language</label>
-      <select id="test-language" value={language} onChange={(e) => setLanguage(e.target.value)}
+      <select id="test-language" value={language} onChange={(e) => setLanguage(e.target.value)} disabled={!languages.length}
         style={{width:"100%",height:46,border:"1px solid var(--border)",borderRadius:8,padding:"0 12px",background:"var(--surface)"}}>
-        {languages.map((value) => <option key={value} value={value}>{value === "en" ? "English" : value === "hi" ? "Hindi" : "Marathi"}</option>)}
+        {languages.map((value) => <option key={value} value={value}>{value === "en" ? "English" : value === "hi" ? "Hindi" : value === "mr" ? "Marathi" : value.toUpperCase()}</option>)}
       </select>
       {error && <p style={{color:"var(--danger)",marginTop:10}}>{error}</p>}
-      <button className="btn btn-primary" disabled={loading || (requiresLogin && !loggedIn)} onClick={start} style={{marginTop:16}}>
+      <button className="btn btn-primary" disabled={loading || !language || (requiresLogin && !loggedIn)} onClick={start} style={{marginTop:16}}>
         {loading ? "Preparing test…" : requiresLogin && !loggedIn ? "Sign in to start" : "Start test"}
       </button>
     </div>
