@@ -16,8 +16,6 @@ export default async function HomePage() {
     ...category,
     exams: (exams ?? []).filter((exam) => exam.category_id === category.id),
   })).filter((category) => category.exams.length > 0);
-  const uncategorised = (exams ?? []).filter((exam) => !exam.category_id);
-
   const featuredTests = [
     ["10-Minute Speed Practice", "banking-speed-10m", "Choose 5, 10, 15 or 20 questions for a focused ten-minute session.", "practice", 20, 10],
     ["Banking Quantitative Aptitude Sectional — 50 Questions", "banking-quant-sectional-50", "50-question quantitative aptitude sectional test.", "sectional", 50, 30],
