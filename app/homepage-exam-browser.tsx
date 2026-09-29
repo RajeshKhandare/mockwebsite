@@ -1,0 +1,162 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+
+export type HomepageExam = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  category_id: string | null;
+  created_at: string | null;
+};
+
+export type HomepageCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  exams: HomepageExam[];
+};
+
+const popularSlugs = [
+  "ibps-clerk","ibps-po","sbi-clerk","sbi-po",
+  "ssc-cgl","ssc-chsl","rrb-ntpc","upsc-civil-services",
+  "jee-main","neet-ug","cat","ctet",
+];
+
+function initials(name: string) {
+  return name.split(/\s+/).map((part) => part[0]).slice(0, 2).join("").toUpperCase();
+}
+
+function ExamCard({ exam, categoryName, index, compact = false }: {
+  exam: HomepageExam;
+  categoryName: string;
+  index: number;
+  compact?: boolean;
+}) {
+  return (
+    <Link className={"card exam-card homepage-exam-card" + (compact ? " homepage-exam-card-compact" : "")} href={"/exams/" + exam.slug}>
+      <div className="exam-art"><span>{initials(exam.name)}</span><small>{String(index + 1).padStart(2, "0")}</small></div>
+      <div className="eyebrow">{categoryName}</div>
+      <h3>{exam.name}</h3>
+      <p>{exam.description ?? "Structured stages, subjects and mock tests."}</p>
+      <span className="card-link">Open exam <b>→</b></span>
+    </Link>
+  );
+}
+
+export default function HomepageExamBrowser({ categories }: { categories: HomepageCategory[] }) {
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  const allExams = useMemo(() => categories.flatMap((category) => category.exams), [categories]);
+  const bySlug = useMemo(() => new Map(allExams.map((exam) => [exam.slug, exam])), [allExams]);
+
+  const popular = popularSlugs.map((slug) => bySlug.get(slug)).filter(Boolean) as HomepageExam[];
+  const popularFallback = allExams.slice(0, 12);
+  const popularExams = popular.length >= 6 ? popular : popularFallback;
+
+  const recentExams = useMemo(
+    () => [...allExams].sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? ""))).slice(0, 12),
+    [allExams],
+  );
+
+  const selectedCategory = categories.find((category) => category.slug === activeCategory);
+  const selectedExams = selectedCategory?.exams ?? [];
+
+  function selectCategory(slug: string) {
+    setActiveCategory(slug);
+    requestAnimationFrame(() => {
+      document.getElementById("homepage-category-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  return (
+    <div className="homepage-exam-browser">
+      <div className="homepage-feature-block">
+        <div className="homepage-feature-heading">
+          <div>
+            <div className="eyebrow">Popular exams</div>
+            <h2>What students usually look for</h2>
+          </div>
+          <Link className="button secondary" href="/exams">View all exams</Link>
+        </div>
+        <div className="grid exam-card-grid homepage-feature-grid">
+          {popularExams.map((exam, index) => {
+            const category = categories.find((item) => item.id === exam.category_id);
+            return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Exam"} index={index} compact />;
+          })}
+        </div>
+      </div>
+
+      <div className="homepage-feature-block homepage-recent-block">
+        <div className="homepage-feature-heading">
+          <div>
+            <div className="eyebrow">Recently added</div>
+            <h2>Fresh preparation tracks</h2>
+          </div>
+          <span className="homepage-section-note">{recentExams.length} recent exams</span>
+        </div>
+        <div className="homepage-horizontal-cards">
+          {recentExams.map((exam, index) => {
+            const category = categories.find((item) => item.id === exam.category_id);
+            return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Exam"} index={index} compact />;
+          })}
+        </div>
+      </div>
+
+      <div className="homepage-category-browser">
+        <div className="homepage-category-browser-heading">
+          <div>
+            <div className="eyebrow">Browse by category</div>
+            <h2>Find the exam you are preparing for</h2>
+            <p>Choose a category and the exams available in it will appear below—without leaving this section.</p>
+          </div>
+        </div>
+
+        <div className="homepage-category-tabs" role="tablist" aria-label="Exam categories">
+          <button type="button" role="tab" aria-selected={activeCategory === "all"} className={activeCategory === "all" ? "active" : ""} onClick={() => selectCategory("all")}>
+            <span className="category-tab-icon">★</span><strong>All exams</strong><small>{allExams.length}</small>
+          </button>
+          {categories.map((category) => (
+            <button type="button" role="tab" aria-selected={activeCategory === category.slug} className={activeCategory === category.slug ? "active" : ""} onClick={() => selectCategory(category.slug)} key={category.id}>
+              <span className="category-tab-icon">{category.name.slice(0, 1)}</span><strong>{category.name}</strong><small>{category.exams.length}</small>
+            </button>
+          ))}
+        </div>
+
+        <section id="homepage-category-results" className="homepage-category-results">
+          {activeCategory === "all" ? (
+            <>
+              <div className="homepage-results-heading">
+                <div><span className="eyebrow">All categories</span><h2>Explore all active exams</h2></div>
+                <span>{allExams.length} exams</span>
+              </div>
+              <div className="grid exam-card-grid">
+                {allExams.map((exam, index) => {
+                  const category = categories.find((item) => item.id === exam.category_id);
+                  return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Other"} index={index} />;
+                })}
+              </div>
+            </>
+          ) : selectedCategory ? (
+            <>
+              <div className="homepage-results-heading">
+                <div>
+                  <span className="eyebrow">{selectedCategory.name}</span>
+                  <h2>{selectedCategory.name} exams</h2>
+                  <p>{selectedCategory.description ?? "Choose an exam to continue into its stages and mock tests."}</p>
+                </div>
+                <Link className="category-view-all" href={"/exams?category=" + selectedCategory.slug}><span>{selectedExams.length} exams</span><b>View full library →</b></Link>
+              </div>
+              <div className="grid exam-card-grid">
+                {selectedExams.map((exam, index) => <ExamCard key={exam.id} exam={exam} categoryName={selectedCategory.name} index={index} />)}
+              </div>
+            </>
+          ) : null}
+        </section>
+      </div>
+    </div>
+  );
+}
