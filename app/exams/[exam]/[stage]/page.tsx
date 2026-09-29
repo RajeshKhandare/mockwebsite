@@ -48,7 +48,7 @@ export default async function ExamStagePage({ params }: Props) {
       .order("sort_order"),
     supabase
       .from("test_templates")
-      .select("id,slug,title,description,test_type,question_count,duration_seconds,marks_per_question,supported_languages")
+      .select("id,slug,title,description,test_type,question_count,duration_seconds,marks_per_question,supported_languages,selection_rules")
       .eq("exam_stage_id", stageRow.id)
       .eq("is_active", true)
       .order("title"),
@@ -89,12 +89,12 @@ export default async function ExamStagePage({ params }: Props) {
         </section>
 
         <section className="section">
-          <div className="section-header"><div><h2>Mock tests</h2><p>Published tests for this stage.</p></div><Link href="/tests">All tests</Link></div>
+          <div className="section-header"><div><h2>Mock tests</h2><p>Five core performance levels are available: Easy → Medium → Hard → Prelims-style → Full Mock.</p></div><Link href="/tests">All tests</Link></div>
           <div className="grid">
-            {(tests ?? []).map((test) => (
+            {([...(tests ?? [])].sort((a, b) => Number((a.selection_rules as { catalog_order?: number } | null)?.catalog_order ?? 99) - Number((b.selection_rules as { catalog_order?: number } | null)?.catalog_order ?? 99))).map((test) => (
               <article className="card test-card" key={test.id}>
                 <div className="test-card-top"><span className="test-index">{test.test_type.replace("_"," ").slice(0,1).toUpperCase()}</span><span className="badge">{test.supported_languages.map((l: string) => l.toUpperCase()).join(" · ")}</span></div>
-                <div className="eyebrow">{test.test_type.replace("_"," ")}</div>
+                <div className="eyebrow">{(() => { const v = (test.selection_rules as { variant?: string } | null)?.variant; return v === "level_1" ? "Level 1 · Easy" : v === "level_2" ? "Level 2 · Medium" : v === "level_3" ? "Level 3 · Hard" : v === "prelims" ? "Prelims-style" : v === "full_mock" ? "Full Mock" : test.test_type.replace("_"," "); })()}</div>
                 <h3>{test.title}</h3>
                 <p>{test.description ?? "Structured practice for this exam stage."}</p>
                 <div className="meta">
