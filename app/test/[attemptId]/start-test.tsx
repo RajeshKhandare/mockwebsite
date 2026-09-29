@@ -7,12 +7,11 @@ type Props = {
   testTemplateId: string;
   language: string;
   requiresLogin: boolean;
-  loggedIn: boolean;
   durationSeconds: number;
   questionCount: number;
 };
 
-export default function StartTest({ testTemplateId, language, requiresLogin, loggedIn, durationSeconds, questionCount }: Props) {
+export default function StartTest({ testTemplateId, language, requiresLogin, durationSeconds, questionCount }: Props) {
   const router = useRouter();
 
   const isSpeedTest = durationSeconds === 600;
@@ -58,8 +57,8 @@ export default function StartTest({ testTemplateId, language, requiresLogin, log
       )}
       <div className="test-language-display" aria-label="Test language"><strong>Exam language:</strong> {language === "en" ? "English" : language === "hi" ? "Hindi" : language === "mr" ? "Marathi" : language.toUpperCase()}</div>
       {error && <p style={{color:"var(--danger)",marginTop:10}}>{error}</p>}
-      <button className="btn btn-primary" disabled={loading || (requiresLogin && !loggedIn)} onClick={start} style={{marginTop:16}}>
-        {loading ? "Preparing test…" : requiresLogin && !loggedIn ? "Sign in to start" : "Start test"}
+      <button className="btn btn-primary" disabled={loading} onClick={start} style={{marginTop:16}}>
+        {loading ? "Preparing test…" : requiresLogin ? "Sign in / Start test" : "Start test"}
       </button>
     </div>
   );
