@@ -1,92 +1,15 @@
 import { NextResponse } from "next/server";
-import { getAttemptOwner } from "@/lib/attempt-owner";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { cookies } from "next/headers";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 
-export async function GET(
-  _request: Request,
-  context: { params: Promise<{ attemptId: string }> },
-) {
-  const { attemptId } = await context.params;
-  const { userId, guestToken } = await getAttemptOwner();
-  if (!userId && !guestToken) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
-  const supabase = createSupabaseAdminClient();
-  const { data: attempt, error } = await supabase
-    .from("test_attempts")
-    .select("id,status,language,started_at,test_template_id,user_id,guest_token,duration_seconds,question_count")
-    .eq("id", attemptId).single();
-
-  if (error || !attempt || (userId ? attempt.user_id !== userId : attempt.guest_token !== guestToken)) {
-    return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
+export async function GET(_request:Request,context:{params:Promise<{attemptId:string}>}){
+  const {attemptId}=await context.params;
+  const guestToken=(await cookies()).get("mock_guest")?.value??null;
+  const supabase=createSupabasePublicClient();
+  const {data,error}=await supabase.rpc("mock_get_attempt",{p_attempt_id:attemptId,p_guest_token:guestToken});
+  if(error||!data){
+    console.error("Test attempt load failed",{attemptId,error});
+    return NextResponse.json({error:error?.message??"Questions could not be loaded."},{status:404});
   }
-
-  if (attempt.status === "submitted") return NextResponse.json({ error: "This attempt has already been submitted." }, { status: 409 });
-  if (attempt.status !== "in_progress") return NextResponse.json({ error: "This attempt is no longer active." }, { status: 409 });
-
-  const { data: template } = await supabase
-    .from("test_templates")
-    .select("title,question_count,duration_seconds,marks_per_question,negative_marks")
-    .eq("id", attempt.test_template_id).single();
-
-  const { data: links, error: linksError } = await supabase
-    .from("test_attempt_questions")
-    .select("question_id,position")
-    .eq("attempt_id", attemptId)
-    .order("position", { ascending: true });
-
-  if (linksError) return NextResponse.json({ error: "Questions could not be loaded." }, { status: 500 });
-
-  const ids = (links ?? []).map((row) => row.question_id);
-  if (!ids.length) return NextResponse.json({ error: "This attempt has no questions." }, { status: 422 });
-
-  const admin = createSupabaseAdminClient();
-  const { data: questions, error: questionsError } = await admin
-    .from("questions")
-    .select("id,question_text")
-    .in("id", ids)
-    .eq("language", attempt.language);
-
-  if (questionsError) return NextResponse.json({ error: "Question content could not be loaded." }, { status: 500 });
-
-  const { data: options, error: optionsError } = await admin
-    .from("question_options")
-    .select("id,question_id,option_index,option_text")
-    .in("question_id", ids)
-    .order("option_index", { ascending: true });
-
-  if (optionsError) return NextResponse.json({ error: "Question options could not be loaded." }, { status: 500 });
-
-  const { data: answers, error: answersError } = await supabase
-    .from("test_answers")
-    .select("question_id,selected_option,marked_for_review")
-    .eq("attempt_id", attemptId);
-
-  if (answersError) return NextResponse.json({ error: "Saved answers could not be loaded." }, { status: 500 });
-
-  const questionMap = new Map((questions ?? []).map((q) => [q.id, q]));
-  type AttemptOption = { id: string; question_id: string; option_index: number; option_text: string };
-  const optionMap = new Map<string, AttemptOption[]>();
-  for (const option of options ?? []) {
-    const current = optionMap.get(option.question_id) ?? [];
-    current.push(option);
-    optionMap.set(option.question_id, current);
-  }
-
-  const result = (links ?? []).map((link) => {
-    const question = questionMap.get(link.question_id);
-    return question ? {
-      id: question.id,
-      position: link.position,
-      text: question.question_text,
-      options: (optionMap.get(question.id) ?? []).map((option) => ({
-        id: option.id, index: option.option_index, text: option.option_text,
-      })),
-    } : null;
-  }).filter(Boolean);
-
-  return NextResponse.json({
-    attempt,
-    template,
-    questions: result,
-    answers: answers ?? [],
-  });
+  return NextResponse.json(data);
 }
