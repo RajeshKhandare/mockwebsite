@@ -15,6 +15,7 @@ export const config = {
     "/admin/:path*",
     "/auth/callback",
     "/test/:path*",
+    "/api/attempts",
     "/api/attempts/:path*",
     "/api/questions/:path*",
   ],
