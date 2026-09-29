@@ -69,6 +69,7 @@ export async function POST(request:Request){
     .eq("question_count", requestedCount)
     .eq("set_number", configuredSetNumber)
     .eq("is_active", true)
+    .order("version", { ascending: false })
     .limit(1)
     .maybeSingle();
 
