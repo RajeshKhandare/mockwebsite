@@ -59,7 +59,7 @@ export default function TestCatalogue({ tests }: { tests: Test[] }) {
             <article className="card test-card" key={test.id}>
               <div className="test-card-top">
                 <span className="test-index">{category(test).slice(0, 1).toUpperCase()}</span>
-                <span className="badge">{test.requires_login ? "Sign in required" : "Free to try"}</span>
+                
               </div>
               <div className="eyebrow">{label}</div>
               <h3>{test.title}</h3>
@@ -71,7 +71,7 @@ export default function TestCatalogue({ tests }: { tests: Test[] }) {
               <div className="test-card-footer">
                 <span>{test.supported_languages.map((language) => language === "en" ? "English" : language === "hi" ? "Hindi" : language === "mr" ? "Marathi" : language.toUpperCase()).join(" · ")}</span>
                 <Link className="btn btn-primary" href={"/test/" + (test.slug ?? test.id)}>
-                  {test.requires_login ? "Sign in & start" : "Start test"}
+                  Start test
                 </Link>
               </div>
             </article>
