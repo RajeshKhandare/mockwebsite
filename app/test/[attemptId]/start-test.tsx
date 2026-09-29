@@ -22,9 +22,13 @@ export default function StartTest({ testTemplateId, language, requiresLogin, dur
 
   async function start() {
     setLoading(true); setError("");
+    const supabase = (await import("@/lib/supabase/browser")).createSupabaseBrowserClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const headers: Record<string, string> = {"Content-Type":"application/json"};
+    if (session?.access_token) headers.Authorization = "Bearer " + session.access_token;
     const response = await fetch("/api/attempts", {
       method: "POST",
-      headers: {"Content-Type":"application/json"},
+      headers,
       body: JSON.stringify({ testTemplateId, language, ...(isSpeedTest ? { questionCount: selectedCount } : {}) }),
     });
     const data = await response.json().catch(() => ({}));
