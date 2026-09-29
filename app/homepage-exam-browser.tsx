@@ -30,6 +30,10 @@ function examDisplayName(name: string) {
   return /\bexam\b$/i.test(name.trim()) ? name : name + " Exam";
 }
 
+function categoryDisplayName(name: string) {
+  return /\\bexam\\b$/i.test(name.trim()) ? name : name + " Exam";
+}
+
 function ExamCard({ exam, categoryName }: {
   exam: HomepageExam;
   categoryName: string;
@@ -86,7 +90,7 @@ export default function HomepageExamBrowser({ categories }: { categories: Homepa
           </button>
           {categories.map((category) => (
             <button type="button" role="tab" aria-selected={activeCategory === category.slug} className={activeCategory === category.slug ? "active" : ""} onClick={() => selectCategory(category.slug)} key={category.id}>
-              <strong>{category.name}</strong><small>{category.exams.length}</small>
+              <strong>{categoryDisplayName(category.name)}</strong><small>{category.exams.length}</small>
             </button>
           ))}
         </div>
