@@ -118,9 +118,6 @@ export default async function TestInstructionsPage({
   } catch (error) {
     console.error("Test language coverage lookup failed", error);
   }
-  if (!availableLanguageCodes.length) {
-    availableLanguageCodes = test.supported_languages;
-  }
   const languages = availableLanguageCodes.map(languageName);
 
   return (
