@@ -2252,3 +2252,83 @@ html[data-theme="dark"] .profile-edit-form select option { background:#111e33; c
 @media (max-width:600px) {
   .test-launch-copy h1 { font-size:clamp(34px,10vw,48px) !important; }
 }
+
+
+/* Final dark-theme surface sweep: eliminate legacy light hard-coding on secondary components. */
+html[data-theme="dark"] .btn-secondary,
+html[data-theme="dark"] .button.secondary,
+html[data-theme="dark"] .auth-trigger,
+html[data-theme="dark"] .option-card,
+html[data-theme="dark"] .legend.empty,
+html[data-theme="dark"] .library-count,
+html[data-theme="dark"] .category-pills span,
+html[data-theme="dark"] .stats-wide > div,
+html[data-theme="dark"] .feature-stack,
+html[data-theme="dark"] .feature-stack article,
+html[data-theme="dark"] .visual-list,
+html[data-theme="dark"] .test-filter-bar,
+html[data-theme="dark"] .catalog-stats > div,
+html[data-theme="dark"] .test-card,
+html[data-theme="dark"] .attempt-card,
+html[data-theme="dark"] .result-meta span,
+html[data-theme="dark"] .result-stat,
+html[data-theme="dark"] .profile-tags span {
+  background:var(--surface) !important;
+  color:var(--text) !important;
+  border-color:var(--border) !important;
+}
+html[data-theme="dark"] .option-card.selected {
+  background:#172541 !important;
+  border-color:#627fcb !important;
+}
+html[data-theme="dark"] .option-letter {
+  background:var(--surface-soft) !important;
+  color:var(--muted) !important;
+  border-color:var(--border) !important;
+}
+html[data-theme="dark"] .legend.answered { background:#123227 !important; border-color:#245744 !important; }
+html[data-theme="dark"] .legend.marked { background:#2c2716 !important; border-color:#6c5925 !important; }
+html[data-theme="dark"] .test-filter-bar input,
+html[data-theme="dark"] .test-filter-bar select,
+html[data-theme="dark"] .catalog-stats input,
+html[data-theme="dark"] .catalog-stats select {
+  background:var(--surface-soft) !important;
+  color:var(--text) !important;
+  border-color:var(--border) !important;
+}
+html[data-theme="dark"] .test-filter-bar select option,
+html[data-theme="dark"] .catalog-stats select option { background:var(--surface-soft); color:var(--text); }
+html[data-theme="dark"] .auth-close {
+  background:var(--surface-soft);
+  color:var(--muted);
+}
+html[data-theme="dark"] .auth-close:hover { background:var(--surface-strong); color:var(--text); }
+html[data-theme="dark"] .auth-mode-switch button.active {
+  background:var(--surface-strong) !important;
+  color:var(--text) !important;
+}
+html[data-theme="dark"] .form-message.error {
+  background:#2a1720 !important;
+  color:#ff9baa !important;
+  border-color:#63303b !important;
+}
+html[data-theme="dark"] .form-message.success {
+  background:#123227 !important;
+  color:#75e1b8 !important;
+  border-color:#245744 !important;
+}
+html[data-theme="dark"] .attempt-content p,
+html[data-theme="dark"] .quick-link,
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .answer-lines span,
+html[data-theme="dark"] .explanation-box > span,
+html[data-theme="dark"] .result-stat small,
+html[data-theme="dark"] .profile-fields span,
+html[data-theme="dark"] .profile-number-list span {
+  color:var(--muted) !important;
+}
+html[data-theme="dark"] .quick-link,
+html[data-theme="dark"] .profile-fields strong,
+html[data-theme="dark"] .answer-lines strong {
+  color:var(--text) !important;
+}
