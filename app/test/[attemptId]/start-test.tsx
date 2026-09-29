@@ -15,7 +15,7 @@ type Props = {
 export default function StartTest({ testTemplateId, language, requiresLogin, durationSeconds, questionCount }: Props) {
   const router = useRouter();
   const isSpeedTest = durationSeconds === 600;
-  const [selectedCount, setSelectedCount] = useState(questionCount);
+  const [selectedCount, setSelectedCount] = useState(isSpeedTest ? 10 : questionCount);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [authOpen, setAuthOpen] = useState(false);
