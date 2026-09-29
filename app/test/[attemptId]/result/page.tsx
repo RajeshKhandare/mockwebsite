@@ -27,12 +27,14 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
 
   const [{ data: result }, { data: template }, { data: links }, { data: profile }] = await Promise.all([
     supabase.from("results").select("correct_count,incorrect_count,unattempted_count,score,accuracy,time_taken_seconds").eq("attempt_id", attemptId).single(),
-    supabase.from("test_templates").select("title,question_count,marks_per_question,negative_marks").eq("id", attempt.test_template_id).single(),
+    supabase.from("test_templates").select("title,question_count,marks_per_question,negative_marks,test_type,selection_rules").eq("id", attempt.test_template_id).single(),
     supabase.from("test_attempt_questions").select("question_id,position").eq("attempt_id", attemptId).order("position"),
     supabase.from("profiles").select("display_name").eq("id", attempt.user_id ?? "").maybeSingle(),
   ]);
 
   if (!result || !template) notFound();
+  const variant = (template.selection_rules as { variant?: string } | null)?.variant;
+  const variantLabel = variant === "level_1" ? "Level 1 · Easy" : variant === "level_2" ? "Level 2 · Medium" : variant === "level_3" ? "Level 3 · Hard" : variant === "prelims" ? "Prelims-style" : variant === "full_mock" ? "Full Mock" : template.test_type.replaceAll("_", " ");
 
   const ids = (links ?? []).map((row) => row.question_id);
   const [{ data: questions }, { data: answers }, { data: options }] = await Promise.all([
@@ -60,7 +62,7 @@ export default async function ResultPage(props: { params: Promise<{ attemptId: s
     <main className="page-shell result-page">
       <section className="result-hero">
         <div>
-          <p className="eyebrow">Test completed · {profile?.display_name || "Student"}</p>
+          <p className="eyebrow">Test completed · {variantLabel} · {profile?.display_name || "Student"}</p>
           <h1>{template.title}</h1>
           <div className="result-meta">
             <span>{attempt.language.toUpperCase()}</span>
