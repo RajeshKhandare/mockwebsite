@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import TestAuthModal from "./test-auth-modal";
 
 type Props = {
   testTemplateId: string;
@@ -13,11 +14,11 @@ type Props = {
 
 export default function StartTest({ testTemplateId, language, requiresLogin, durationSeconds, questionCount }: Props) {
   const router = useRouter();
-
   const isSpeedTest = durationSeconds === 600;
   const [selectedCount, setSelectedCount] = useState(questionCount);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [authOpen, setAuthOpen] = useState(false);
 
   async function start() {
     setLoading(true); setError("");
@@ -28,8 +29,9 @@ export default function StartTest({ testTemplateId, language, requiresLogin, dur
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      if (response.status === 401) {
-        router.push("/login?next=" + encodeURIComponent(window.location.pathname));
+      if (response.status === 401 && requiresLogin) {
+        setAuthOpen(true);
+        setLoading(false);
         return;
       }
       setError(data.error ?? "Could not start the test.");
@@ -38,6 +40,15 @@ export default function StartTest({ testTemplateId, language, requiresLogin, dur
     }
     router.push("/test/" + data.attemptId + "/session");
   }
+
+  useEffect(() => {
+    if (!requiresLogin || isSpeedTest) return;
+    if (new URLSearchParams(window.location.search).get("autostart") !== "1") return;
+    window.history.replaceState({}, "", window.location.pathname);
+    void start();
+    // The query flag is intentionally consumed once after successful authentication.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div style={{marginTop:22}}>
@@ -56,9 +67,16 @@ export default function StartTest({ testTemplateId, language, requiresLogin, dur
       )}
       <div className="test-language-display" aria-label="Test language"><strong>Exam language:</strong> {language === "en" ? "English" : language === "hi" ? "Hindi" : language === "mr" ? "Marathi" : language.toUpperCase()}</div>
       {error && <p style={{color:"var(--danger)",marginTop:10}}>{error}</p>}
-      <button className="btn btn-primary" disabled={loading} onClick={start} style={{marginTop:16}}>
-        {loading ? "Preparing test…" : requiresLogin ? "Sign in / Start test" : "Start test"}
+      <button className="btn btn-primary" disabled={loading} onClick={() => void start()} style={{marginTop:16}}>
+        {loading ? "Preparing test…" : "Start test"}
       </button>
+
+      {authOpen && (
+        <TestAuthModal
+          next={window.location.pathname + "?autostart=1"}
+          onClose={() => setAuthOpen(false)}
+        />
+      )}
     </div>
   );
 }
