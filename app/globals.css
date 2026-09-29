@@ -2514,9 +2514,9 @@ html[data-theme="dark"] .answer-lines strong {
   flex:0 0 auto;
   min-width:116px;
   display:grid;
-  grid-template-columns:30px 1fr auto;
+  grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
-  column-gap:8px;
+  column-gap:10px;
   padding:9px 11px;
   border:1px solid var(--border);
   border-radius:13px;
