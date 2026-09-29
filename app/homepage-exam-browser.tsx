@@ -48,7 +48,7 @@ function ExamCard({ exam, categoryName, index, compact = false }: {
 }
 
 export default function HomepageExamBrowser({ categories }: { categories: HomepageCategory[] }) {
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeCategory, setActiveCategory] = useState("popular");
 
   const allExams = useMemo(() => categories.flatMap((category) => category.exams), [categories]);
   const bySlug = useMemo(() => new Map(allExams.map((exam) => [exam.slug, exam])), [allExams]);
@@ -74,38 +74,6 @@ export default function HomepageExamBrowser({ categories }: { categories: Homepa
 
   return (
     <div className="homepage-exam-browser">
-      <div className="homepage-feature-block">
-        <div className="homepage-feature-heading">
-          <div>
-            <div className="eyebrow">Popular exams</div>
-            <h2>What students usually look for</h2>
-          </div>
-          <Link className="button secondary" href="/exams">View all exams</Link>
-        </div>
-        <div className="grid exam-card-grid homepage-feature-grid">
-          {popularExams.map((exam, index) => {
-            const category = categories.find((item) => item.id === exam.category_id);
-            return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Exam"} index={index} compact />;
-          })}
-        </div>
-      </div>
-
-      <div className="homepage-feature-block homepage-recent-block">
-        <div className="homepage-feature-heading">
-          <div>
-            <div className="eyebrow">Recently added</div>
-            <h2>Fresh preparation tracks</h2>
-          </div>
-          <span className="homepage-section-note">{recentExams.length} recent exams</span>
-        </div>
-        <div className="homepage-horizontal-cards">
-          {recentExams.map((exam, index) => {
-            const category = categories.find((item) => item.id === exam.category_id);
-            return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Exam"} index={index} compact />;
-          })}
-        </div>
-      </div>
-
       <div className="homepage-category-browser">
         <div className="homepage-category-browser-heading">
           <div>
@@ -116,8 +84,11 @@ export default function HomepageExamBrowser({ categories }: { categories: Homepa
         </div>
 
         <div className="homepage-category-tabs" role="tablist" aria-label="Exam categories">
-          <button type="button" role="tab" aria-selected={activeCategory === "all"} className={activeCategory === "all" ? "active" : ""} onClick={() => selectCategory("all")}>
-            <span className="category-tab-icon">★</span><strong>All exams</strong><small>{allExams.length}</small>
+          <button type="button" role="tab" aria-selected={activeCategory === "popular"} className={activeCategory === "popular" ? "active" : ""} onClick={() => selectCategory("popular")}>
+            <span className="category-tab-icon">★</span><strong>Popular</strong><small>{popularExams.length}</small>
+          </button>
+          <button type="button" role="tab" aria-selected={activeCategory === "recent"} className={activeCategory === "recent" ? "active" : ""} onClick={() => selectCategory("recent")}>
+            <span className="category-tab-icon">✦</span><strong>Recently Added</strong><small>{recentExams.length}</small>
           </button>
           {categories.map((category) => (
             <button type="button" role="tab" aria-selected={activeCategory === category.slug} className={activeCategory === category.slug ? "active" : ""} onClick={() => selectCategory(category.slug)} key={category.id}>
@@ -127,16 +98,29 @@ export default function HomepageExamBrowser({ categories }: { categories: Homepa
         </div>
 
         <section id="homepage-category-results" className="homepage-category-results">
-          {activeCategory === "all" ? (
+          {activeCategory === "popular" ? (
             <>
               <div className="homepage-results-heading">
-                <div><span className="eyebrow">All categories</span><h2>Explore all active exams</h2></div>
-                <span>{allExams.length} exams</span>
+                <div><span className="eyebrow">Popular exams</span><h2>What students usually look for</h2></div>
+                <Link className="category-view-all" href="/exams"><span>{popularExams.length} featured</span><b>View all exams →</b></Link>
               </div>
               <div className="grid exam-card-grid">
-                {allExams.map((exam, index) => {
+                {popularExams.map((exam, index) => {
                   const category = categories.find((item) => item.id === exam.category_id);
-                  return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Other"} index={index} />;
+                  return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Exam"} index={index} />;
+                })}
+              </div>
+            </>
+          ) : activeCategory === "recent" ? (
+            <>
+              <div className="homepage-results-heading">
+                <div><span className="eyebrow">Recently added</span><h2>Fresh preparation tracks</h2></div>
+                <span>{recentExams.length} recent exams</span>
+              </div>
+              <div className="grid exam-card-grid">
+                {recentExams.map((exam, index) => {
+                  const category = categories.find((item) => item.id === exam.category_id);
+                  return <ExamCard key={exam.id} exam={exam} categoryName={category?.name ?? "Exam"} index={index} />;
                 })}
               </div>
             </>
