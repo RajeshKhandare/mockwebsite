@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TestAuthModal from "./test-auth-modal";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type Props = {
   testTemplateId: string;
@@ -22,7 +23,7 @@ export default function StartTest({ testTemplateId, language, requiresLogin, dur
 
   async function start() {
     setLoading(true); setError("");
-    const supabase = (await import("@/lib/supabase/browser")).createSupabaseBrowserClient();
+    const supabase = createSupabaseBrowserClient();
     const { data: { session } } = await supabase.auth.getSession();
     const headers: Record<string, string> = {"Content-Type":"application/json"};
     if (session?.access_token) headers.Authorization = "Bearer " + session.access_token;
